@@ -1,33 +1,46 @@
 package de.mpg.mpdl.r2d2.model;
 
+import java.util.List;
+
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
+import javax.persistence.ManyToMany;
 
 @Entity
-public class Dataset {
+public class Dataset extends BaseDb {
 	
-	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
-	private Long id;
 	
-	private String title;
-
-	public String getTitle() {
-		return title;
+	public enum State {
+		PUBLIC, PRIVATE, WITHDRAWN
+	}
+	
+	@Enumerated(EnumType.STRING)
+	private Dataset.State state = State.PRIVATE;
+	
+	@ManyToMany(fetch = FetchType.LAZY)
+	private List<User> datamanager;
+	
+	
+	private List<User> getDatamanager() {
+		return datamanager;
+	}
+	
+	private void setDatamanager(List<User> datamanager) {
+		this.datamanager = datamanager;
+	}
+	
+	public Dataset.State getState() {
+		return state;
 	}
 
-	public void setTitle(String title) {
-		this.title = title;
+	public void setState(Dataset.State state) {
+		this.state = state;
 	}
 
-	public Long getId() {
-		return id;
-	}
 
-	public void setId(Long id) {
-		this.id = id;
-	}
+	
+	
 
 }
