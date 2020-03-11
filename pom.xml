@@ -8,10 +8,10 @@
 		<version>2.2.4.RELEASE</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
-	<groupId>de.mpg.mpdl.rdrepo</groupId>
-	<artifactId>rdrepo</artifactId>
+	<groupId>de.mpg.mpdl.r2d2</groupId>
+	<artifactId>r2d2</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>rdrepo</name>
+	<name>r2d2</name>
 	<description>Research Data Repository</description>
 
 	<properties>

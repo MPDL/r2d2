@@ -1,12 +1,15 @@
-package de.mpg.mpdl.rdrepo.model;
+package de.mpg.mpdl.r2d2.model;
 
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 
 @Entity
 public class Dataset {
 	
 	@Id
+	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Long id;
 	
 	private String title;
