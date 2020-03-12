@@ -16,6 +16,7 @@
 
 	<properties>
 		<java.version>11</java.version>
+		<elasticsearch.version>7.6.1</elasticsearch.version>
 	</properties>
 
 	<dependencies>
@@ -35,10 +36,17 @@
 		    <groupId>org.postgresql</groupId>
 		    <artifactId>postgresql</artifactId>
 		</dependency>
+		
+		<!-- enables usage of json/jsonb in postgres DB -->
 		<dependency>
 		    <groupId>com.vladmihalcea</groupId>
 		    <artifactId>hibernate-types-52</artifactId>
 		    <version>2.9.5</version>
+		</dependency>
+
+		<dependency>
+		    <groupId>org.elasticsearch.client</groupId>
+		    <artifactId>elasticsearch-rest-high-level-client</artifactId>
 		</dependency>
 
 		<dependency>
