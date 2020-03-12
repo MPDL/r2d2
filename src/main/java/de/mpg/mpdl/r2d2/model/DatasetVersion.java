@@ -9,6 +9,7 @@ import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
+import javax.persistence.JoinColumn;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 
@@ -31,7 +32,7 @@ public class DatasetVersion extends BaseDb {
 	
 	@ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
 	@OnDelete(action = OnDeleteAction.CASCADE)
-	@Column(nullable = false)
+	@JoinColumn(nullable = false)
 	private Dataset dataset;
 	
 	@Column(columnDefinition = "TIMESTAMP WITH TIME ZONE")
