@@ -33,14 +33,10 @@ import org.elasticsearch.index.reindex.BulkByScrollResponse;
 import org.elasticsearch.index.reindex.DeleteByQueryRequest;
 import org.elasticsearch.search.Scroll;
 import org.elasticsearch.search.SearchHit;
-import org.elasticsearch.search.aggregations.AggregationBuilder;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
-import org.elasticsearch.search.sort.SortBuilders;
-import org.elasticsearch.search.sort.SortOrder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -52,7 +48,6 @@ import de.mpg.mpdl.r2d2.model.search.SearchResult;
 import de.mpg.mpdl.r2d2.search.dao.GenericDaoEs;
 import de.mpg.mpdl.r2d2.search.util.ElasticSearchIndexField;
 import de.mpg.mpdl.r2d2.search.util.ElasticSearchIndexField.Type;
-import de.mpg.mpdl.r2d2.util.JsonObjectMapperFactory;
 
 /**
  * ElasticSearchClient enables elasticsearch accessibility
