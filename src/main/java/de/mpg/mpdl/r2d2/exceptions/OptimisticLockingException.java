@@ -2,6 +2,11 @@ package de.mpg.mpdl.r2d2.exceptions;
 
 public class OptimisticLockingException extends R2d2ApplicationException {
 
+	public OptimisticLockingException(String message) {
+		super(message);
+		// TODO Auto-generated constructor stub
+	}
+
 	public OptimisticLockingException() {
 		super();
 		// TODO Auto-generated constructor stub

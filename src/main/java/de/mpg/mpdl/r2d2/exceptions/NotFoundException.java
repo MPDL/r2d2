@@ -2,6 +2,11 @@ package de.mpg.mpdl.r2d2.exceptions;
 
 public class NotFoundException extends R2d2ApplicationException {
 
+	public NotFoundException(String message) {
+		super(message);
+		// TODO Auto-generated constructor stub
+	}
+
 	public NotFoundException() {
 		super();
 		// TODO Auto-generated constructor stub

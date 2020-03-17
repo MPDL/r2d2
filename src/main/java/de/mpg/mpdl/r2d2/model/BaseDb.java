@@ -42,6 +42,9 @@ public class BaseDb {
 	@ManyToOne(fetch = FetchType.LAZY)
 	private User creator;
 	
+	@ManyToOne(fetch = FetchType.LAZY)
+	private User modifier;
+	
 	
 	
 	public UUID getId() {
@@ -74,6 +77,14 @@ public class BaseDb {
 
 	public void setCreator(User creator) {
 		this.creator = creator;
+	}
+
+	public User getModifier() {
+		return modifier;
+	}
+
+	public void setModifier(User modifier) {
+		this.modifier = modifier;
 	}
 
 }

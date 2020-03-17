@@ -33,7 +33,7 @@ public class DatasetVersion extends BaseDb {
 	@ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
 	@OnDelete(action = OnDeleteAction.CASCADE)
 	@JoinColumn(nullable = false)
-	private Dataset dataset;
+	private Dataset dataset = new Dataset();
 	
 	@Column(columnDefinition = "TIMESTAMP WITH TIME ZONE")
 	private OffsetDateTime publicationDate;

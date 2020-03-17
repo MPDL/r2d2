@@ -2,6 +2,11 @@ package de.mpg.mpdl.r2d2.exceptions;
 
 public class InvalidStateException extends R2d2ApplicationException {
 
+	public InvalidStateException(String message) {
+		super(message);
+		// TODO Auto-generated constructor stub
+	}
+
 	public InvalidStateException() {
 		super();
 		// TODO Auto-generated constructor stub

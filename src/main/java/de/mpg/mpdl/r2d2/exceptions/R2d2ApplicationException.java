@@ -2,6 +2,11 @@ package de.mpg.mpdl.r2d2.exceptions;
 
 public class R2d2ApplicationException extends Exception {
 
+	public R2d2ApplicationException(String message) {
+		super(message);
+		// TODO Auto-generated constructor stub
+	}
+
 	public R2d2ApplicationException() {
 		super();
 		// TODO Auto-generated constructor stub
