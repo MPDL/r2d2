@@ -4,35 +4,57 @@ import javax.persistence.Entity;
 
 @Entity
 public class File extends BaseDb {
-	
-	private String filename;
-	
-	private String storageLocation;
-	
-	private String checksum;
 
-	public String getFilename() {
-		return filename;
-	}
+  private String filename;
 
-	public void setFilename(String filename) {
-		this.filename = filename;
-	}
+  private String storageLocation;
 
-	public String getStorageLocation() {
-		return storageLocation;
-	}
+  private String checksum;
 
-	public void setStorageLocation(String storageLocation) {
-		this.storageLocation = storageLocation;
-	}
+  private String format;
 
-	public String getChecksum() {
-		return checksum;
-	}
+  private long size;
 
-	public void setChecksum(String checksum) {
-		this.checksum = checksum;
-	}
+  // Date uploaded = creationDate BaseDb
+
+  public String getFilename() {
+    return filename;
+  }
+
+  public void setFilename(String filename) {
+    this.filename = filename;
+  }
+
+  public String getStorageLocation() {
+    return storageLocation;
+  }
+
+  public void setStorageLocation(String storageLocation) {
+    this.storageLocation = storageLocation;
+  }
+
+  public String getChecksum() {
+    return checksum;
+  }
+
+  public void setChecksum(String checksum) {
+    this.checksum = checksum;
+  }
+
+  public String getFormat() {
+    return format;
+  }
+
+  public void setFormat(String format) {
+    this.format = format;
+  }
+
+  public long getSize() {
+    return size;
+  }
+
+  public void setSize(long size) {
+    this.size = size;
+  }
 
 }
