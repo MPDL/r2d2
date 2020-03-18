@@ -21,10 +21,10 @@ import de.mpg.mpdl.r2d2.model.Dataset.State;
 import de.mpg.mpdl.r2d2.model.DatasetVersion;
 import de.mpg.mpdl.r2d2.model.User;
 import de.mpg.mpdl.r2d2.search.dao.DatasetVersionDaoEs;
-import de.mpg.mpdl.r2d2.service.DatasetService;
+import de.mpg.mpdl.r2d2.service.DatasetVersionService;
 
 @Service
-public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVersion> implements DatasetService {
+public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVersion> implements DatasetVersionService {
 
 	private static Logger LOGGER = LoggerFactory.getLogger(DatasetVersionServiceDbImpl.class);
 

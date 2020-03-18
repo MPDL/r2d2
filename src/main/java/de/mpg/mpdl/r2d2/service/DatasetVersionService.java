@@ -11,7 +11,7 @@ import de.mpg.mpdl.r2d2.exceptions.ValidationException;
 import de.mpg.mpdl.r2d2.model.DatasetVersion;
 import de.mpg.mpdl.r2d2.model.User;
 
-public interface DatasetService {
+public interface DatasetVersionService {
 	
 	public DatasetVersion create(DatasetVersion object, User user)
 			throws R2d2TechnicalException, ValidationException;
