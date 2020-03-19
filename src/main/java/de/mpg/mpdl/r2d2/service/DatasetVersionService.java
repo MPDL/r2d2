@@ -9,7 +9,7 @@ import de.mpg.mpdl.r2d2.exceptions.OptimisticLockingException;
 import de.mpg.mpdl.r2d2.exceptions.R2d2TechnicalException;
 import de.mpg.mpdl.r2d2.exceptions.ValidationException;
 import de.mpg.mpdl.r2d2.model.DatasetVersion;
-import de.mpg.mpdl.r2d2.model.User;
+import de.mpg.mpdl.r2d2.model.aa.User;
 
 public interface DatasetVersionService {
 	

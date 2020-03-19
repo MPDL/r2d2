@@ -8,6 +8,8 @@ import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.ManyToMany;
 
+import de.mpg.mpdl.r2d2.model.aa.User;
+
 @Entity
 public class Dataset extends BaseDb {
 	

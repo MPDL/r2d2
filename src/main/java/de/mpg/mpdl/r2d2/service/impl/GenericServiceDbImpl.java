@@ -6,8 +6,8 @@ import de.mpg.mpdl.r2d2.exceptions.OptimisticLockingException;
 import de.mpg.mpdl.r2d2.model.BaseDb;
 import de.mpg.mpdl.r2d2.model.Dataset;
 import de.mpg.mpdl.r2d2.model.DatasetVersion;
-import de.mpg.mpdl.r2d2.model.User;
 import de.mpg.mpdl.r2d2.model.Dataset.State;
+import de.mpg.mpdl.r2d2.model.aa.User;
 
 public class GenericServiceDbImpl<E> {
 	
