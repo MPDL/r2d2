@@ -20,8 +20,8 @@ public class DatasetController {
 	@Autowired
 	private DatasetVersionService datasetVersionService;
 	
-	@GetMapping
-	public DatasetVersion getDataset(@PathVariable("/{uuid}") String uuid) throws R2d2TechnicalException, R2d2ApplicationException
+	@GetMapping(path="/{uuid}")
+	public DatasetVersion getDataset(@PathVariable("uuid") String uuid) throws R2d2TechnicalException, R2d2ApplicationException
 	{
 		return datasetVersionService.get(UUID.fromString(uuid), null);
 		

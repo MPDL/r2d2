@@ -1,5 +1,6 @@
 package de.mpg.mpdl.r2d2.model;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class DatasetVersionMetadata {
@@ -8,7 +9,7 @@ public class DatasetVersionMetadata {
 
   // creator is in BaseDB
 
-  private List<Person> authors;
+  private List<Person> authors = new ArrayList<Person>();
 
   private String description;
 
@@ -20,7 +21,7 @@ public class DatasetVersionMetadata {
 
   private String language;
 
-  private List<Publication> correspondingPapers;
+  private List<Publication> correspondingPapers = new ArrayList<Publication>();
 
   // doi is in DatasetVersion
 

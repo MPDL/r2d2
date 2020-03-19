@@ -24,7 +24,7 @@ public class DatasetVersion extends BaseDb {
 	
 
 	@Column(nullable = false)
-	public int versionNumber;
+	public int versionNumber = 1;
 	
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = false)
@@ -42,7 +42,7 @@ public class DatasetVersion extends BaseDb {
 	
 	@Type(type = "jsonb")
 	@Column(columnDefinition = "jsonb")
-	private DatasetVersionMetadata metadata;
+	private DatasetVersionMetadata metadata = new DatasetVersionMetadata();
 	
 	@ManyToMany
 	private List<File> files;

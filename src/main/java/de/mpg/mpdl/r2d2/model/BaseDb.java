@@ -12,10 +12,13 @@ import javax.persistence.ManyToOne;
 import javax.persistence.MappedSuperclass;
 
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.Parameter;
 import org.hibernate.annotations.TypeDef;
 import org.hibernate.annotations.TypeDefs;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import com.vladmihalcea.hibernate.type.array.EnumArrayType;
 import com.vladmihalcea.hibernate.type.array.IntArrayType;
 import com.vladmihalcea.hibernate.type.array.StringArrayType;
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
@@ -27,7 +30,9 @@ import de.mpg.mpdl.r2d2.model.aa.User;
 @TypeDefs({ @TypeDef(name = "json", typeClass = JsonStringType.class),
 		@TypeDef(name = "jsonb", typeClass = JsonBinaryType.class),
 		@TypeDef(name = "string-array", typeClass = StringArrayType.class),
-		@TypeDef(name = "int-array", typeClass = IntArrayType.class) })
+		@TypeDef(name = "int-array", typeClass = IntArrayType.class)
+})
+
 public class BaseDb {
 
 	@Id

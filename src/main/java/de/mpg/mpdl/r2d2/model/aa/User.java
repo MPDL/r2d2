@@ -21,16 +21,14 @@ public class User extends BaseDb {
 		USER, ADMIN
 	}
 	
-	@Id
-	private UUID id;
 	
 	@Column(unique = true)
 	private String email;
 	
 	private String name;
 	
-	@Type(type = "string-array")
-    @Column(columnDefinition = "text[]")
+    @Type(type = "jsonb")
+    @Column(columnDefinition = "jsonb")
 	private List<Role> roles = new ArrayList<Role>();
 
 	public String getEmail() {
