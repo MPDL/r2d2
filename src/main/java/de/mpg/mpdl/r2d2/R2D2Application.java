@@ -17,7 +17,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 @SpringBootApplication
-@PropertySource("classpath:r2d2.properties")
+@PropertySource("classpath:application.r2d2.properties")
 public class R2D2Application {
 
   @Autowired
