@@ -12,37 +12,37 @@ import de.mpg.mpdl.r2d2.model.aa.User;
 
 @Entity
 public class Dataset extends BaseDb {
-	
-	
-	public enum State {
-		PUBLIC, PRIVATE, WITHDRAWN
-	}
-	
-	@Enumerated(EnumType.STRING)
-	private Dataset.State state = State.PRIVATE;
-	
-	@ManyToMany(fetch = FetchType.LAZY)
-	private List<User> datamanager;
-	
-	
-	private List<User> getDatamanager() {
-		return datamanager;
-	}
-	
-	private void setDatamanager(List<User> datamanager) {
-		this.datamanager = datamanager;
-	}
-	
-	public Dataset.State getState() {
-		return state;
-	}
-
-	public void setState(Dataset.State state) {
-		this.state = state;
-	}
 
 
-	
-	
+  public enum State {
+    PUBLIC,
+    PRIVATE,
+    WITHDRAWN
+  }
+
+  @Enumerated(EnumType.STRING)
+  private Dataset.State state = State.PRIVATE;
+
+  @ManyToMany(fetch = FetchType.LAZY)
+  private List<User> datamanager;
+
+
+  private List<User> getDatamanager() {
+    return datamanager;
+  }
+
+  private void setDatamanager(List<User> datamanager) {
+    this.datamanager = datamanager;
+  }
+
+  public Dataset.State getState() {
+    return state;
+  }
+
+  public void setState(Dataset.State state) {
+    this.state = state;
+  }
+
+
 
 }

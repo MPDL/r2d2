@@ -10,14 +10,13 @@ import de.mpg.mpdl.r2d2.model.Dataset.State;
 import de.mpg.mpdl.r2d2.model.aa.User;
 
 public class GenericServiceDbImpl<E> {
-	
-	
-	
-	
-	protected void checkEqualModificationDate(OffsetDateTime date1, OffsetDateTime date2) throws OptimisticLockingException {
-	    if (date1 == null || date2 == null || !date1.isEqual(date2)) {
-	      throw new OptimisticLockingException("Object changed in the meantime: " + date1 + "  does not equal  " + date2);
-	    }
-	  }
+
+
+
+  protected void checkEqualModificationDate(OffsetDateTime date1, OffsetDateTime date2) throws OptimisticLockingException {
+    if (date1 == null || date2 == null || !date1.isEqual(date2)) {
+      throw new OptimisticLockingException("Object changed in the meantime: " + date1 + "  does not equal  " + date2);
+    }
+  }
 
 }

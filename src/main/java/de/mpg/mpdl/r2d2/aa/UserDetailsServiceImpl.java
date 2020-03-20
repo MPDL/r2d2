@@ -17,15 +17,15 @@ import de.mpg.mpdl.r2d2.model.aa.InternalUser;
 
 @Service
 public class UserDetailsServiceImpl implements UserDetailsService {
-	
-	@Autowired
-	private InternalUserRepository userRepository;
 
-	
-	@Override
-	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-		InternalUser applicationUser = userRepository.findById(username).orElseThrow(() -> new UsernameNotFoundException(username));
+  @Autowired
+  private InternalUserRepository userRepository;
 
-		return new User(applicationUser.getUsername(), applicationUser.getPassword(), new ArrayList<GrantedAuthority>());
-	}
+
+  @Override
+  public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+    InternalUser applicationUser = userRepository.findById(username).orElseThrow(() -> new UsernameNotFoundException(username));
+
+    return new User(applicationUser.getUsername(), applicationUser.getPassword(), new ArrayList<GrantedAuthority>());
+  }
 }

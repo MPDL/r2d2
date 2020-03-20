@@ -6,6 +6,6 @@ import org.springframework.data.repository.CrudRepository;
 
 import de.mpg.mpdl.r2d2.model.Dataset;
 
-public interface DatasetRepository extends CrudRepository<Dataset, UUID>{
+public interface DatasetRepository extends CrudRepository<Dataset, UUID> {
 
 }

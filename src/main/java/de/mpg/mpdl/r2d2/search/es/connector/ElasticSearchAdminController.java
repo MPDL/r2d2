@@ -22,52 +22,50 @@ import de.mpg.mpdl.r2d2.exceptions.R2d2TechnicalException;
 @Component
 public class ElasticSearchAdminController {
 
-	@Autowired
-	private RestHighLevelClient client;
+  @Autowired
+  private RestHighLevelClient client;
 
-	/**
-	 * Create a new index
-	 * 
-	 * @param indexName
-	 */
-	public boolean createIndex(String indexName, String alias) throws R2d2TechnicalException {
+  /**
+   * Create a new index
+   * 
+   * @param indexName
+   */
+  public boolean createIndex(String indexName, String alias) throws R2d2TechnicalException {
 
-		try {
-			GetIndexRequest request = new GetIndexRequest(indexName);
+    try {
+      GetIndexRequest request = new GetIndexRequest(indexName);
 
-			boolean exists = client.indices().exists(request, RequestOptions.DEFAULT);
+      boolean exists = client.indices().exists(request, RequestOptions.DEFAULT);
 
-			if (exists) {
-				deleteIndex(indexName);
-			}
+      if (exists) {
+        deleteIndex(indexName);
+      }
 
-			CreateIndexRequest createIndexRequest = new CreateIndexRequest(indexName);
-			CreateIndexResponse createIndexResponse = client.indices().create(createIndexRequest,
-					RequestOptions.DEFAULT);
-			return createIndexResponse.isAcknowledged();
+      CreateIndexRequest createIndexRequest = new CreateIndexRequest(indexName);
+      CreateIndexResponse createIndexResponse = client.indices().create(createIndexRequest, RequestOptions.DEFAULT);
+      return createIndexResponse.isAcknowledged();
 
-		} catch (IOException e) {
-			throw new R2d2TechnicalException(e);
-		}
-	}
+    } catch (IOException e) {
+      throw new R2d2TechnicalException(e);
+    }
+  }
 
-	/**
-	 * delete an existing index
-	 * 
-	 * @param index
-	 * @return boolean
-	 */
-	public boolean deleteIndex(String index) throws R2d2TechnicalException {
+  /**
+   * delete an existing index
+   * 
+   * @param index
+   * @return boolean
+   */
+  public boolean deleteIndex(String index) throws R2d2TechnicalException {
 
-		try {
-			DeleteIndexRequest deleteIndexRequest = new DeleteIndexRequest(index);
-			AcknowledgedResponse deleteIndexResponse = client.indices().delete(deleteIndexRequest,
-					RequestOptions.DEFAULT);
-			return deleteIndexResponse.isAcknowledged();
-		} catch (IOException e) {
-			throw new R2d2TechnicalException(e);
-		}
-	}
+    try {
+      DeleteIndexRequest deleteIndexRequest = new DeleteIndexRequest(index);
+      AcknowledgedResponse deleteIndexResponse = client.indices().delete(deleteIndexRequest, RequestOptions.DEFAULT);
+      return deleteIndexResponse.isAcknowledged();
+    } catch (IOException e) {
+      throw new R2d2TechnicalException(e);
+    }
+  }
 
 
 }

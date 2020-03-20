@@ -3,65 +3,65 @@ package de.mpg.mpdl.r2d2.model.search;
 import de.mpg.mpdl.r2d2.search.es.daoimpl.ElasticSearchGenericDAOImpl;
 
 public class SearchQuery {
-	
-	private String query;
-	
-	private String sort;
-	
-	private int from = 0;
-	
-	private int size = -1;
-	
-	private String scrollId;
-	
-	private boolean scroll = false;
 
-	public String getQuery() {
-		return query;
-	}
+  private String query;
 
-	public void setQuery(String query) {
-		this.query = query;
-	}
+  private String sort;
 
-	public String getSort() {
-		return sort;
-	}
+  private int from = 0;
 
-	public void setSort(String sort) {
-		this.sort = sort;
-	}
+  private int size = -1;
 
-	public int getFrom() {
-		return from;
-	}
+  private String scrollId;
 
-	public void setFrom(int from) {
-		this.from = from;
-	}
+  private boolean scroll = false;
 
-	public int getSize() {
-		return size;
-	}
+  public String getQuery() {
+    return query;
+  }
 
-	public void setSize(int size) {
-		this.size = size;
-	}
+  public void setQuery(String query) {
+    this.query = query;
+  }
 
-	public boolean isScroll() {
-		return scroll;
-	}
+  public String getSort() {
+    return sort;
+  }
 
-	public void setScroll(boolean scroll) {
-		this.scroll = scroll;
-	}
+  public void setSort(String sort) {
+    this.sort = sort;
+  }
 
-	public String getScrollId() {
-		return scrollId;
-	}
+  public int getFrom() {
+    return from;
+  }
 
-	public void setScrollId(String scrollId) {
-		this.scrollId = scrollId;
-	}
+  public void setFrom(int from) {
+    this.from = from;
+  }
+
+  public int getSize() {
+    return size;
+  }
+
+  public void setSize(int size) {
+    this.size = size;
+  }
+
+  public boolean isScroll() {
+    return scroll;
+  }
+
+  public void setScroll(boolean scroll) {
+    this.scroll = scroll;
+  }
+
+  public String getScrollId() {
+    return scrollId;
+  }
+
+  public void setScrollId(String scrollId) {
+    this.scrollId = scrollId;
+  }
 
 }

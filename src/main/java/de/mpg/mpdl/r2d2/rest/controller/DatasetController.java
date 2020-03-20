@@ -16,15 +16,14 @@ import de.mpg.mpdl.r2d2.service.DatasetVersionService;
 @RestController
 @RequestMapping("api/dataset")
 public class DatasetController {
-	
-	@Autowired
-	private DatasetVersionService datasetVersionService;
-	
-	@GetMapping(path="/{uuid}")
-	public DatasetVersion getDataset(@PathVariable("uuid") String uuid) throws R2d2TechnicalException, R2d2ApplicationException
-	{
-		return datasetVersionService.get(UUID.fromString(uuid), null);
-		
-	}
+
+  @Autowired
+  private DatasetVersionService datasetVersionService;
+
+  @GetMapping(path = "/{uuid}")
+  public DatasetVersion getDataset(@PathVariable("uuid") String uuid) throws R2d2TechnicalException, R2d2ApplicationException {
+    return datasetVersionService.get(UUID.fromString(uuid), null);
+
+  }
 
 }

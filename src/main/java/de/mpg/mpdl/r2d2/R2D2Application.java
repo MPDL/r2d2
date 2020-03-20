@@ -20,39 +20,38 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 @PropertySource("classpath:r2d2.properties")
 public class R2D2Application {
 
-	@Autowired
-	private Environment env;
-	
-	
-	
-	public static void main(String[] args) {
-		SpringApplication.run(R2D2Application.class, args);
-	}
-	
-	@Bean
-	public RestHighLevelClient elasticSearchClient() {
-		return new RestHighLevelClient(RestClient.builder(new HttpHost(env.getProperty("elasticsearch.url"))));
-	}
+  @Autowired
+  private Environment env;
 
-	
-	
-	@Bean
-	public ObjectMapper jsonObjectMapper()
-	{
-		ObjectMapper jsonObjectMapper = new ObjectMapper();
-		jsonObjectMapper.registerModule(new JavaTimeModule());
-	    jsonObjectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-	    jsonObjectMapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
-	    jsonObjectMapper.enable(SerializationFeature.INDENT_OUTPUT);
-	    jsonObjectMapper.configure(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY, true);
-	    
-	    return jsonObjectMapper;
-		
-	}
-	
-	@Bean
-    public BCryptPasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
+
+
+  public static void main(String[] args) {
+    SpringApplication.run(R2D2Application.class, args);
+  }
+
+  @Bean
+  public RestHighLevelClient elasticSearchClient() {
+    return new RestHighLevelClient(RestClient.builder(new HttpHost(env.getProperty("elasticsearch.url"))));
+  }
+
+
+
+  @Bean
+  public ObjectMapper jsonObjectMapper() {
+    ObjectMapper jsonObjectMapper = new ObjectMapper();
+    jsonObjectMapper.registerModule(new JavaTimeModule());
+    jsonObjectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+    jsonObjectMapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
+    jsonObjectMapper.enable(SerializationFeature.INDENT_OUTPUT);
+    jsonObjectMapper.configure(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY, true);
+
+    return jsonObjectMapper;
+
+  }
+
+  @Bean
+  public BCryptPasswordEncoder passwordEncoder() {
+    return new BCryptPasswordEncoder();
+  }
 
 }

@@ -7,8 +7,8 @@ import org.springframework.data.repository.CrudRepository;
 import de.mpg.mpdl.r2d2.model.Dataset;
 import de.mpg.mpdl.r2d2.model.aa.User;
 
-public interface UserRepository extends CrudRepository<User, UUID>{
-	
-	public User findByEmail(String email);
+public interface UserRepository extends CrudRepository<User, UUID> {
+
+  public User findByEmail(String email);
 
 }

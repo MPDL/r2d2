@@ -16,45 +16,46 @@ import de.mpg.mpdl.r2d2.model.BaseDb;
 @Entity
 @Table(name = "users")
 public class User extends BaseDb {
-	
-	public enum Role {
-		USER, ADMIN
-	}
-	
-	
-	@Column(unique = true)
-	private String email;
-	
-	private String name;
-	
-    @Type(type = "jsonb")
-    @Column(columnDefinition = "jsonb")
-	private List<Role> roles = new ArrayList<Role>();
 
-	public String getEmail() {
-		return email;
-	}
+  public enum Role {
+    USER,
+    ADMIN
+  }
 
-	public void setEmail(String email) {
-		this.email = email;
-	}
 
-	public String getName() {
-		return name;
-	}
+  @Column(unique = true)
+  private String email;
 
-	public void setName(String name) {
-		this.name = name;
-	}
+  private String name;
 
-	public List<Role> getRoles() {
-		return roles;
-	}
+  @Type(type = "jsonb")
+  @Column(columnDefinition = "jsonb")
+  private List<Role> roles = new ArrayList<Role>();
 
-	public void setRoles(List<Role> roles) {
-		this.roles = roles;
-	}
-	
-	
+  public String getEmail() {
+    return email;
+  }
+
+  public void setEmail(String email) {
+    this.email = email;
+  }
+
+  public String getName() {
+    return name;
+  }
+
+  public void setName(String name) {
+    this.name = name;
+  }
+
+  public List<Role> getRoles() {
+    return roles;
+  }
+
+  public void setRoles(List<Role> roles) {
+    this.roles = roles;
+  }
+
+
 
 }

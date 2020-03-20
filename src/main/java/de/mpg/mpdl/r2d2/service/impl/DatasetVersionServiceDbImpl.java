@@ -26,163 +26,155 @@ import de.mpg.mpdl.r2d2.service.DatasetVersionService;
 @Service
 public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVersion> implements DatasetVersionService {
 
-	private static Logger LOGGER = LoggerFactory.getLogger(DatasetVersionServiceDbImpl.class);
+  private static Logger LOGGER = LoggerFactory.getLogger(DatasetVersionServiceDbImpl.class);
 
-	@Autowired
-	private DatasetVersionRepository datasetVersionRepository;
+  @Autowired
+  private DatasetVersionRepository datasetVersionRepository;
 
-	@Autowired
-	private DatasetVersionDaoEs datasetVersionIndexDao;
+  @Autowired
+  private DatasetVersionDaoEs datasetVersionIndexDao;
 
-	@Override
-	@Transactional(rollbackFor = Throwable.class)
-	public DatasetVersion create(DatasetVersion datasetVersion, User user)
-			throws R2d2TechnicalException, ValidationException {
+  @Override
+  @Transactional(rollbackFor = Throwable.class)
+  public DatasetVersion create(DatasetVersion datasetVersion, User user) throws R2d2TechnicalException, ValidationException {
 
-		// TODO authorization?
+    // TODO authorization?
 
-		DatasetVersion datasetVersionToCreate = buildDatasetVersionToCreate(datasetVersion, user, 1, null);
+    DatasetVersion datasetVersionToCreate = buildDatasetVersionToCreate(datasetVersion, user, 1, null);
 
-		// TODO validation
+    // TODO validation
 
-		try {
-			datasetVersionToCreate = datasetVersionRepository.save(datasetVersionToCreate);
-			datasetVersionIndexDao.createImmediately(datasetVersionToCreate.getId().toString(), datasetVersionToCreate);
-		} catch (Exception e) {
-			throw new R2d2TechnicalException(e);
-		}
+    try {
+      datasetVersionToCreate = datasetVersionRepository.save(datasetVersionToCreate);
+      datasetVersionIndexDao.createImmediately(datasetVersionToCreate.getId().toString(), datasetVersionToCreate);
+    } catch (Exception e) {
+      throw new R2d2TechnicalException(e);
+    }
 
-		return datasetVersionToCreate;
-	}
+    return datasetVersionToCreate;
+  }
 
-	@Override
-	@Transactional(rollbackFor = Throwable.class)
-	public DatasetVersion update(DatasetVersion datasetVersion, User user) throws R2d2TechnicalException,
-			OptimisticLockingException, ValidationException, NotFoundException, InvalidStateException {
+  @Override
+  @Transactional(rollbackFor = Throwable.class)
+  public DatasetVersion update(DatasetVersion datasetVersion, User user)
+      throws R2d2TechnicalException, OptimisticLockingException, ValidationException, NotFoundException, InvalidStateException {
 
-		return update(datasetVersion, user, false);
-	}
+    return update(datasetVersion, user, false);
+  }
 
-	@Override
-	@Transactional(rollbackFor = Throwable.class)
-	public DatasetVersion createNewVersion(DatasetVersion datasetVersion, User user) throws R2d2TechnicalException,
-			OptimisticLockingException, ValidationException, NotFoundException, InvalidStateException {
-		return update(datasetVersion, user, true);
-	}
+  @Override
+  @Transactional(rollbackFor = Throwable.class)
+  public DatasetVersion createNewVersion(DatasetVersion datasetVersion, User user)
+      throws R2d2TechnicalException, OptimisticLockingException, ValidationException, NotFoundException, InvalidStateException {
+    return update(datasetVersion, user, true);
+  }
 
-	@Override
-	@Transactional(rollbackFor = Throwable.class)
-	public void delete(UUID id, OffsetDateTime lastModificationDate, User user)
-			throws R2d2TechnicalException, OptimisticLockingException, NotFoundException, InvalidStateException {
-		
-		DatasetVersion datsetVersion = get(id, user);
-		checkEqualModificationDate(lastModificationDate, datsetVersion.getDataset().getModificationDate());
-		//TODO Complete deletion if only one version
-		//TODO check state
-		
-		//TODO Authorization
-		datasetVersionRepository.deleteById(id);
-		datasetVersionIndexDao.delete(id.toString());
-		// TODO Auto-generated method stub
+  @Override
+  @Transactional(rollbackFor = Throwable.class)
+  public void delete(UUID id, OffsetDateTime lastModificationDate, User user)
+      throws R2d2TechnicalException, OptimisticLockingException, NotFoundException, InvalidStateException {
 
-	}
+    DatasetVersion datsetVersion = get(id, user);
+    checkEqualModificationDate(lastModificationDate, datsetVersion.getDataset().getModificationDate());
+    //TODO Complete deletion if only one version
+    //TODO check state
 
-	@Override
-	@Transactional(readOnly = true)
-	public DatasetVersion get(UUID id, User user) throws R2d2TechnicalException, NotFoundException {
+    //TODO Authorization
+    datasetVersionRepository.deleteById(id);
+    datasetVersionIndexDao.delete(id.toString());
+    // TODO Auto-generated method stub
+
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public DatasetVersion get(UUID id, User user) throws R2d2TechnicalException, NotFoundException {
 
 
-		DatasetVersion datasetVersion = datasetVersionRepository.findById(id)
-				.orElseThrow(() -> new NotFoundException("Dataset version with id " + id + " not found"));
-		// TODO authorization
+    DatasetVersion datasetVersion =
+        datasetVersionRepository.findById(id).orElseThrow(() -> new NotFoundException("Dataset version with id " + id + " not found"));
+    // TODO authorization
 
-		return datasetVersion;
+    return datasetVersion;
 
-	}
+  }
 
-	@Override
-	@Transactional(rollbackFor = Throwable.class)
-	public void publish(UUID id, OffsetDateTime lastModificationDate, User user) throws R2d2TechnicalException,
-			OptimisticLockingException, ValidationException, NotFoundException, InvalidStateException {
-		// TODO Auto-generated method stub
+  @Override
+  @Transactional(rollbackFor = Throwable.class)
+  public void publish(UUID id, OffsetDateTime lastModificationDate, User user)
+      throws R2d2TechnicalException, OptimisticLockingException, ValidationException, NotFoundException, InvalidStateException {
+    // TODO Auto-generated method stub
 
-	}
+  }
 
-	private DatasetVersion update(DatasetVersion datasetVersion, User user, boolean createNewVersion)
-			throws R2d2TechnicalException, OptimisticLockingException, ValidationException, NotFoundException,
-			InvalidStateException {
+  private DatasetVersion update(DatasetVersion datasetVersion, User user, boolean createNewVersion)
+      throws R2d2TechnicalException, OptimisticLockingException, ValidationException, NotFoundException, InvalidStateException {
 
-		DatasetVersion datasetVersionToBeUpdated = get(datasetVersion.getId(), user);
-		DatasetVersion latestVersion = datasetVersionRepository
-				.getLatestVersion(datasetVersionToBeUpdated.getDataset().getId());
+    DatasetVersion datasetVersionToBeUpdated = get(datasetVersion.getId(), user);
+    DatasetVersion latestVersion = datasetVersionRepository.getLatestVersion(datasetVersionToBeUpdated.getDataset().getId());
 
-		if (!datasetVersionToBeUpdated.getId().equals(latestVersion.getId())) {
-			throw new InvalidStateException("Only the latest dataset version can be updated. Given version: "
-					+ datasetVersionToBeUpdated.getVersionNumber() + "; Latest version: "
-					+ latestVersion.getVersionNumber());
-		}
+    if (!datasetVersionToBeUpdated.getId().equals(latestVersion.getId())) {
+      throw new InvalidStateException("Only the latest dataset version can be updated. Given version: "
+          + datasetVersionToBeUpdated.getVersionNumber() + "; Latest version: " + latestVersion.getVersionNumber());
+    }
 
-		// TODO authorization
-		// TODO validation
-		checkEqualModificationDate(datasetVersion.getDataset().getModificationDate(),
-				datasetVersionToBeUpdated.getDataset().getModificationDate());
+    // TODO authorization
+    // TODO validation
+    checkEqualModificationDate(datasetVersion.getDataset().getModificationDate(),
+        datasetVersionToBeUpdated.getDataset().getModificationDate());
 
-		if (createNewVersion) {
-			if (!State.PUBLIC.equals(datasetVersionToBeUpdated.getState())) {
-				throw new InvalidStateException(
-						"A new version can only be created if the state of the latest version is public.");
-			}
+    if (createNewVersion) {
+      if (!State.PUBLIC.equals(datasetVersionToBeUpdated.getState())) {
+        throw new InvalidStateException("A new version can only be created if the state of the latest version is public.");
+      }
 
-			datasetVersionToBeUpdated = buildDatasetVersionToCreate(datasetVersion, user,
-					datasetVersionToBeUpdated.getVersionNumber() + 1, datasetVersionToBeUpdated.getDataset());
-		} else {
-			datasetVersionToBeUpdated = updateDatasetVersion(datasetVersion, datasetVersionToBeUpdated, user);
-		}
+      datasetVersionToBeUpdated = buildDatasetVersionToCreate(datasetVersion, user, datasetVersionToBeUpdated.getVersionNumber() + 1,
+          datasetVersionToBeUpdated.getDataset());
+    } else {
+      datasetVersionToBeUpdated = updateDatasetVersion(datasetVersion, datasetVersionToBeUpdated, user);
+    }
 
-		try {
-			datasetVersionToBeUpdated = datasetVersionRepository.save(datasetVersionToBeUpdated);
-			datasetVersionIndexDao.updateImmediately(datasetVersionToBeUpdated.getId().toString(),
-					datasetVersionToBeUpdated);
-		} catch (Exception e) {
-			throw new R2d2TechnicalException(e);
-		}
+    try {
+      datasetVersionToBeUpdated = datasetVersionRepository.save(datasetVersionToBeUpdated);
+      datasetVersionIndexDao.updateImmediately(datasetVersionToBeUpdated.getId().toString(), datasetVersionToBeUpdated);
+    } catch (Exception e) {
+      throw new R2d2TechnicalException(e);
+    }
 
-		return datasetVersionToBeUpdated;
-	}
+    return datasetVersionToBeUpdated;
+  }
 
-	private DatasetVersion updateDatasetVersion(DatasetVersion givenDatasetVersion, DatasetVersion latestVersion,
-			User modifier) {
+  private DatasetVersion updateDatasetVersion(DatasetVersion givenDatasetVersion, DatasetVersion latestVersion, User modifier) {
 
-		latestVersion.setModifier(modifier);
-		latestVersion.setMetadata(givenDatasetVersion.getMetadata());
+    latestVersion.setModifier(modifier);
+    latestVersion.setMetadata(givenDatasetVersion.getMetadata());
 
-		latestVersion.getDataset().setModifier(modifier);
+    latestVersion.getDataset().setModifier(modifier);
 
-		return latestVersion;
-	}
+    return latestVersion;
+  }
 
-	private DatasetVersion buildDatasetVersionToCreate(DatasetVersion givenDatasetVersion, User creator,
-			int versionNumber, Dataset dataset) {
+  private DatasetVersion buildDatasetVersionToCreate(DatasetVersion givenDatasetVersion, User creator, int versionNumber, Dataset dataset) {
 
-		DatasetVersion datasetVersionToCreate = new DatasetVersion();
-		datasetVersionToCreate.setState(State.PRIVATE);
-		datasetVersionToCreate.setMetadata(givenDatasetVersion.getMetadata());
-		datasetVersionToCreate.setCreator(creator);
-		datasetVersionToCreate.setModifier(creator);
-		datasetVersionToCreate.setVersionNumber(versionNumber);
+    DatasetVersion datasetVersionToCreate = new DatasetVersion();
+    datasetVersionToCreate.setState(State.PRIVATE);
+    datasetVersionToCreate.setMetadata(givenDatasetVersion.getMetadata());
+    datasetVersionToCreate.setCreator(creator);
+    datasetVersionToCreate.setModifier(creator);
+    datasetVersionToCreate.setVersionNumber(versionNumber);
 
-		Dataset datasetToCreate = dataset;
-		if (datasetToCreate == null) {
-			datasetToCreate = new Dataset();
-			datasetToCreate.setState(State.PRIVATE);
-			datasetToCreate.setCreator(creator);
-		}
+    Dataset datasetToCreate = dataset;
+    if (datasetToCreate == null) {
+      datasetToCreate = new Dataset();
+      datasetToCreate.setState(State.PRIVATE);
+      datasetToCreate.setCreator(creator);
+    }
 
-		datasetToCreate.setModifier(creator);
-		datasetVersionToCreate.setDataset(datasetToCreate);
+    datasetToCreate.setModifier(creator);
+    datasetVersionToCreate.setDataset(datasetToCreate);
 
-		return datasetVersionToCreate;
+    return datasetVersionToCreate;
 
-	}
+  }
 
 }

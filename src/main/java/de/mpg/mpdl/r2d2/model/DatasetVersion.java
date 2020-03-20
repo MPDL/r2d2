@@ -21,86 +21,86 @@ import de.mpg.mpdl.r2d2.model.Dataset.State;
 
 @Entity
 public class DatasetVersion extends BaseDb {
-	
 
-	@Column(nullable = false)
-	public int versionNumber = 1;
-	
-	@Enumerated(EnumType.STRING)
-	@Column(nullable = false)
-	private Dataset.State state = State.PRIVATE;
-	
-	@ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
-	@OnDelete(action = OnDeleteAction.CASCADE)
-	@JoinColumn(nullable = false)
-	private Dataset dataset = new Dataset();
-	
-	@Column(columnDefinition = "TIMESTAMP WITH TIME ZONE")
-	private OffsetDateTime publicationDate;
-	
-	private String doi;
-	
-	@Type(type = "jsonb")
-	@Column(columnDefinition = "jsonb")
-	private DatasetVersionMetadata metadata = new DatasetVersionMetadata();
-	
-	@ManyToMany
-	private List<File> files;
 
-	public int getVersionNumber() {
-		return versionNumber;
-	}
+  @Column(nullable = false)
+  public int versionNumber = 1;
 
-	public void setVersionNumber(int versionNumber) {
-		this.versionNumber = versionNumber;
-	}
+  @Enumerated(EnumType.STRING)
+  @Column(nullable = false)
+  private Dataset.State state = State.PRIVATE;
 
-	public Dataset.State getState() {
-		return state;
-	}
+  @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
+  @OnDelete(action = OnDeleteAction.CASCADE)
+  @JoinColumn(nullable = false)
+  private Dataset dataset = new Dataset();
 
-	public void setState(Dataset.State state) {
-		this.state = state;
-	}
+  @Column(columnDefinition = "TIMESTAMP WITH TIME ZONE")
+  private OffsetDateTime publicationDate;
 
-	public Dataset getDataset() {
-		return dataset;
-	}
+  private String doi;
 
-	public void setDataset(Dataset dataset) {
-		this.dataset = dataset;
-	}
+  @Type(type = "jsonb")
+  @Column(columnDefinition = "jsonb")
+  private DatasetVersionMetadata metadata = new DatasetVersionMetadata();
 
-	public OffsetDateTime getPublicationDate() {
-		return publicationDate;
-	}
+  @ManyToMany
+  private List<File> files;
 
-	public void setPublicationDate(OffsetDateTime publicationDate) {
-		this.publicationDate = publicationDate;
-	}
+  public int getVersionNumber() {
+    return versionNumber;
+  }
 
-	public String getDoi() {
-		return doi;
-	}
+  public void setVersionNumber(int versionNumber) {
+    this.versionNumber = versionNumber;
+  }
 
-	public void setDoi(String doi) {
-		this.doi = doi;
-	}
+  public Dataset.State getState() {
+    return state;
+  }
 
-	public DatasetVersionMetadata getMetadata() {
-		return metadata;
-	}
+  public void setState(Dataset.State state) {
+    this.state = state;
+  }
 
-	public void setMetadata(DatasetVersionMetadata metadata) {
-		this.metadata = metadata;
-	}
+  public Dataset getDataset() {
+    return dataset;
+  }
 
-	public List<File> getFiles() {
-		return files;
-	}
+  public void setDataset(Dataset dataset) {
+    this.dataset = dataset;
+  }
 
-	public void setFiles(List<File> files) {
-		this.files = files;
-	}
+  public OffsetDateTime getPublicationDate() {
+    return publicationDate;
+  }
+
+  public void setPublicationDate(OffsetDateTime publicationDate) {
+    this.publicationDate = publicationDate;
+  }
+
+  public String getDoi() {
+    return doi;
+  }
+
+  public void setDoi(String doi) {
+    this.doi = doi;
+  }
+
+  public DatasetVersionMetadata getMetadata() {
+    return metadata;
+  }
+
+  public void setMetadata(DatasetVersionMetadata metadata) {
+    this.metadata = metadata;
+  }
+
+  public List<File> getFiles() {
+    return files;
+  }
+
+  public void setFiles(List<File> files) {
+    this.files = files;
+  }
 
 }

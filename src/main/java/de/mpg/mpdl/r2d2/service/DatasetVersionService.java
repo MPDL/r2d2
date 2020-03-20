@@ -12,23 +12,21 @@ import de.mpg.mpdl.r2d2.model.DatasetVersion;
 import de.mpg.mpdl.r2d2.model.aa.User;
 
 public interface DatasetVersionService {
-	
-	public DatasetVersion create(DatasetVersion object, User user)
-			throws R2d2TechnicalException, ValidationException;
 
-	public DatasetVersion update(DatasetVersion object, User user)
-			throws R2d2TechnicalException, OptimisticLockingException, ValidationException, NotFoundException, InvalidStateException;
-	
-	public DatasetVersion createNewVersion(DatasetVersion object, User user)
-			throws R2d2TechnicalException, OptimisticLockingException, ValidationException, NotFoundException, InvalidStateException;
+  public DatasetVersion create(DatasetVersion object, User user) throws R2d2TechnicalException, ValidationException;
 
-	public void delete(UUID id, OffsetDateTime lastModificationDate, User user)
-			throws R2d2TechnicalException, OptimisticLockingException, NotFoundException, InvalidStateException;
+  public DatasetVersion update(DatasetVersion object, User user)
+      throws R2d2TechnicalException, OptimisticLockingException, ValidationException, NotFoundException, InvalidStateException;
 
-	public DatasetVersion get(UUID id, User user)
-			throws R2d2TechnicalException, NotFoundException;
-	
-	public void publish(UUID id, OffsetDateTime lastModificationDate, User user)
-			throws R2d2TechnicalException, OptimisticLockingException, ValidationException, NotFoundException, InvalidStateException;
+  public DatasetVersion createNewVersion(DatasetVersion object, User user)
+      throws R2d2TechnicalException, OptimisticLockingException, ValidationException, NotFoundException, InvalidStateException;
+
+  public void delete(UUID id, OffsetDateTime lastModificationDate, User user)
+      throws R2d2TechnicalException, OptimisticLockingException, NotFoundException, InvalidStateException;
+
+  public DatasetVersion get(UUID id, User user) throws R2d2TechnicalException, NotFoundException;
+
+  public void publish(UUID id, OffsetDateTime lastModificationDate, User user)
+      throws R2d2TechnicalException, OptimisticLockingException, ValidationException, NotFoundException, InvalidStateException;
 
 }

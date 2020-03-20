@@ -88,6 +88,27 @@
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
 			</plugin>
+			<plugin>
+				<groupId>net.revelc.code.formatter</groupId>
+				<artifactId>formatter-maven-plugin</artifactId>
+				<version>2.11.0</version>
+				<configuration>
+					<compilerSource>${java.version}</compilerSource>
+					<compilerCompliance>${java.version}</compilerCompliance>
+					<compilerTargetPlatform>${java.version}</compilerTargetPlatform>
+					<lineEnding>LF</lineEnding>
+					<encoding>UTF-8</encoding>
+					<configFile>${project.basedir}/java-google-style-custom.xml</configFile>
+				</configuration>
+				<executions>
+					<execution>
+						<phase>process-sources</phase>
+						<goals>
+							<goal>format</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
 		</plugins>
 	</build>
 

@@ -22,51 +22,47 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import de.mpg.mpdl.r2d2.aa.model.UserLogin;
 
+/**
+ * This class controls the login process via Username and Password. 
+ * When successful, it creates a JWT token and returns it to the user.
+ * @author haarlae1
+ *
+ */
 public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
-	
-	//TODO change this!!!!!
-	public static final String SECRET = "SecretKeyToGenJWTs";
-    public static final long EXPIRATION_TIME = 864_000_000; // 10 days
-    public static final String TOKEN_PREFIX = "Bearer ";
-    public static final String HEADER_STRING = "Authorization";
-    
-	
-	
-    private AuthenticationManager authenticationManager;
 
-    public JWTAuthenticationFilter(AuthenticationManager authenticationManager) {
-        this.authenticationManager = authenticationManager;
+  //TODO change this!!!!!
+  public static final String SECRET = "SecretKeyToGenJWTs";
+  public static final long EXPIRATION_TIME = 864_000_000; // 10 days
+  public static final String TOKEN_PREFIX = "Bearer ";
+  public static final String HEADER_STRING = "Authorization";
+
+
+
+  private AuthenticationManager authenticationManager;
+
+  public JWTAuthenticationFilter(AuthenticationManager authenticationManager) {
+    this.authenticationManager = authenticationManager;
+  }
+
+  @Override
+  public Authentication attemptAuthentication(HttpServletRequest req, HttpServletResponse res) throws AuthenticationException {
+    try {
+      UserLogin creds = new ObjectMapper().readValue(req.getInputStream(), UserLogin.class);
+
+      return authenticationManager
+          .authenticate(new UsernamePasswordAuthenticationToken(creds.getUsername(), creds.getPassword(), new ArrayList<>()));
+    } catch (IOException e) {
+      throw new RuntimeException(e);
     }
+  }
 
-    @Override
-    public Authentication attemptAuthentication(HttpServletRequest req,
-                                                HttpServletResponse res) throws AuthenticationException {
-        try {
-            UserLogin creds = new ObjectMapper()
-                    .readValue(req.getInputStream(), UserLogin.class);
+  @Override
+  protected void successfulAuthentication(HttpServletRequest req, HttpServletResponse res, FilterChain chain, Authentication auth)
+      throws IOException, ServletException {
 
-            return authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(
-                            creds.getUsername(),
-                            creds.getPassword(),
-                            new ArrayList<>())
-            );
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    @Override
-    protected void successfulAuthentication(HttpServletRequest req,
-                                            HttpServletResponse res,
-                                            FilterChain chain,
-                                            Authentication auth) throws IOException, ServletException {
-
-        String token = JWT.create()
-                .withSubject(((User) auth.getPrincipal()).getUsername())
-                .withExpiresAt(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
-                .sign(Algorithm.HMAC512(SECRET.getBytes()));
-        res.addHeader(HEADER_STRING, TOKEN_PREFIX + token);
-    }
+    String token = JWT.create().withSubject(((User) auth.getPrincipal()).getUsername())
+        .withExpiresAt(new Date(System.currentTimeMillis() + EXPIRATION_TIME)).sign(Algorithm.HMAC512(SECRET.getBytes()));
+    res.addHeader(HEADER_STRING, TOKEN_PREFIX + token);
+  }
 
 }

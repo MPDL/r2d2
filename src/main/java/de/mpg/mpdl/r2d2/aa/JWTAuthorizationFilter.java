@@ -16,43 +16,44 @@ import org.springframework.security.web.authentication.www.BasicAuthenticationFi
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 
+/**
+ * This filter checks and validates the JWT token, if sent in an header
+ * @author haarlae1
+ *
+ */
 public class JWTAuthorizationFilter extends BasicAuthenticationFilter {
 
-    public JWTAuthorizationFilter(AuthenticationManager authManager) {
-        super(authManager);
+  public JWTAuthorizationFilter(AuthenticationManager authManager) {
+    super(authManager);
+  }
+
+  @Override
+  protected void doFilterInternal(HttpServletRequest req, HttpServletResponse res, FilterChain chain) throws IOException, ServletException {
+    String header = req.getHeader(JWTAuthenticationFilter.HEADER_STRING);
+
+    if (header == null || !header.startsWith(JWTAuthenticationFilter.TOKEN_PREFIX)) {
+      chain.doFilter(req, res);
+      return;
     }
 
-    @Override
-    protected void doFilterInternal(HttpServletRequest req,
-                                    HttpServletResponse res,
-                                    FilterChain chain) throws IOException, ServletException {
-        String header = req.getHeader(JWTAuthenticationFilter.HEADER_STRING);
+    UsernamePasswordAuthenticationToken authentication = getAuthentication(req);
 
-        if (header == null || !header.startsWith(JWTAuthenticationFilter.TOKEN_PREFIX)) {
-            chain.doFilter(req, res);
-            return;
-        }
+    SecurityContextHolder.getContext().setAuthentication(authentication);
+    chain.doFilter(req, res);
+  }
 
-        UsernamePasswordAuthenticationToken authentication = getAuthentication(req);
+  private UsernamePasswordAuthenticationToken getAuthentication(HttpServletRequest request) {
+    String token = request.getHeader(JWTAuthenticationFilter.HEADER_STRING);
+    if (token != null) {
+      // parse the token.
+      String user = JWT.require(Algorithm.HMAC512(JWTAuthenticationFilter.SECRET.getBytes())).build()
+          .verify(token.replace(JWTAuthenticationFilter.TOKEN_PREFIX, "")).getSubject();
 
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-        chain.doFilter(req, res);
+      if (user != null) {
+        return new UsernamePasswordAuthenticationToken(user, null, new ArrayList<>());
+      }
+      return null;
     }
-
-    private UsernamePasswordAuthenticationToken getAuthentication(HttpServletRequest request) {
-        String token = request.getHeader(JWTAuthenticationFilter.HEADER_STRING);
-        if (token != null) {
-            // parse the token.
-            String user = JWT.require(Algorithm.HMAC512(JWTAuthenticationFilter.SECRET.getBytes()))
-                    .build()
-                    .verify(token.replace(JWTAuthenticationFilter.TOKEN_PREFIX, ""))
-                    .getSubject();
-
-            if (user != null) {
-                return new UsernamePasswordAuthenticationToken(user, null, new ArrayList<>());
-            }
-            return null;
-        }
-        return null;
-    }
+    return null;
+  }
 }

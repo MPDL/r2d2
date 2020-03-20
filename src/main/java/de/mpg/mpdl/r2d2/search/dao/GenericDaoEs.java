@@ -8,7 +8,6 @@ import org.elasticsearch.search.builder.SearchSourceBuilder;
 
 
 
-
 import de.mpg.mpdl.r2d2.exceptions.R2d2TechnicalException;
 import de.mpg.mpdl.r2d2.model.search.SearchQuery;
 import de.mpg.mpdl.r2d2.model.search.SearchResult;
@@ -84,7 +83,7 @@ public interface GenericDaoEs<E> {
    */
   public SearchResult<E> search(SearchQuery searchQuery) throws R2d2TechnicalException;
 
-  
+
 
   public SearchResponse searchDetailed(SearchSourceBuilder ssb) throws R2d2TechnicalException;
 
