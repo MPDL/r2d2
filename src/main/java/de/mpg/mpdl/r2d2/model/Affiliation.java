@@ -2,11 +2,22 @@ package de.mpg.mpdl.r2d2.model;
 
 public class Affiliation {
 
+  //grid ID
+  private String id;
+
   //organization/institute
   private String organization;
 
   //department/group
   private String department;
+
+  public String getId() {
+    return id;
+  }
+
+  public void setId(String id) {
+    this.id = id;
+  }
 
   public String getOrganization() {
     return organization;

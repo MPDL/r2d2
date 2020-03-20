@@ -25,7 +25,7 @@ public class DatasetVersionMetadata {
 
   // doi is in DatasetVersion
 
-  private String citeAs;
+  // citeAs gets automatically created/composed
 
   public String getTitle() {
     return title;
@@ -89,14 +89,6 @@ public class DatasetVersionMetadata {
 
   public void setCorrespondingPapers(List<Publication> correspondingPapers) {
     this.correspondingPapers = correspondingPapers;
-  }
-
-  public String getCiteAs() {
-    return citeAs;
-  }
-
-  public void setCiteAs(String citeAs) {
-    this.citeAs = citeAs;
   }
 
 }

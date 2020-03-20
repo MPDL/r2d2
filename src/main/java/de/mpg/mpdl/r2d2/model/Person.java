@@ -1,6 +1,5 @@
 package de.mpg.mpdl.r2d2.model;
 
-import java.net.URI;
 import java.util.List;
 
 public class Person {
@@ -9,8 +8,8 @@ public class Person {
 
   private String familyName;
 
-  // ORCID
-  private URI nameIdentifier;
+  // ORCID (The id part of the ORCID-URI)
+  private String nameIdentifier;
 
   private List<Affiliation> affiliations;
 
@@ -30,11 +29,11 @@ public class Person {
     this.familyName = familyName;
   }
 
-  public URI getNameIdentifier() {
+  public String getNameIdentifier() {
     return nameIdentifier;
   }
 
-  public void setNameIdentifier(URI nameIdentifier) {
+  public void setNameIdentifier(String nameIdentifier) {
     this.nameIdentifier = nameIdentifier;
   }
 

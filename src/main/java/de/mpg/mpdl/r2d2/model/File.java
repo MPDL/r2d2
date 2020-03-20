@@ -15,7 +15,7 @@ public class File extends BaseDb {
 
   private long size;
 
-  // Date uploaded = creationDate BaseDb
+  // Date uploaded = BaseDb.creationDate
 
   public String getFilename() {
     return filename;
