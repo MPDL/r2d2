@@ -23,8 +23,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import de.mpg.mpdl.r2d2.aa.model.UserLogin;
 
 /**
- * This class controls the login process via Username and Password. 
- * When successful, it creates a JWT token and returns it to the user.
+ * This class controls the login process via Username and Password. When successful, it creates a
+ * JWT token and returns it to the user.
+ * 
  * @author haarlae1
  *
  */

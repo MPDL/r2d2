@@ -2,7 +2,7 @@ package de.mpg.mpdl.r2d2;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
-@ConfigurationProperties("mpcdf.cloud")
+@ConfigurationProperties("cloud")
 public class SwiftStorageConfigurationProperties {
 
   private String provider;

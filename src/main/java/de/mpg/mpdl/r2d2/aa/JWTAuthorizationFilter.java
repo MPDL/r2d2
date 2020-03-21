@@ -18,6 +18,7 @@ import com.auth0.jwt.algorithms.Algorithm;
 
 /**
  * This filter checks and validates the JWT token, if sent in an header
+ * 
  * @author haarlae1
  *
  */
