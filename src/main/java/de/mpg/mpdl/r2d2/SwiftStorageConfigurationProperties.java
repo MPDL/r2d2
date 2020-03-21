@@ -51,5 +51,4 @@ public class SwiftStorageConfigurationProperties {
     this.endpoint = endpoint;
   }
 
-
 }
