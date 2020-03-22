@@ -1,18 +1,14 @@
 package de.mpg.mpdl.r2d2.service.storage;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.List;
 
 import org.apache.commons.fileupload.FileItemStream;
-import org.apache.commons.io.IOUtils;
 import org.jclouds.apis.ApiMetadata;
 import org.jclouds.blobstore.BlobStore;
 import org.jclouds.blobstore.BlobStoreContext;
 import org.jclouds.blobstore.domain.Blob;
-import org.jclouds.blobstore.options.PutOptions;
 import org.jclouds.domain.Location;
-import org.jclouds.io.payloads.ByteArrayPayload;
 import org.jclouds.io.payloads.InputStreamPayload;
 import org.jclouds.openstack.swift.v1.SwiftApiMetadata;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,30 +45,25 @@ public class CloudStorageService implements StorageService {
     file.setFilename(item.getName());
     file.setFormat(item.getContentType());
     file = fileRepository.save(file);
-    InputStream stream = item.openStream();
-    // ByteSourcePayload streamPayload = new ByteSourcePayload(ByteSource.wrap(stream.readAllBytes()));
-    // System.out.println("array size in byteSource" + streamPayload.getRawContent().size());
-    byte[]  array = IOUtils.toByteArray(stream);
-    InputStreamPayload streamPayload = new InputStreamPayload(stream);
-    ByteArrayPayload arrayPayload = new ByteArrayPayload(array);
+    
+    InputStreamPayload streamPayload = new InputStreamPayload(item.openStream());
     Blob blob = null;
-    try (stream) {
-      blob =
-          blobStore.blobBuilder(file.getId().toString()).payload(arrayPayload).contentDisposition("attachment; filename=" + item.getName())
-              .contentLength(array.length).contentType(item.getContentType()).build();
+    try (streamPayload) {
+	blob = blobStore.blobBuilder(file.getId().toString())
+          .payload(streamPayload)
+          .contentDisposition("attachment; filename=" + item.getName())
+          .contentType(item.getContentType())
+          .build();
       if (!blobStore.containerExists(containerId)) {
         blobStore.createContainerInLocation(location, containerId);
       }
-      String eTag = blobStore.putBlob(containerId, blob, PutOptions.Builder.multipart());
-      System.out.println("ETAG " + eTag);
+      String eTag = blobStore.putBlob(containerId, blob);
       Blob uploaded = blobStore.getBlob(containerId, file.getId().toString());
-      file.setChecksum(uploaded.getPayload().getContentMetadata().getContentMD5AsHashCode().toString());
-      file.setStorageLocation(uploaded.getMetadata().getUri().toString());
+      file.setChecksum(eTag);
+      file.setStorageLocation(uploaded.getMetadata().getPublicUri().toString());
       file.setSize(uploaded.getMetadata().getSize());
       file = fileRepository.save(file);
       return file;
-    } catch (IOException ioe) {
-      throw new R2d2TechnicalException(ioe.getMessage(), ioe);
     }
 
   }

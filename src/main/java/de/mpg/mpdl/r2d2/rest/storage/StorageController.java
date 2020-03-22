@@ -1,6 +1,8 @@
 package de.mpg.mpdl.r2d2.rest.storage;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -34,8 +36,9 @@ public class StorageController {
   }
 
   @PostMapping("/up/{containerId}")
-  public ResponseEntity<File> upload(@PathVariable("containerId") String containerId, HttpServletRequest request)
+  public ResponseEntity<List<File>> upload(@PathVariable("containerId") String containerId, HttpServletRequest request)
       throws R2d2ApplicationException {
+	  List<File> fileList = new ArrayList<>();
     boolean isMultipart = ServletFileUpload.isMultipartContent(request);
     if (!isMultipart) {
       throw new R2d2ApplicationException("PECH!");
@@ -48,13 +51,14 @@ public class StorageController {
         FileItemStream item = iterator.next();
         if (!item.isFormField()) {
           file = storageService.store(containerId, item);
+          fileList.add(file);
         }
       }
     } catch (FileUploadException | IOException | R2d2TechnicalException e) {
       throw new R2d2ApplicationException(e);
     }
+    return ResponseEntity.ok(fileList);
 
-    return ResponseEntity.ok(file);
   }
 
 }
