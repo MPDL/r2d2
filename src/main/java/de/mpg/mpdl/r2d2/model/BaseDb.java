@@ -12,13 +12,11 @@ import javax.persistence.ManyToOne;
 import javax.persistence.MappedSuperclass;
 
 import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.GenericGenerator;
-import org.hibernate.annotations.Parameter;
 import org.hibernate.annotations.TypeDef;
 import org.hibernate.annotations.TypeDefs;
 import org.hibernate.annotations.UpdateTimestamp;
 
-import com.vladmihalcea.hibernate.type.array.EnumArrayType;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.vladmihalcea.hibernate.type.array.IntArrayType;
 import com.vladmihalcea.hibernate.type.array.StringArrayType;
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
@@ -32,6 +30,9 @@ import de.mpg.mpdl.r2d2.model.aa.User;
 
 public class BaseDb {
 
+  public final static String[] userIgnoreJsonProperties =
+      new String[] {"creationDate", "creator", "modificationDate", "modifier", "email", "roles"};
+
   @Id
   @GeneratedValue(strategy = GenerationType.AUTO)
   private UUID id;
@@ -44,10 +45,12 @@ public class BaseDb {
   @Column(columnDefinition = "TIMESTAMP WITH TIME ZONE")
   private OffsetDateTime modificationDate;
 
-  @ManyToOne(fetch = FetchType.LAZY)
+  @ManyToOne(fetch = FetchType.EAGER)
+  @JsonIgnoreProperties(value = {"creationDate", "creator", "modificationDate", "modifier", "email", "roles"})
   private User creator;
 
-  @ManyToOne(fetch = FetchType.LAZY)
+  @ManyToOne(fetch = FetchType.EAGER)
+  @JsonIgnoreProperties(value = {"creationDate", "creator", "modificationDate", "modifier", "email", "roles"})
   private User modifier;
 
   public UUID getId() {

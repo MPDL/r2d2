@@ -8,6 +8,8 @@ import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.ManyToMany;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import de.mpg.mpdl.r2d2.model.aa.User;
 
 @Entity
@@ -23,7 +25,8 @@ public class Dataset extends BaseDb {
   @Enumerated(EnumType.STRING)
   private Dataset.State state = State.PRIVATE;
 
-  @ManyToMany(fetch = FetchType.LAZY)
+  @ManyToMany(fetch = FetchType.EAGER)
+  @JsonIgnoreProperties(value = {"creationDate", "creator", "modificationDate", "modifier", "email", "roles"})
   private List<User> datamanager;
 
 

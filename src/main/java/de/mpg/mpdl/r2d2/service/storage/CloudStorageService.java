@@ -45,15 +45,12 @@ public class CloudStorageService implements StorageService {
     file.setFilename(item.getName());
     file.setFormat(item.getContentType());
     file = fileRepository.save(file);
-    
+
     InputStreamPayload streamPayload = new InputStreamPayload(item.openStream());
     Blob blob = null;
     try (streamPayload) {
-	blob = blobStore.blobBuilder(file.getId().toString())
-          .payload(streamPayload)
-          .contentDisposition("attachment; filename=" + item.getName())
-          .contentType(item.getContentType())
-          .build();
+      blob = blobStore.blobBuilder(file.getId().toString()).payload(streamPayload)
+          .contentDisposition("attachment; filename=" + item.getName()).contentType(item.getContentType()).build();
       if (!blobStore.containerExists(containerId)) {
         blobStore.createContainerInLocation(location, containerId);
       }
