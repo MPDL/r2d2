@@ -1,0 +1,34 @@
+{
+	"index": {
+		"number_of_shards": "5",
+		"analysis": {
+			"normalizer": {
+				"sort": {
+					"filter": [
+						"lowercase",
+						"trim",
+						"asciifolding"
+					]
+				}
+			},
+			"analyzer": {
+				"html_standard_analyzer": {
+					"filter": [
+						"standard",
+						"lowercase"
+					],
+					"char_filter": [
+						"html_char_filter"
+					],
+					"tokenizer": "standard"
+				}
+			},
+			"char_filter": {
+				"html_char_filter": {
+					"type": "html_strip"
+				}
+			}
+		},
+		"number_of_replicas": "0"
+	}
+}

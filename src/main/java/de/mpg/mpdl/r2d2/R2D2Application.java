@@ -1,5 +1,7 @@
 package de.mpg.mpdl.r2d2;
 
+import javax.annotation.PostConstruct;
+
 import org.apache.http.HttpHost;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestHighLevelClient;
@@ -29,11 +31,6 @@ public class R2D2Application {
     SpringApplication.run(R2D2Application.class, args);
   }
 
-  @Bean
-  public RestHighLevelClient elasticSearchClient() {
-    return new RestHighLevelClient(RestClient.builder(new HttpHost(env.getProperty("elasticsearch.url"))));
-  }
-
 
 
   @Bean
@@ -53,5 +50,7 @@ public class R2D2Application {
   public BCryptPasswordEncoder passwordEncoder() {
     return new BCryptPasswordEncoder();
   }
+
+
 
 }

@@ -1,0 +1,137 @@
+{ "dynamic": "true",
+            "properties": {
+                "creationDate": {
+                    "type": "date"
+                },
+                "creator": {
+                    "properties": {
+                        "id": {
+                            "type": "keyword"
+                        },
+                        "name": {
+                            "type": "text",
+                            "fields": {
+                                "keyword": {
+                                    "type": "keyword",
+                                    "ignore_above": 256
+                                }
+                            }
+                        }
+                    }
+                },
+                "id": {
+                    "type": "keyword"
+                },
+                "metadata": {
+                    "properties": {
+                        "authors": {
+                            "properties": {
+                                "familyName": {
+                                    "type": "text",
+                                    "fields": {
+                                        "keyword": {
+                                            "type": "keyword",
+                                            "ignore_above": 256
+                                        }
+                                    }
+                                },
+                                "givenName": {
+                                    "type": "text",
+                                    "fields": {
+                                        "keyword": {
+                                            "type": "keyword",
+                                            "ignore_above": 256
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "title": {
+                            "type": "text",
+                            "fields": {
+                                "keyword": {
+                                    "type": "keyword",
+                                    "ignore_above": 256
+                                }
+                            }
+                        }
+                    }
+                },
+                "modificationDate": {
+                    "type": "date"
+                },
+                "modifier": {
+                    "properties": {
+                        "id": {
+                            "type": "keyword"     
+                        },
+                        "name": {
+                            "type": "text",
+                            "fields": {
+                                "keyword": {
+                                    "type": "keyword",
+                                    "ignore_above": 256
+                                }
+                            }
+                        }
+                    }
+                },
+                "parent": {
+                    "properties": {
+                        "creationDate": {
+                            "type": "date"
+                        },
+                        "creator": {
+                            "properties": {
+                                "id": {
+                                    "type": "keyword"
+                                },
+                                "name": {
+                                    "type": "text",
+                                    "fields": {
+                                        "keyword": {
+                                            "type": "keyword",
+                                            "ignore_above": 256
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "id": {
+                            "type": "keyword"
+                        },
+                        "modificationDate": {
+                            "type": "date"
+                        },
+                        "modifier": {
+                            "properties": {
+                                "id": {
+                                    "type": "keyword"
+                                   
+                                },
+                                "name": {
+                                    "type": "text",
+                                    "fields": {
+                                        "keyword": {
+                                            "type": "keyword",
+                                            "ignore_above": 256
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "state": {
+                            "type": "keyword"
+                            
+                        }
+                    }
+                },
+                "state": {
+                    "type": "keyword"
+                    
+                },
+                "versionNumber": {
+                    "type": "long"
+                }
+            }
+        }

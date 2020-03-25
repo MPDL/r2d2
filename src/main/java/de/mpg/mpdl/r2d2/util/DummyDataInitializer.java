@@ -11,18 +11,23 @@ import org.springframework.stereotype.Component;
 import de.mpg.mpdl.r2d2.db.DatasetVersionRepository;
 import de.mpg.mpdl.r2d2.db.InternalUserRepository;
 import de.mpg.mpdl.r2d2.db.UserRepository;
+import de.mpg.mpdl.r2d2.exceptions.R2d2TechnicalException;
 import de.mpg.mpdl.r2d2.model.Dataset;
 import de.mpg.mpdl.r2d2.model.DatasetVersion;
 import de.mpg.mpdl.r2d2.model.Person;
 import de.mpg.mpdl.r2d2.model.aa.InternalUser;
 import de.mpg.mpdl.r2d2.model.aa.User;
 import de.mpg.mpdl.r2d2.model.aa.User.Role;
+import de.mpg.mpdl.r2d2.search.dao.DatasetVersionDaoEs;
 
 @Component
 public class DummyDataInitializer {
 
   @Autowired
   private DatasetVersionRepository datasetVersionRepository;
+
+  @Autowired
+  private DatasetVersionDaoEs datasetVersionDao;
 
   @Autowired
   private UserRepository userRepository;
@@ -34,7 +39,7 @@ public class DummyDataInitializer {
   private BCryptPasswordEncoder passwordEncoder;
 
   @PostConstruct
-  public void initialize() {
+  public void initialize() throws R2d2TechnicalException {
     User user = new User();
     user.setEmail("testuser@mpdl.mpg.de");
     user.setName("Test Admin");
@@ -72,7 +77,8 @@ public class DummyDataInitializer {
 
     dv.setDataset(dataset);
 
-    datasetVersionRepository.save(dv);
+    dv = datasetVersionRepository.save(dv);
+    datasetVersionDao.createImmediately(dv.getId().toString(), dv);
 
   }
 

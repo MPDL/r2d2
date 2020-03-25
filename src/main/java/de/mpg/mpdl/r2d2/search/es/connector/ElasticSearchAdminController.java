@@ -14,6 +14,9 @@ import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.client.indices.CreateIndexRequest;
 import org.elasticsearch.client.indices.CreateIndexResponse;
 import org.elasticsearch.client.indices.GetIndexRequest;
+import org.elasticsearch.common.xcontent.XContentType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -21,6 +24,8 @@ import de.mpg.mpdl.r2d2.exceptions.R2d2TechnicalException;
 
 @Component
 public class ElasticSearchAdminController {
+
+  private static Logger Logger = LoggerFactory.getLogger(ElasticSearchAdminController.class);
 
   @Autowired
   private RestHighLevelClient client;
@@ -30,18 +35,24 @@ public class ElasticSearchAdminController {
    * 
    * @param indexName
    */
-  public boolean createIndex(String indexName, String alias) throws R2d2TechnicalException {
+  public boolean createIndex(String indexName, boolean overwriteOld, String settings, String mapping) throws R2d2TechnicalException {
 
+    Logger.info("Trying to create elasticsearch index " + indexName);
     try {
-      GetIndexRequest request = new GetIndexRequest(indexName);
 
-      boolean exists = client.indices().exists(request, RequestOptions.DEFAULT);
+      if (overwriteOld) {
+        GetIndexRequest request = new GetIndexRequest(indexName);
+        boolean exists = client.indices().exists(request, RequestOptions.DEFAULT);
 
-      if (exists) {
-        deleteIndex(indexName);
+        if (exists) {
+
+          deleteIndex(indexName);
+        }
+
       }
+      CreateIndexRequest createIndexRequest =
+          new CreateIndexRequest(indexName).mapping(mapping, XContentType.JSON).settings(settings, XContentType.JSON);
 
-      CreateIndexRequest createIndexRequest = new CreateIndexRequest(indexName);
       CreateIndexResponse createIndexResponse = client.indices().create(createIndexRequest, RequestOptions.DEFAULT);
       return createIndexResponse.isAcknowledged();
 
@@ -57,7 +68,7 @@ public class ElasticSearchAdminController {
    * @return boolean
    */
   public boolean deleteIndex(String index) throws R2d2TechnicalException {
-
+    Logger.info("Trying to delete  index with name " + index);
     try {
       DeleteIndexRequest deleteIndexRequest = new DeleteIndexRequest(index);
       AcknowledgedResponse deleteIndexResponse = client.indices().delete(deleteIndexRequest, RequestOptions.DEFAULT);

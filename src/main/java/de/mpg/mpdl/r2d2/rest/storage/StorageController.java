@@ -38,7 +38,7 @@ public class StorageController {
   @PostMapping("/up/{containerId}")
   public ResponseEntity<List<File>> upload(@PathVariable("containerId") String containerId, HttpServletRequest request)
       throws R2d2ApplicationException {
-	  List<File> fileList = new ArrayList<>();
+    List<File> fileList = new ArrayList<>();
     boolean isMultipart = ServletFileUpload.isMultipartContent(request);
     if (!isMultipart) {
       throw new R2d2ApplicationException("PECH!");
