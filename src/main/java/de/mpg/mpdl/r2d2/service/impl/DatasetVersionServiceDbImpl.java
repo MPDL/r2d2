@@ -18,6 +18,7 @@ import de.mpg.mpdl.r2d2.exceptions.R2d2TechnicalException;
 import de.mpg.mpdl.r2d2.exceptions.ValidationException;
 import de.mpg.mpdl.r2d2.model.Dataset;
 import de.mpg.mpdl.r2d2.model.Dataset.State;
+import de.mpg.mpdl.r2d2.model.aa.Principal;
 import de.mpg.mpdl.r2d2.model.aa.UserAccount;
 import de.mpg.mpdl.r2d2.model.DatasetVersion;
 import de.mpg.mpdl.r2d2.search.dao.DatasetVersionDaoEs;
@@ -36,11 +37,11 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
 
   @Override
   @Transactional(rollbackFor = Throwable.class)
-  public DatasetVersion create(DatasetVersion datasetVersion, UserAccount user) throws R2d2TechnicalException, ValidationException {
+  public DatasetVersion create(DatasetVersion datasetVersion, Principal user) throws R2d2TechnicalException, ValidationException {
 
     // TODO authorization?
 
-    DatasetVersion datasetVersionToCreate = buildDatasetVersionToCreate(datasetVersion, user, 1, null);
+    DatasetVersion datasetVersionToCreate = buildDatasetVersionToCreate(datasetVersion, user.getUserAccount(), 1, null);
 
     // TODO validation
 
@@ -56,7 +57,7 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
 
   @Override
   @Transactional(rollbackFor = Throwable.class)
-  public DatasetVersion update(DatasetVersion datasetVersion, UserAccount user)
+  public DatasetVersion update(DatasetVersion datasetVersion, Principal user)
       throws R2d2TechnicalException, OptimisticLockingException, ValidationException, NotFoundException, InvalidStateException {
 
     return update(datasetVersion, user, false);
@@ -64,14 +65,14 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
 
   @Override
   @Transactional(rollbackFor = Throwable.class)
-  public DatasetVersion createNewVersion(DatasetVersion datasetVersion, UserAccount user)
+  public DatasetVersion createNewVersion(DatasetVersion datasetVersion, Principal user)
       throws R2d2TechnicalException, OptimisticLockingException, ValidationException, NotFoundException, InvalidStateException {
     return update(datasetVersion, user, true);
   }
 
   @Override
   @Transactional(rollbackFor = Throwable.class)
-  public void delete(UUID id, OffsetDateTime lastModificationDate, UserAccount user)
+  public void delete(UUID id, OffsetDateTime lastModificationDate, Principal user)
       throws R2d2TechnicalException, OptimisticLockingException, NotFoundException, InvalidStateException {
 
     DatasetVersion datsetVersion = get(id, user);
@@ -88,7 +89,7 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
 
   @Override
   @Transactional(readOnly = true)
-  public DatasetVersion get(UUID id, UserAccount user) throws R2d2TechnicalException, NotFoundException {
+  public DatasetVersion get(UUID id, Principal user) throws R2d2TechnicalException, NotFoundException {
 
 
     DatasetVersion datasetVersion =
@@ -101,13 +102,13 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
 
   @Override
   @Transactional(rollbackFor = Throwable.class)
-  public void publish(UUID id, OffsetDateTime lastModificationDate, UserAccount user)
+  public void publish(UUID id, OffsetDateTime lastModificationDate, Principal user)
       throws R2d2TechnicalException, OptimisticLockingException, ValidationException, NotFoundException, InvalidStateException {
     // TODO Auto-generated method stub
 
   }
 
-  private DatasetVersion update(DatasetVersion datasetVersion, UserAccount user, boolean createNewVersion)
+  private DatasetVersion update(DatasetVersion datasetVersion, Principal user, boolean createNewVersion)
       throws R2d2TechnicalException, OptimisticLockingException, ValidationException, NotFoundException, InvalidStateException {
 
     DatasetVersion datasetVersionToBeUpdated = get(datasetVersion.getId(), user);
@@ -128,10 +129,10 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
         throw new InvalidStateException("A new version can only be created if the state of the latest version is public.");
       }
 
-      datasetVersionToBeUpdated = buildDatasetVersionToCreate(datasetVersion, user, datasetVersionToBeUpdated.getVersionNumber() + 1,
-          datasetVersionToBeUpdated.getDataset());
+      datasetVersionToBeUpdated = buildDatasetVersionToCreate(datasetVersion, user.getUserAccount(),
+          datasetVersionToBeUpdated.getVersionNumber() + 1, datasetVersionToBeUpdated.getDataset());
     } else {
-      datasetVersionToBeUpdated = updateDatasetVersion(datasetVersion, datasetVersionToBeUpdated, user);
+      datasetVersionToBeUpdated = updateDatasetVersion(datasetVersion, datasetVersionToBeUpdated, user.getUserAccount());
     }
 
     try {

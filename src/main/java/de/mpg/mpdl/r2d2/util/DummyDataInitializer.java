@@ -9,8 +9,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import de.mpg.mpdl.r2d2.db.DatasetVersionRepository;
-import de.mpg.mpdl.r2d2.db.InternalUserRepository;
-import de.mpg.mpdl.r2d2.db.UserRepository;
+import de.mpg.mpdl.r2d2.db.LocalUserAccountRepository;
+import de.mpg.mpdl.r2d2.db.UserAccountRepository;
 import de.mpg.mpdl.r2d2.exceptions.R2d2TechnicalException;
 import de.mpg.mpdl.r2d2.model.Dataset;
 import de.mpg.mpdl.r2d2.model.DatasetVersion;
@@ -30,10 +30,10 @@ public class DummyDataInitializer {
   private DatasetVersionDaoEs datasetVersionDao;
 
   @Autowired
-  private UserRepository userRepository;
+  private UserAccountRepository userRepository;
 
   @Autowired
-  private InternalUserRepository internalUserRepository;
+  private LocalUserAccountRepository internalUserRepository;
 
   @Autowired
   private BCryptPasswordEncoder passwordEncoder;

@@ -10,8 +10,8 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import de.mpg.mpdl.r2d2.db.InternalUserRepository;
-import de.mpg.mpdl.r2d2.db.UserRepository;
+import de.mpg.mpdl.r2d2.db.LocalUserAccountRepository;
+import de.mpg.mpdl.r2d2.db.UserAccountRepository;
 import de.mpg.mpdl.r2d2.model.aa.LocalUserAccount;
 
 
@@ -19,7 +19,7 @@ import de.mpg.mpdl.r2d2.model.aa.LocalUserAccount;
 public class UserDetailsServiceImpl implements UserDetailsService {
 
   @Autowired
-  private InternalUserRepository userRepository;
+  private LocalUserAccountRepository userRepository;
 
 
   @Override

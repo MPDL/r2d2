@@ -5,10 +5,11 @@ import java.util.UUID;
 import org.springframework.data.repository.CrudRepository;
 
 import de.mpg.mpdl.r2d2.model.Dataset;
+import de.mpg.mpdl.r2d2.model.aa.LocalUserAccount;
 import de.mpg.mpdl.r2d2.model.aa.UserAccount;
 
-public interface UserRepository extends CrudRepository<UserAccount, UUID> {
+public interface LocalUserAccountRepository extends CrudRepository<LocalUserAccount, String> {
 
-  public UserAccount findByEmail(String email);
+  //public User findByEmail(String email);
 
 }

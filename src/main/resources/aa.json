@@ -1,0 +1,202 @@
+{
+	"de.mpg.mpdl.r2d2.service.impl.DatasetVersionServiceDbImpl" : {
+		"technical" : {
+			"order" : ["user", "item", "context"],
+			"indices" : {
+				"item.object.creator.objectId" : "creator.objectId",
+				"item.object.context.objectId" : "context.objectId",
+				"item.versionState" : "versionState",
+				"item.object.publicState" : "publicState"
+			}
+		}, 
+		"create" : [
+			{
+				"user" : {
+					"role" : "SYSADMIN"
+				}
+			},		
+			{
+				"user" : {
+					"role" : "DEPOSITOR",
+					"field_grant_id_match" : "item.object.context.objectId"
+				}
+			}
+		],
+		
+		"update" : [
+			{
+				"user" : {
+					"role" : "SYSADMIN"
+				},
+				"item.versionState" : ["PENDING", "SUBMITTED", "RELEASED"],
+				"item.object.publicState" : ["PENDING", "SUBMITTED", "RELEASED"]
+			},			{
+				"user" : {
+					"field_user_id_match" : "item.object.creator.objectId"
+				},
+				"context.workflow" : "SIMPLE",
+				"item.versionState" : ["PENDING", "SUBMITTED", "RELEASED"],
+				"item.object.publicState" : ["PENDING", "SUBMITTED", "RELEASED"]
+			},
+			{
+				"context.workflow" : "SIMPLE",
+				"user" : {
+					"role" : "MODERATOR",
+					"field_grant_id_match" : "item.object.context.objectId"
+				},
+				"item.versionState" : ["RELEASED"],
+				"item.object.publicState" : ["PENDING", "SUBMITTED", "RELEASED"]
+			},
+			{
+				"context.workflow" : "STANDARD",
+				"user" : {
+					"field_user_id_match" : "item.object.creator.objectId"
+				},
+				"item.versionState" : ["PENDING", "RELEASED", "IN_REVISION"],
+				"item.object.publicState" : ["PENDING", "SUBMITTED", "RELEASED"]
+			},
+			{
+				"user" : {
+					"role" : "MODERATOR",
+					"field_grant_id_match" : "item.object.context.objectId"
+				},
+				"item.versionState" : ["RELEASED", "SUBMITTED"],
+				"item.object.publicState" : ["PENDING", "SUBMITTED", "RELEASED"]
+			}
+		],
+		
+		"delete" : [
+			{
+				"user" : {
+					"role" : "SYSADMIN"
+				}
+			},			{
+				"user" : {
+					"field_user_id_match" : "item.object.creator.objectId"
+				},
+				"item.versionState" : ["PENDING", "IN_REVISION"],
+				"item.object.publicState" : ["PENDING", "SUBMITTED"]
+			},
+			{
+				"user" : {
+					"role" : "MODERATOR",
+					"field_grant_id_match" : "item.object.context.objectId"
+				},
+				"item.versionState" : ["SUBMITTED", "IN_REVISION"],
+				"item.object.publicState" : ["SUBMITTED"]
+			}
+		],
+		
+		"get" : [
+			{
+				"user" : {
+					"role" : "SYSADMIN"
+				}
+			},
+			{
+				"item.versionState" : ["RELEASED"]
+			},
+			{
+				"item.object.publicState" : ["WITHDRAWN"]
+			},
+			{
+				"user" : {
+					"field_user_id_match" : "item.object.creator.objectId"
+				},
+				"item.versionState" : ["PENDING", "IN_REVISION", "SUBMITTED"]
+			},
+			{
+				"user" : {
+					"role" : "MODERATOR",
+					"field_grant_id_match" : "item.object.context.objectId"
+				},
+				"item.versionState" : ["SUBMITTED", "IN_REVISION"]
+			}
+		],
+		
+		"submit" : [
+			{
+				"user" : {
+					"role" : "SYSADMIN"
+				},
+				"item.versionState" : ["PENDING", "IN_REVISION"],
+				"item.object.publicState" : ["PENDING", "SUBMITTED", "RELEASED"]
+			},			{
+				"context.workflow" : "STANDARD",
+				"user" : {
+					"field_user_id_match" : "item.object.creator.objectId"
+				},
+				"item.versionState" : ["PENDING", "IN_REVISION"],
+				"item.object.publicState" : ["PENDING", "SUBMITTED", "RELEASED"]
+			}
+		],
+		
+		"release" : [
+			{
+				"user" : {
+					"role" : "SYSADMIN"
+				},
+				"item.versionState" : ["PENDING", "SUBMITTED"],
+				"item.object.publicState" : ["PENDING", "SUBMITTED", "RELEASED"]
+			},			{
+				"context.workflow" : "SIMPLE",
+				"user" : {
+					"field_user_id_match" : "item.object.creator.objectId"
+				},
+				"item.versionState" : ["PENDING", "SUBMITTED"],
+				"item.object.publicState" : ["PENDING", "SUBMITTED", "RELEASED"]
+			},
+			{
+				"user" : {
+					"role" : "MODERATOR",
+					"field_grant_id_match" : "item.object.context.objectId"
+				},
+				"item.versionState" : ["SUBMITTED"],
+				"item.object.publicState" : ["PENDING", "SUBMITTED", "RELEASED"]
+			}
+		],
+		
+		"revise" : [
+			{
+				"user" : {
+					"role" : "SYSADMIN"
+				},
+				"item.versionState" : ["SUBMITTED"],
+				"item.object.publicState" : ["PENDING", "SUBMITTED", "RELEASED"]
+			},			{
+				"context.workflow" : "STANDARD",
+				"user" : {
+					"role" : "MODERATOR",
+					"field_grant_id_match" : "item.object.context.objectId"
+				},
+				"item.versionState" : ["SUBMITTED"],
+				"item.object.publicState" : ["PENDING", "SUBMITTED", "RELEASED"]
+			}
+		],
+		
+		"withdraw" : [
+			{
+				"user" : {
+					"role" : "SYSADMIN"
+				},
+				"item.versionState" : ["RELEASED"],
+				"item.object.publicState" : ["RELEASED"]
+			},			{
+				"context.workflow" : "SIMPLE",
+				"user" : {
+					"field_user_id_match" : "item.object.creator.objectId"
+				},
+				"item.versionState" : ["RELEASED"],
+				"item.object.publicState" : ["RELEASED"]
+			},
+			{
+				"user" : {
+					"role" : "MODERATOR",
+					"field_grant_id_match" : "item.object.context.objectId"
+				},
+				"item.versionState" : ["RELEASED"],
+				"item.object.publicState" : ["RELEASED"]
+			}
+		]
+	}
+}

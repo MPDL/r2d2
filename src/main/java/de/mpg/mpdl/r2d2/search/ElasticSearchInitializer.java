@@ -29,7 +29,7 @@ public class ElasticSearchInitializer {
 
   @Autowired
   private ElasticSearchAdminController esAdminController;
-  
+
   @Autowired
   private Environment env;
 
@@ -39,8 +39,8 @@ public class ElasticSearchInitializer {
     try {
       String datasetIndexSettings = Files
           .readString(Paths.get(ElasticSearchInitializer.class.getClassLoader().getResource("es/datasets_index_settings.json").toURI()));
-      String datasetIndexMapping =
-          Files.readString(Paths.get(ElasticSearchInitializer.class.getClassLoader().getResource("es/datasets_index_mapping.json").toURI()));
+      String datasetIndexMapping = Files
+          .readString(Paths.get(ElasticSearchInitializer.class.getClassLoader().getResource("es/datasets_index_mapping.json").toURI()));
 
       esAdminController.createIndex(env.getProperty("index.dataset.name"), true, datasetIndexSettings, datasetIndexMapping);
     } catch (Exception e) {
