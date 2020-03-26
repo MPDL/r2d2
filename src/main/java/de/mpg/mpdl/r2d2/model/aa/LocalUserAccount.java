@@ -5,13 +5,13 @@ import javax.persistence.Id;
 import javax.persistence.OneToOne;
 
 @Entity
-public class InternalUser {
+public class LocalUserAccount {
 
   @Id
   private String username;
 
   @OneToOne
-  private User user;
+  private UserAccount user;
 
   String password;
 
@@ -31,11 +31,11 @@ public class InternalUser {
     this.username = username;
   }
 
-  public User getUser() {
+  public UserAccount getUser() {
     return user;
   }
 
-  public void setUser(User user) {
+  public void setUser(UserAccount user) {
     this.user = user;
   }
 

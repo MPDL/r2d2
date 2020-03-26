@@ -22,7 +22,7 @@ import com.vladmihalcea.hibernate.type.array.StringArrayType;
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
 import com.vladmihalcea.hibernate.type.json.JsonStringType;
 
-import de.mpg.mpdl.r2d2.model.aa.User;
+import de.mpg.mpdl.r2d2.model.aa.UserAccount;
 
 @MappedSuperclass
 @TypeDefs({@TypeDef(name = "json", typeClass = JsonStringType.class), @TypeDef(name = "jsonb", typeClass = JsonBinaryType.class),
@@ -47,11 +47,11 @@ public class BaseDb {
 
   @ManyToOne(fetch = FetchType.EAGER)
   @JsonIgnoreProperties(value = {"creationDate", "creator", "modificationDate", "modifier", "email", "roles"})
-  private User creator;
+  private UserAccount creator;
 
   @ManyToOne(fetch = FetchType.EAGER)
   @JsonIgnoreProperties(value = {"creationDate", "creator", "modificationDate", "modifier", "email", "roles"})
-  private User modifier;
+  private UserAccount modifier;
 
   public UUID getId() {
     return id;
@@ -77,19 +77,19 @@ public class BaseDb {
     this.modificationDate = modificationDate;
   }
 
-  public User getCreator() {
+  public UserAccount getCreator() {
     return creator;
   }
 
-  public void setCreator(User creator) {
+  public void setCreator(UserAccount creator) {
     this.creator = creator;
   }
 
-  public User getModifier() {
+  public UserAccount getModifier() {
     return modifier;
   }
 
-  public void setModifier(User modifier) {
+  public void setModifier(UserAccount modifier) {
     this.modifier = modifier;
   }
 

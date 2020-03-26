@@ -5,10 +5,10 @@ import java.util.UUID;
 import org.springframework.data.repository.CrudRepository;
 
 import de.mpg.mpdl.r2d2.model.Dataset;
-import de.mpg.mpdl.r2d2.model.aa.InternalUser;
-import de.mpg.mpdl.r2d2.model.aa.User;
+import de.mpg.mpdl.r2d2.model.aa.LocalUserAccount;
+import de.mpg.mpdl.r2d2.model.aa.UserAccount;
 
-public interface InternalUserRepository extends CrudRepository<InternalUser, String> {
+public interface InternalUserRepository extends CrudRepository<LocalUserAccount, String> {
 
   //public User findByEmail(String email);
 

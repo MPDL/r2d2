@@ -18,7 +18,7 @@ import de.mpg.mpdl.r2d2.exceptions.R2d2TechnicalException;
 import de.mpg.mpdl.r2d2.exceptions.ValidationException;
 import de.mpg.mpdl.r2d2.model.Dataset;
 import de.mpg.mpdl.r2d2.model.Dataset.State;
-import de.mpg.mpdl.r2d2.model.aa.User;
+import de.mpg.mpdl.r2d2.model.aa.UserAccount;
 import de.mpg.mpdl.r2d2.model.DatasetVersion;
 import de.mpg.mpdl.r2d2.search.dao.DatasetVersionDaoEs;
 import de.mpg.mpdl.r2d2.service.DatasetVersionService;
@@ -36,7 +36,7 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
 
   @Override
   @Transactional(rollbackFor = Throwable.class)
-  public DatasetVersion create(DatasetVersion datasetVersion, User user) throws R2d2TechnicalException, ValidationException {
+  public DatasetVersion create(DatasetVersion datasetVersion, UserAccount user) throws R2d2TechnicalException, ValidationException {
 
     // TODO authorization?
 
@@ -56,7 +56,7 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
 
   @Override
   @Transactional(rollbackFor = Throwable.class)
-  public DatasetVersion update(DatasetVersion datasetVersion, User user)
+  public DatasetVersion update(DatasetVersion datasetVersion, UserAccount user)
       throws R2d2TechnicalException, OptimisticLockingException, ValidationException, NotFoundException, InvalidStateException {
 
     return update(datasetVersion, user, false);
@@ -64,14 +64,14 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
 
   @Override
   @Transactional(rollbackFor = Throwable.class)
-  public DatasetVersion createNewVersion(DatasetVersion datasetVersion, User user)
+  public DatasetVersion createNewVersion(DatasetVersion datasetVersion, UserAccount user)
       throws R2d2TechnicalException, OptimisticLockingException, ValidationException, NotFoundException, InvalidStateException {
     return update(datasetVersion, user, true);
   }
 
   @Override
   @Transactional(rollbackFor = Throwable.class)
-  public void delete(UUID id, OffsetDateTime lastModificationDate, User user)
+  public void delete(UUID id, OffsetDateTime lastModificationDate, UserAccount user)
       throws R2d2TechnicalException, OptimisticLockingException, NotFoundException, InvalidStateException {
 
     DatasetVersion datsetVersion = get(id, user);
@@ -88,7 +88,7 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
 
   @Override
   @Transactional(readOnly = true)
-  public DatasetVersion get(UUID id, User user) throws R2d2TechnicalException, NotFoundException {
+  public DatasetVersion get(UUID id, UserAccount user) throws R2d2TechnicalException, NotFoundException {
 
 
     DatasetVersion datasetVersion =
@@ -101,13 +101,13 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
 
   @Override
   @Transactional(rollbackFor = Throwable.class)
-  public void publish(UUID id, OffsetDateTime lastModificationDate, User user)
+  public void publish(UUID id, OffsetDateTime lastModificationDate, UserAccount user)
       throws R2d2TechnicalException, OptimisticLockingException, ValidationException, NotFoundException, InvalidStateException {
     // TODO Auto-generated method stub
 
   }
 
-  private DatasetVersion update(DatasetVersion datasetVersion, User user, boolean createNewVersion)
+  private DatasetVersion update(DatasetVersion datasetVersion, UserAccount user, boolean createNewVersion)
       throws R2d2TechnicalException, OptimisticLockingException, ValidationException, NotFoundException, InvalidStateException {
 
     DatasetVersion datasetVersionToBeUpdated = get(datasetVersion.getId(), user);
@@ -144,7 +144,7 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
     return datasetVersionToBeUpdated;
   }
 
-  private DatasetVersion updateDatasetVersion(DatasetVersion givenDatasetVersion, DatasetVersion latestVersion, User modifier) {
+  private DatasetVersion updateDatasetVersion(DatasetVersion givenDatasetVersion, DatasetVersion latestVersion, UserAccount modifier) {
 
     latestVersion.setModifier(modifier);
     latestVersion.setMetadata(givenDatasetVersion.getMetadata());
@@ -154,7 +154,8 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
     return latestVersion;
   }
 
-  private DatasetVersion buildDatasetVersionToCreate(DatasetVersion givenDatasetVersion, User creator, int versionNumber, Dataset dataset) {
+  private DatasetVersion buildDatasetVersionToCreate(DatasetVersion givenDatasetVersion, UserAccount creator, int versionNumber,
+      Dataset dataset) {
 
     DatasetVersion datasetVersionToCreate = new DatasetVersion();
     datasetVersionToCreate.setState(State.PRIVATE);

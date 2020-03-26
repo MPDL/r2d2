@@ -10,7 +10,7 @@ import javax.persistence.ManyToMany;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
-import de.mpg.mpdl.r2d2.model.aa.User;
+import de.mpg.mpdl.r2d2.model.aa.UserAccount;
 
 @Entity
 public class Dataset extends BaseDb {
@@ -27,14 +27,14 @@ public class Dataset extends BaseDb {
 
   @ManyToMany(fetch = FetchType.EAGER)
   @JsonIgnoreProperties(value = {"creationDate", "creator", "modificationDate", "modifier", "email", "roles"})
-  private List<User> datamanager;
+  private List<UserAccount> datamanager;
 
 
-  private List<User> getDatamanager() {
+  private List<UserAccount> getDatamanager() {
     return datamanager;
   }
 
-  private void setDatamanager(List<User> datamanager) {
+  private void setDatamanager(List<UserAccount> datamanager) {
     this.datamanager = datamanager;
   }
 

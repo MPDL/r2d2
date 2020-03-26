@@ -15,9 +15,9 @@ import de.mpg.mpdl.r2d2.exceptions.R2d2TechnicalException;
 import de.mpg.mpdl.r2d2.model.Dataset;
 import de.mpg.mpdl.r2d2.model.DatasetVersion;
 import de.mpg.mpdl.r2d2.model.Person;
-import de.mpg.mpdl.r2d2.model.aa.InternalUser;
-import de.mpg.mpdl.r2d2.model.aa.User;
-import de.mpg.mpdl.r2d2.model.aa.User.Role;
+import de.mpg.mpdl.r2d2.model.aa.LocalUserAccount;
+import de.mpg.mpdl.r2d2.model.aa.UserAccount;
+import de.mpg.mpdl.r2d2.model.aa.UserAccount.Role;
 import de.mpg.mpdl.r2d2.search.dao.DatasetVersionDaoEs;
 
 @Component
@@ -40,7 +40,7 @@ public class DummyDataInitializer {
 
   @PostConstruct
   public void initialize() throws R2d2TechnicalException {
-    User user = new User();
+    UserAccount user = new UserAccount();
     user.setEmail("testuser@mpdl.mpg.de");
     user.setName("Test Admin");
     user.setId(UUID.fromString("2d0dd850-eabb-43fe-8b8f-1a1b54018738"));
@@ -51,7 +51,7 @@ public class DummyDataInitializer {
 
     user = userRepository.save(user);
 
-    InternalUser internalUser = new InternalUser();
+    LocalUserAccount internalUser = new LocalUserAccount();
     internalUser.setUser(user);
     internalUser.setUsername("testuser@mpdl.mpg.de");
     internalUser.setPassword(passwordEncoder.encode("test"));
