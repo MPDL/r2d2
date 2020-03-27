@@ -1,4 +1,4 @@
-package de.mpg.mpdl.rdrepo.rdrepo;
+package de.mpg.mpdl.r2d2;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
