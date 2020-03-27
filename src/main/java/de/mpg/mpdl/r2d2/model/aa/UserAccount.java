@@ -14,8 +14,8 @@ import org.hibernate.annotations.Type;
 import de.mpg.mpdl.r2d2.model.BaseDb;
 
 @Entity
-@Table(name = "users")
-public class User extends BaseDb {
+@Table(name = "user_account")
+public class UserAccount extends BaseDb {
 
   public enum Role {
     USER,

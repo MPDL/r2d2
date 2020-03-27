@@ -1,0 +1,42 @@
+{
+	"de.mpg.mpdl.r2d2.service.impl.DatasetVersionServiceDbImpl" : {
+		"technical" : {
+			"order" : ["user", "datasetVersion"],
+			"indices" : {
+				"datasetVersion.dataset.creator.objectId" : "creator.id",
+				"datasetVersion.state" : "state",
+				"datsetVersion.dataset.state" : "parent.state"
+			}
+		}, 
+		"create" : [
+			{
+				"user" : {
+					"role" : "ADMIN"
+				}
+			},
+			{
+				"user" : {
+					"role" : "USER"
+				}
+			}
+		],
+		
+		"get" : [
+			{
+				"user" : {
+					"role" : "ADMIN"
+				}
+			},
+			{
+				"datasetVersion.state" : ["PUBLIC"]
+			},
+			{
+				"user" : {
+					"field_user_id_match" : "datasetVersion.dataset.creator.id"
+				},
+				"item.versionState" : ["PRIVATE"]
+			}
+		]
+		}		
+		
+}
