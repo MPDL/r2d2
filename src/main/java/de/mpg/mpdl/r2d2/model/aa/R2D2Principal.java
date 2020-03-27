@@ -1,5 +1,10 @@
 package de.mpg.mpdl.r2d2.model.aa;
 
+import java.util.Collection;
+
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.User;
+
 /**
  * Wrapper object for UserAccount to support authorization mechanisms. Can be extended at a later
  * stage, e.g. for IP-based stuff etc.
@@ -7,14 +12,16 @@ package de.mpg.mpdl.r2d2.model.aa;
  * @author haarlae1
  *
  */
-public class Principal {
+public class R2D2Principal extends User {
+
+  public R2D2Principal(String username, String password, Collection<? extends GrantedAuthority> authorities) {
+    super(username, password, authorities);
+    // TODO Auto-generated constructor stub
+  }
 
   private UserAccount userAccount;
 
-  public Principal(UserAccount userAccount) {
-    super();
-    this.userAccount = userAccount;
-  }
+
 
   public UserAccount getUserAccount() {
     return userAccount;

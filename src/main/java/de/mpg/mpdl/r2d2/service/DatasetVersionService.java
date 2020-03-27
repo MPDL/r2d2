@@ -10,26 +10,26 @@ import de.mpg.mpdl.r2d2.exceptions.OptimisticLockingException;
 import de.mpg.mpdl.r2d2.exceptions.R2d2TechnicalException;
 import de.mpg.mpdl.r2d2.exceptions.ValidationException;
 import de.mpg.mpdl.r2d2.model.DatasetVersion;
-import de.mpg.mpdl.r2d2.model.aa.Principal;
+import de.mpg.mpdl.r2d2.model.aa.R2D2Principal;
 import de.mpg.mpdl.r2d2.model.aa.UserAccount;
 
 public interface DatasetVersionService {
 
-  public DatasetVersion create(DatasetVersion object, Principal user)
+  public DatasetVersion create(DatasetVersion object, R2D2Principal user)
       throws R2d2TechnicalException, ValidationException, AuthorizationException;
 
-  public DatasetVersion update(DatasetVersion object, Principal user) throws R2d2TechnicalException, OptimisticLockingException,
+  public DatasetVersion update(DatasetVersion object, R2D2Principal user) throws R2d2TechnicalException, OptimisticLockingException,
       ValidationException, NotFoundException, InvalidStateException, AuthorizationException;
 
-  public DatasetVersion createNewVersion(DatasetVersion object, Principal user) throws R2d2TechnicalException, OptimisticLockingException,
-      ValidationException, NotFoundException, InvalidStateException, AuthorizationException;
+  public DatasetVersion createNewVersion(DatasetVersion object, R2D2Principal user) throws R2d2TechnicalException,
+      OptimisticLockingException, ValidationException, NotFoundException, InvalidStateException, AuthorizationException;
 
-  public void delete(UUID id, OffsetDateTime lastModificationDate, Principal user)
+  public void delete(UUID id, OffsetDateTime lastModificationDate, R2D2Principal user)
       throws R2d2TechnicalException, OptimisticLockingException, NotFoundException, InvalidStateException, AuthorizationException;
 
-  public DatasetVersion get(UUID id, Principal user) throws R2d2TechnicalException, NotFoundException, AuthorizationException;
+  public DatasetVersion get(UUID id, R2D2Principal user) throws R2d2TechnicalException, NotFoundException, AuthorizationException;
 
-  public void publish(UUID id, OffsetDateTime lastModificationDate, Principal user) throws R2d2TechnicalException,
+  public void publish(UUID id, OffsetDateTime lastModificationDate, R2D2Principal user) throws R2d2TechnicalException,
       OptimisticLockingException, ValidationException, NotFoundException, InvalidStateException, AuthorizationException;
 
 }

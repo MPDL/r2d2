@@ -21,6 +21,8 @@ import com.auth0.jwt.algorithms.Algorithm;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import de.mpg.mpdl.r2d2.aa.model.UserLogin;
+import de.mpg.mpdl.r2d2.model.aa.R2D2Principal;
+import de.mpg.mpdl.r2d2.model.aa.UserAccount;
 
 /**
  * This class controls the login process via Username and Password. When successful, it creates a
@@ -61,7 +63,8 @@ public class JWTLoginFilter extends UsernamePasswordAuthenticationFilter {
   protected void successfulAuthentication(HttpServletRequest req, HttpServletResponse res, FilterChain chain, Authentication auth)
       throws IOException, ServletException {
 
-    String token = JWT.create().withSubject(((User) auth.getPrincipal()).getUsername())
+    UserAccount ua = ((R2D2Principal) auth.getPrincipal()).getUserAccount();
+    String token = JWT.create().withSubject(((User) auth.getPrincipal()).getUsername()).withClaim("user_id", ua.getId().toString())
         .withExpiresAt(new Date(System.currentTimeMillis() + EXPIRATION_TIME)).sign(Algorithm.HMAC512(SECRET.getBytes()));
     res.addHeader(HEADER_STRING, TOKEN_PREFIX + token);
   }

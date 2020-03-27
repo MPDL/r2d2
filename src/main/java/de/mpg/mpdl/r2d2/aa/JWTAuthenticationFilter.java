@@ -2,12 +2,16 @@ package de.mpg.mpdl.r2d2.aa;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.UUID;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -15,6 +19,10 @@ import org.springframework.security.web.authentication.www.BasicAuthenticationFi
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
+
+import de.mpg.mpdl.r2d2.db.UserAccountRepository;
+import de.mpg.mpdl.r2d2.model.aa.R2D2Principal;
+import de.mpg.mpdl.r2d2.model.aa.UserAccount;
 
 /**
  * This filter checks and validates the JWT token, if sent in an header
@@ -24,9 +32,15 @@ import com.auth0.jwt.algorithms.Algorithm;
  */
 public class JWTAuthenticationFilter extends BasicAuthenticationFilter {
 
-  public JWTAuthenticationFilter(AuthenticationManager authManager) {
+  private static Logger Logger = LoggerFactory.getLogger(JWTAuthenticationFilter.class);
+
+  private UserAccountRepository userAccountRepository;
+
+  public JWTAuthenticationFilter(AuthenticationManager authManager, UserAccountRepository uar) {
     super(authManager);
+    this.userAccountRepository = uar;
   }
+
 
   @Override
   protected void doFilterInternal(HttpServletRequest req, HttpServletResponse res, FilterChain chain) throws IOException, ServletException {
@@ -47,11 +61,14 @@ public class JWTAuthenticationFilter extends BasicAuthenticationFilter {
     String token = request.getHeader(JWTLoginFilter.HEADER_STRING);
     if (token != null) {
       // parse the token.
-      String user = JWT.require(Algorithm.HMAC512(JWTLoginFilter.SECRET.getBytes())).build()
-          .verify(token.replace(JWTLoginFilter.TOKEN_PREFIX, "")).getSubject();
+      String userId = JWT.require(Algorithm.HMAC512(JWTLoginFilter.SECRET.getBytes())).build()
+          .verify(token.replace(JWTLoginFilter.TOKEN_PREFIX, "")).getClaim("user_id").asString();
 
-      if (user != null) {
-        return new UsernamePasswordAuthenticationToken(user, null, new ArrayList<>());
+      if (userId != null) {
+        UserAccount ua = userAccountRepository.findById(UUID.fromString(userId)).get();
+        R2D2Principal p = new R2D2Principal(ua.getEmail(), "", new ArrayList<>());
+        p.setUserAccount(ua);
+        return new UsernamePasswordAuthenticationToken(p, null, new ArrayList<>());
       }
       return null;
     }

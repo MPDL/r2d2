@@ -11,7 +11,7 @@ import de.mpg.mpdl.r2d2.exceptions.AuthorizationException;
 import de.mpg.mpdl.r2d2.exceptions.OptimisticLockingException;
 import de.mpg.mpdl.r2d2.exceptions.R2d2ApplicationException;
 import de.mpg.mpdl.r2d2.exceptions.R2d2TechnicalException;
-import de.mpg.mpdl.r2d2.model.aa.Principal;
+import de.mpg.mpdl.r2d2.model.aa.R2D2Principal;
 
 public abstract class GenericServiceDbImpl<E> {
 
@@ -26,8 +26,8 @@ public abstract class GenericServiceDbImpl<E> {
   }
 
 
-  protected void checkAa(String method, Principal userAccount, Object... objects)
-      throws R2d2TechnicalException, AuthorizationException, R2d2ApplicationException {
+  protected void checkAa(String method, R2D2Principal userAccount, Object... objects)
+      throws R2d2TechnicalException, AuthorizationException {
     if (objects == null) {
       objects = new Object[0];
     }

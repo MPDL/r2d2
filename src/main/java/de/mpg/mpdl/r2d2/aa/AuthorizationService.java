@@ -22,7 +22,7 @@ import de.mpg.mpdl.r2d2.db.UserAccountRepository;
 import de.mpg.mpdl.r2d2.exceptions.AuthorizationException;
 import de.mpg.mpdl.r2d2.exceptions.R2d2ApplicationException;
 import de.mpg.mpdl.r2d2.exceptions.R2d2TechnicalException;
-import de.mpg.mpdl.r2d2.model.aa.Principal;
+import de.mpg.mpdl.r2d2.model.aa.R2D2Principal;
 import de.mpg.mpdl.r2d2.model.aa.UserAccount;
 import de.mpg.mpdl.r2d2.model.aa.UserAccount.Role;
 
@@ -111,7 +111,7 @@ public class AuthorizationService {
 
     UserAccount userAccount;
     try {
-      userAccount = ((Principal) objects[order.indexOf("user")]).getUserAccount();
+      userAccount = ((R2D2Principal) objects[order.indexOf("user")]).getUserAccount();
     } catch (NullPointerException e) {
       userAccount = null;
 
@@ -268,7 +268,7 @@ public class AuthorizationService {
 
 
   public void checkAuthorization(String serviceName, String methodName, Object... objects)
-      throws AuthorizationException, R2d2TechnicalException, R2d2ApplicationException {
+      throws AuthorizationException, R2d2TechnicalException {
 
     Map<String, Map<String, Object>> serviceMap = (Map<String, Map<String, Object>>) aaMap.get(serviceName);
     if (serviceMap == null) {
@@ -354,8 +354,8 @@ public class AuthorizationService {
   }
 
   private void checkUser(Map<String, Object> ruleMap, List<String> order, Object[] objects)
-      throws AuthorizationException, R2d2TechnicalException, R2d2ApplicationException {
-    Principal principal = (Principal) objects[order.indexOf("user")];
+      throws AuthorizationException, R2d2TechnicalException {
+    R2D2Principal principal = (R2D2Principal) objects[order.indexOf("user")];
     if (principal == null) {
       throw new AuthorizationException("You have to be logged in with username/password or ip address.");
     }

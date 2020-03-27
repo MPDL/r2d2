@@ -12,6 +12,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.MappedSuperclass;
 
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.TypeDef;
 import org.hibernate.annotations.TypeDefs;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -34,7 +35,10 @@ public class BaseDb {
       new String[] {"creationDate", "creator", "modificationDate", "modifier", "email", "roles"};
 
   @Id
-  @GeneratedValue(strategy = GenerationType.AUTO)
+  //@GeneratedValue(strategy = GenerationType.AUTO)
+  @GenericGenerator(name = "UseExistingIdOtherwiseGenerateUsingUUID",
+      strategy = "de.mpg.mpdl.r2d2.db.UseExistingIdOtherwiseGenerateUsingUUID")
+  @GeneratedValue(generator = "UseExistingIdOtherwiseGenerateUsingUUID")
   private UUID id;
 
   @CreationTimestamp
