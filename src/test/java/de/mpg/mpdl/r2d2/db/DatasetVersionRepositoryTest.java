@@ -14,6 +14,7 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.elasticsearch.ElasticsearchContainer;
 
 import de.mpg.mpdl.r2d2.model.Dataset;
 import de.mpg.mpdl.r2d2.model.DatasetVersion;
@@ -23,12 +24,13 @@ import de.mpg.mpdl.r2d2.model.DatasetVersion;
 @ContextConfiguration(initializers = {DatasetVersionRepositoryTest.Initializer.class})
 public class DatasetVersionRepositoryTest {
 
-  //Setup test DB in Container + Configure DB Test properties:
-  //TODO: Outsource the test DB setup and configuration
+  //TODO: Outsource the test DB/ES setup and configuration
 
-  public static PostgreSQLContainer<?> postgreSQLContainer = createAndStartContainer();
+  //Setup test DB in Container:
 
-  public static PostgreSQLContainer<?> createAndStartContainer() {
+  public static PostgreSQLContainer<?> postgreSQLContainer = createAndStartDBContainer();
+
+  public static PostgreSQLContainer<?> createAndStartDBContainer() {
     PostgreSQLContainer<?> container = new PostgreSQLContainer<>("postgres:12.2");
     container.withDatabaseName("integration-tests-db").withUsername("UN").withPassword("PW");
     container.start();
@@ -36,14 +38,30 @@ public class DatasetVersionRepositoryTest {
     return container;
   }
 
+  //Setup test ES in Container:
+
+  public static ElasticsearchContainer elasticSearchContainer = creatAndStartESContainer();
+
+  public static ElasticsearchContainer creatAndStartESContainer() {
+    ElasticsearchContainer container = new ElasticsearchContainer("docker.elastic.co/elasticsearch/elasticsearch:7.5.2");
+    container.start();
+
+    return container;
+  }
+
+  //Configure DB & ES Test properties:
+
   static class Initializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
     @Override
     public void initialize(ConfigurableApplicationContext configurableApplicationContext) {
       TestPropertyValues.of("spring.datasource.url=" + postgreSQLContainer.getJdbcUrl(),
           "spring.datasource.username=" + postgreSQLContainer.getUsername(),
-          "spring.datasource.password=" + postgreSQLContainer.getPassword()).applyTo(configurableApplicationContext.getEnvironment());
+          "spring.datasource.password=" + postgreSQLContainer.getPassword(),
+          "elasticsearch.url=" + elasticSearchContainer.getHttpHostAddress()).applyTo(configurableApplicationContext.getEnvironment());
     }
   }
+
+  //TODO: Stop DB/ES container after test?
 
   //Test specifics:
 
