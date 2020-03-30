@@ -34,7 +34,7 @@
 				"user" : {
 					"field_user_id_match" : "datasetVersion.dataset.creator.id"
 				},
-				"item.versionState" : ["PRIVATE"]
+				"datasetVersion.state" : ["PRIVATE"]
 			}
 		]
 		}		

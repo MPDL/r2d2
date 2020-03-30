@@ -3,6 +3,9 @@ package de.mpg.mpdl.r2d2.service.impl;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
+import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.index.query.QueryBuilder;
+import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +27,7 @@ import de.mpg.mpdl.r2d2.model.aa.R2D2Principal;
 import de.mpg.mpdl.r2d2.model.aa.UserAccount;
 import de.mpg.mpdl.r2d2.model.DatasetVersion;
 import de.mpg.mpdl.r2d2.search.dao.DatasetVersionDaoEs;
+import de.mpg.mpdl.r2d2.search.dao.GenericDaoEs;
 import de.mpg.mpdl.r2d2.service.DatasetVersionService;
 
 @Service
@@ -111,6 +115,10 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
     // TODO Auto-generated method stub
 
   }
+  
+  
+  
+  
 
   private DatasetVersion update(DatasetVersion datasetVersion, R2D2Principal user, boolean createNewVersion) throws R2d2TechnicalException,
       OptimisticLockingException, ValidationException, NotFoundException, InvalidStateException, AuthorizationException {
@@ -181,6 +189,11 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
 
     return datasetVersionToCreate;
 
+  }
+
+  @Override
+  protected GenericDaoEs<DatasetVersion> getIndexDao() {
+    return datasetVersionIndexDao;
   }
 
 }

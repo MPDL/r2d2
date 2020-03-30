@@ -82,7 +82,7 @@ public class AuthorizationService {
   }
 
   public QueryBuilder modifyQueryForAa(String serviceName, QueryBuilder query, Object... objects)
-      throws AuthorizationException, R2d2ApplicationException, R2d2TechnicalException {
+      throws AuthorizationException, R2d2TechnicalException {
 
     QueryBuilder filterQuery = getAaFilterQuery(serviceName, objects);
 
@@ -101,7 +101,7 @@ public class AuthorizationService {
 
 
   private QueryBuilder getAaFilterQuery(String serviceName, Object... objects)
-      throws AuthorizationException, R2d2ApplicationException, R2d2TechnicalException {
+      throws AuthorizationException, R2d2TechnicalException {
     Map<String, Map<String, Object>> serviceMap = (Map<String, Map<String, Object>>) aaMap.get(serviceName);
 
     List<String> order = (List<String>) serviceMap.get("technical").get("order");
