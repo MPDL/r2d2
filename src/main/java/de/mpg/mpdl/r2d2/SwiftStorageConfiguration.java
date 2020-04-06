@@ -55,7 +55,7 @@ public class SwiftStorageConfiguration {
   }
 
   @Bean
-  public BlobStoreContext blStoreContext() {
+  public BlobStoreContext blobStoreContext() {
     return blobStoreContext;
   }
 }

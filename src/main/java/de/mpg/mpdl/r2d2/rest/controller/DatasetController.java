@@ -48,7 +48,7 @@ public class DatasetController {
 
   @Autowired
   private ObjectMapper objectMapper;
-  
+
   @Autowired
   private DatasetVersionService datasetVersionService;
 
@@ -75,7 +75,7 @@ public class DatasetController {
     }
 
     SearchSourceBuilder ssb = Utils.parseJsonToSearchSourceBuilder(searchSourceText);
-    
+
     SearchResponse resp = datasetVersionService.searchDetailed(ssb, scrollTime, Utils.toCustomPrincipal(p));
 
 
@@ -83,8 +83,8 @@ public class DatasetController {
     /*
     XContentBuilder builder = XContentFactory.jsonBuilder();
     resp.toXContent(builder, ToXContent.EMPTY_PARAMS);
-*/
-   
+    */
+
 
     return new ResponseEntity<String>(resp.toString(), HttpStatus.OK);
   }

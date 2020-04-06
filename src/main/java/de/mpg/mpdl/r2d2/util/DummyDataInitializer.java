@@ -80,7 +80,7 @@ public class DummyDataInitializer {
 
     dv = datasetVersionRepository.save(dv);
     datasetVersionDao.createImmediately(dv.getId().toString(), dv);
-    
+
     DatasetVersion dv2 = new DatasetVersion();
     dv2.setState(State.PUBLIC);
     dv2.setId(UUID.fromString("a6124f2a-9a06-489d-a7e2-40b583ebbd24"));

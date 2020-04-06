@@ -9,11 +9,11 @@ import de.mpg.mpdl.r2d2.exceptions.R2d2TechnicalException;
 import de.mpg.mpdl.r2d2.model.aa.R2D2Principal;
 
 public interface GenericService<ModelObject> {
-  
+
   public SearchResponse searchDetailed(SearchSourceBuilder ssb, long scrollTime, R2D2Principal principal)
-      throws R2d2TechnicalException,  AuthorizationException;
-  
+      throws R2d2TechnicalException, AuthorizationException;
+
   public SearchResponse searchDetailed(SearchSourceBuilder ssb, R2D2Principal principal)
-      throws R2d2TechnicalException,  AuthorizationException;
+      throws R2d2TechnicalException, AuthorizationException;
 
 }

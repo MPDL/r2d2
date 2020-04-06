@@ -14,7 +14,6 @@
 			"analyzer": {
 				"html_standard_analyzer": {
 					"filter": [
-						"standard",
 						"lowercase"
 					],
 					"char_filter": [
