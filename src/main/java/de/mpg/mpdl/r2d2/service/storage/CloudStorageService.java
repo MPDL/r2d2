@@ -20,6 +20,7 @@ import de.mpg.mpdl.r2d2.db.FileRepository;
 import de.mpg.mpdl.r2d2.exceptions.R2d2TechnicalException;
 import de.mpg.mpdl.r2d2.model.File;
 
+@Deprecated
 @Service
 public class CloudStorageService implements StorageService {
 

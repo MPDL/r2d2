@@ -10,6 +10,7 @@ public class SwiftStorageConfigurationProperties {
   private String identity;
   private String credentials;
   private String endpoint;
+  private String region;
 
   public String getProvider() {
     return provider;
@@ -49,6 +50,14 @@ public class SwiftStorageConfigurationProperties {
 
   public void setEndpoint(String endpoint) {
     this.endpoint = endpoint;
+  }
+
+  public String getRegion() {
+    return region;
+  }
+
+  public void setRegion(String region) {
+    this.region = region;
   }
 
 }

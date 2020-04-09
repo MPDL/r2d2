@@ -1,9 +1,20 @@
 package de.mpg.mpdl.r2d2.model;
 
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 
 @Entity
 public class File extends BaseDb {
+
+  public enum UploadState {
+    INITIATED,
+    ONGOING,
+    COMPLETE
+  }
+
+  @Enumerated(EnumType.STRING)
+  private File.UploadState state = UploadState.INITIATED;
 
   private String filename;
 
@@ -14,6 +25,10 @@ public class File extends BaseDb {
   private String format;
 
   private long size;
+
+  private int totalParts;
+
+  private int completedParts;
 
   // Date uploaded = BaseDb.creationDate
 
@@ -55,6 +70,30 @@ public class File extends BaseDb {
 
   public void setSize(long size) {
     this.size = size;
+  }
+
+  public File.UploadState getState() {
+    return state;
+  }
+
+  public void setState(File.UploadState state) {
+    this.state = state;
+  }
+
+  public int getTotalParts() {
+    return totalParts;
+  }
+
+  public void setTotalParts(int totalParts) {
+    this.totalParts = totalParts;
+  }
+
+  public int getCompletedParts() {
+    return completedParts;
+  }
+
+  public void setCompletedParts(int completedParts) {
+    this.completedParts = completedParts;
   }
 
 }
