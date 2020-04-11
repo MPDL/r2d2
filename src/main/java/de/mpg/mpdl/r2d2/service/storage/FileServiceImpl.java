@@ -64,10 +64,9 @@ public class FileServiceImpl extends GenericServiceDbImpl<File> implements FileS
     File file2update = get(object.getId(), user);
     checkEqualModificationDate(object.getModificationDate(), file2update.getModificationDate());
 
-    file2update = createFile(object, user.getUserAccount());
     try {
-      file2update = fileRepository.save(file2update);
-      fileDao.createImmediately(file2update.getId().toString(), file2update);
+      file2update = fileRepository.save(object);
+      fileDao.createImmediately(file2update.getId().toString(), object);
     } catch (Exception e) {
       throw new R2d2TechnicalException(e);
     }

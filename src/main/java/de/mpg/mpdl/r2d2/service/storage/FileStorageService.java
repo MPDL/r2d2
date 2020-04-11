@@ -1,5 +1,6 @@
 package de.mpg.mpdl.r2d2.service.storage;
 
+import java.io.InputStream;
 import java.util.UUID;
 
 import org.jclouds.blobstore.BlobStoreContext;
@@ -24,14 +25,14 @@ public class FileStorageService {
   private static final Logger logger = LoggerFactory.getLogger(FileStorageService.class);
 
   private static final String SEGMENTS = "segments";
-  
+
   private BlobStoreContext blobStoreContext;
 
   private SwiftObjectStoreRepository repository;
   private FileService service;
 
   @Autowired
-  public FileStorageService( BlobStoreContext context, SwiftObjectStoreRepository repo, FileService svc) {
+  public FileStorageService(BlobStoreContext context, SwiftObjectStoreRepository repo, FileService svc) {
     this.repository = repo;
     this.blobStoreContext = context;
     this.repository.setContext(blobStoreContext);
@@ -89,6 +90,10 @@ public class FileStorageService {
       throw new R2d2TechnicalException(e);
     }
     return file;
+  }
+  
+  public InputStream download(String container, String File, R2D2Principal user) {
+	  return repository.downloadFile(container, File);
   }
 
   private File updateFile(File file, R2D2Principal user, int chunk) throws R2d2TechnicalException {
