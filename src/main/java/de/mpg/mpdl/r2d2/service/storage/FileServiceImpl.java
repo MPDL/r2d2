@@ -29,111 +29,107 @@ import de.mpg.mpdl.r2d2.service.impl.GenericServiceDbImpl;
 @Service
 public class FileServiceImpl extends GenericServiceDbImpl<File> implements FileService {
 
-	private FileRepository fileRepository;
-	private FileDaoEs fileDao;
+  private FileRepository fileRepository;
+  private FileDaoEs fileDao;
 
-	@Autowired
-	public FileServiceImpl(FileRepository repository, FileDaoEs dao) {
-		this.fileRepository = repository;
-		this.fileDao = dao;
-	}
+  @Autowired
+  public FileServiceImpl(FileRepository repository, FileDaoEs dao) {
+    this.fileRepository = repository;
+    this.fileDao = dao;
+  }
 
-	@Override
-	@Transactional(rollbackFor = Throwable.class)
-	public File create(File object, R2D2Principal user)
-			throws R2d2TechnicalException, ValidationException, AuthorizationException {
+  @Override
+  @Transactional(rollbackFor = Throwable.class)
+  public File create(File object, R2D2Principal user) throws R2d2TechnicalException, ValidationException, AuthorizationException {
 
-		File file = createFile(object, user.getUserAccount());
-		/*
-		 * TODO
-		 */
-		// checkAa("create", user, file);
-		try {
-			file = fileRepository.save(file);
-			fileDao.createImmediately(file.getId().toString(), file);
-		} catch (Exception e) {
-			throw new R2d2TechnicalException(e);
-		}
-		return file;
-	}
+    File file = createFile(object, user.getUserAccount());
+    /*
+     * TODO
+     */
+    // checkAa("create", user, file);
+    try {
+      file = fileRepository.save(file);
+      fileDao.createImmediately(file.getId().toString(), file);
+    } catch (Exception e) {
+      throw new R2d2TechnicalException(e);
+    }
+    return file;
+  }
 
-	@Override
-	@Transactional(rollbackFor = Throwable.class)
-	public File update(File object, R2D2Principal user) throws R2d2TechnicalException, OptimisticLockingException,
-			ValidationException, NotFoundException, InvalidStateException, AuthorizationException {
+  @Override
+  @Transactional(rollbackFor = Throwable.class)
+  public File update(File object, R2D2Principal user) throws R2d2TechnicalException, OptimisticLockingException, ValidationException,
+      NotFoundException, InvalidStateException, AuthorizationException {
 
-		File file2update = get(object.getId(), user);
-		checkEqualModificationDate(object.getModificationDate(), file2update.getModificationDate());
+    File file2update = get(object.getId(), user);
+    checkEqualModificationDate(object.getModificationDate(), file2update.getModificationDate());
 
-		file2update = createFile(object, user.getUserAccount());
-		try {
-			file2update = fileRepository.save(file2update);
-			fileDao.createImmediately(file2update.getId().toString(), file2update);
-		} catch (Exception e) {
-			throw new R2d2TechnicalException(e);
-		}
+    file2update = createFile(object, user.getUserAccount());
+    try {
+      file2update = fileRepository.save(file2update);
+      fileDao.createImmediately(file2update.getId().toString(), file2update);
+    } catch (Exception e) {
+      throw new R2d2TechnicalException(e);
+    }
+    return file2update;
+  }
 
-	}
+  @Override
+  @Transactional(rollbackFor = Throwable.class)
+  public void delete(UUID id, OffsetDateTime lastModificationDate, R2D2Principal user)
+      throws R2d2TechnicalException, OptimisticLockingException, NotFoundException, InvalidStateException, AuthorizationException {
+    File file = get(id, user);
+    checkEqualModificationDate(lastModificationDate, file.getModificationDate());
+    try {
+      fileRepository.deleteById(id);
+      fileDao.delete(id.toString());
+    } catch (Exception e) {
+      throw new R2d2TechnicalException(e);
+    }
 
-	@Override
-	@Transactional(rollbackFor = Throwable.class)
-	public void delete(UUID id, OffsetDateTime lastModificationDate, R2D2Principal user) throws R2d2TechnicalException,
-			OptimisticLockingException, NotFoundException, InvalidStateException, AuthorizationException {
-		File file = get(id, user);
-		checkEqualModificationDate(lastModificationDate, file.getModificationDate());
-		try {
-			fileRepository.deleteById(id);
-			fileDao.delete(id.toString());
-		} catch (Exception e) {
-			throw new R2d2TechnicalException(e);
-		}
+  }
 
-	}
+  @Override
+  @Transactional(readOnly = true)
+  public File get(UUID id, R2D2Principal user) throws R2d2TechnicalException, NotFoundException, AuthorizationException {
 
-	@Override
-	@Transactional(readOnly = true)
-	public File get(UUID id, R2D2Principal user)
-			throws R2d2TechnicalException, NotFoundException, AuthorizationException {
+    File file = fileRepository.findById(id).orElseThrow(() -> new NotFoundException("File with id " + id + " not found"));
+    /*
+     * TODO
+     */
+    // checkAa("get", user, file);
 
-		File file = fileRepository.findById(id)
-				.orElseThrow(() -> new NotFoundException("File with id " + id + " not found"));
-		/*
-		 * TODO
-		 */
-		// checkAa("get", user, file);
+    return file;
+  }
 
-		return file;
-	}
+  @Override
+  @Transactional(rollbackFor = Throwable.class)
+  public void publish(UUID id, OffsetDateTime lastModificationDate, R2D2Principal user) throws R2d2TechnicalException,
+      OptimisticLockingException, ValidationException, NotFoundException, InvalidStateException, AuthorizationException {
+    // TODO Auto-generated method stub
 
-	@Override
-	@Transactional(rollbackFor = Throwable.class)
-	public void publish(UUID id, OffsetDateTime lastModificationDate, R2D2Principal user)
-			throws R2d2TechnicalException, OptimisticLockingException, ValidationException, NotFoundException,
-			InvalidStateException, AuthorizationException {
-		// TODO Auto-generated method stub
+  }
 
-	}
+  @Override
+  protected GenericDaoEs<File> getIndexDao() {
+    return fileDao;
+  }
 
-	@Override
-	protected GenericDaoEs<File> getIndexDao() {
-		return fileDao;
-	}
+  private File createFile(File file, UserAccount user) {
 
-	private File createFile(File file, UserAccount user) {
+    File theFile = new File();
+    theFile.setCreator(user);
+    theFile.setModifier(user);
+    theFile.setState(file.getState());
+    theFile.setChecksum(file.getChecksum());
+    theFile.setTotalParts(file.getTotalParts());
+    theFile.setCompletedParts(file.getCompletedParts());
+    theFile.setFilename(file.getFilename());
+    theFile.setFormat(file.getFormat());
+    theFile.setSize(file.getSize());
+    theFile.setStorageLocation(file.getStorageLocation());
+    return theFile;
 
-		File theFile = new File();
-		theFile.setCreator(user);
-		theFile.setModifier(user);
-		theFile.setState(file.getState());
-		theFile.setChecksum(file.getChecksum());
-		theFile.setTotalParts(file.getTotalParts());
-		theFile.setCompletedParts(file.getCompletedParts());
-		theFile.setFilename(file.getFilename());
-		theFile.setFormat(file.getFormat());
-		theFile.setSize(file.getSize());
-		theFile.setStorageLocation(file.getStorageLocation());
-		return theFile;
-
-	}
+  }
 
 }

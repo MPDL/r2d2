@@ -10,8 +10,7 @@ import de.mpg.mpdl.r2d2.exceptions.R2d2TechnicalException;
 import de.mpg.mpdl.r2d2.model.File;
 
 /**
- * @deprecated
- * use FileService and FileStorageService
+ * @deprecated use FileService and FileStorageService
  *
  */
 @Deprecated
