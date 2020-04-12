@@ -50,7 +50,7 @@ public class SwiftObjectStoreRepository {
     this.store = getContext().getBlobStore();
   }
 
-  public String uploadFile(String container, byte[] bytes, String name, String contentType) {
+  public String uploadFile(String container, byte[] bytes, String name, String fileName, String contentType) {
 
     HashCode md5 = Hashing.md5().hashBytes(bytes);
 
@@ -58,6 +58,7 @@ public class SwiftObjectStoreRepository {
     payload.getContentMetadata().setContentLength((long) bytes.length);
     payload.getContentMetadata().setContentMD5(md5);
     payload.getContentMetadata().setContentType(contentType);
+    payload.getContentMetadata().setContentDisposition(fileName);
     /*
      * TODO provide metadata
      */

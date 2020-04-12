@@ -16,7 +16,6 @@ import de.mpg.mpdl.r2d2.exceptions.ValidationException;
 import de.mpg.mpdl.r2d2.model.File;
 import de.mpg.mpdl.r2d2.model.File.UploadState;
 import de.mpg.mpdl.r2d2.model.aa.R2D2Principal;
-import de.mpg.mpdl.r2d2.rest.storage.StorageController;
 import de.mpg.mpdl.r2d2.service.FileService;
 
 @Service
@@ -56,7 +55,7 @@ public class FileStorageService {
     return file.getId().toString();
   }
 
-  public File upload(String fileId, int fileChunkNumber, byte[] bytes, String contentType, R2D2Principal user)
+  public File upload(String fileId, int fileChunkNumber, byte[] bytes, String name, String contentType, R2D2Principal user)
       throws R2d2TechnicalException {
 
     String path = SEGMENTS + "/" + String.format("%06d", fileChunkNumber);
@@ -64,7 +63,7 @@ public class FileStorageService {
     try {
       file = service.get(UUID.fromString(fileId), user);
       repository.createContainer(fileId);
-      String eTag = repository.uploadFile(fileId, bytes, path, contentType);
+      String eTag = repository.uploadFile(fileId, bytes, path, name, contentType);
       if (!eTag.isBlank()) {
         file = updateFile(file, user, fileChunkNumber);
       }
@@ -91,9 +90,9 @@ public class FileStorageService {
     }
     return file;
   }
-  
+
   public InputStream download(String container, String File, R2D2Principal user) {
-	  return repository.downloadFile(container, File);
+    return repository.downloadFile(container, File);
   }
 
   private File updateFile(File file, R2D2Principal user, int chunk) throws R2d2TechnicalException {
