@@ -1,5 +1,6 @@
 package de.mpg.mpdl.r2d2.service;
 
+import java.io.InputStream;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
@@ -10,6 +11,8 @@ import de.mpg.mpdl.r2d2.exceptions.OptimisticLockingException;
 import de.mpg.mpdl.r2d2.exceptions.R2d2TechnicalException;
 import de.mpg.mpdl.r2d2.exceptions.ValidationException;
 import de.mpg.mpdl.r2d2.model.DatasetVersion;
+import de.mpg.mpdl.r2d2.model.File;
+import de.mpg.mpdl.r2d2.model.FileChunk;
 import de.mpg.mpdl.r2d2.model.aa.R2D2Principal;
 import de.mpg.mpdl.r2d2.model.aa.UserAccount;
 
@@ -31,5 +34,17 @@ public interface DatasetVersionService extends GenericService<DatasetVersion> {
 
   public void publish(UUID id, OffsetDateTime lastModificationDate, R2D2Principal user) throws R2d2TechnicalException,
       OptimisticLockingException, ValidationException, NotFoundException, InvalidStateException, AuthorizationException;
+
+  public File addEmptyFile(UUID datasetId, File file, R2D2Principal user) throws R2d2TechnicalException, OptimisticLockingException,
+      ValidationException, NotFoundException, InvalidStateException, AuthorizationException;
+
+  public FileChunk uploadChunk(UUID datasetId, UUID fileId, FileChunk chunk, InputStream fileStream, R2D2Principal user)
+      throws R2d2TechnicalException, OptimisticLockingException, ValidationException, NotFoundException, InvalidStateException,
+      AuthorizationException;
+  
+  
+  public InputStream getFileContent(UUID datasetId, UUID fileId, R2D2Principal user) throws R2d2TechnicalException, OptimisticLockingException,
+  ValidationException, NotFoundException, InvalidStateException, AuthorizationException;
+
 
 }

@@ -12,6 +12,7 @@ import org.jclouds.blobstore.BlobStoreContext;
 import org.jclouds.blobstore.domain.Blob;
 import org.jclouds.io.Payload;
 import org.jclouds.io.payloads.ByteArrayPayload;
+import org.jclouds.io.payloads.InputStreamPayload;
 import org.jclouds.openstack.swift.v1.SwiftApi;
 import org.jclouds.openstack.swift.v1.domain.ObjectList;
 import org.jclouds.openstack.swift.v1.domain.Segment;
@@ -28,6 +29,8 @@ import com.google.common.hash.HashCode;
 import com.google.common.hash.Hashing;
 
 import de.mpg.mpdl.r2d2.SwiftStorageConfigurationProperties;
+import de.mpg.mpdl.r2d2.model.File;
+import de.mpg.mpdl.r2d2.model.FileChunk;
 
 @Repository
 public class SwiftObjectStoreRepository {
@@ -41,14 +44,47 @@ public class SwiftObjectStoreRepository {
 
   private BlobStore store;
 
+
+
+  private static final String SEGMENTS = "segments";
+
+
+  public SwiftObjectStoreRepository(BlobStoreContext context) {
+    this.context = context;
+    store = context.getBlobStore();
+  }
+
   public BlobStoreContext getContext() {
     return context;
   }
 
-  public void setContext(BlobStoreContext context) {
-    this.context = context;
-    this.store = getContext().getBlobStore();
+
+  public String uploadChunk(String container, FileChunk f, InputStream is) {
+
+
+    Payload payload = new InputStreamPayload(is);
+    //payload.getContentMetadata().setContentLength(f.getSize());
+    if(f.getClientEtag()!=null)
+    {
+      payload.getContentMetadata().setContentMD5(HashCode.fromString(f.getClientEtag()));
+    }
+    
+    //payload.getContentMetadata().setContentType(contentType);
+    //payload.getContentMetadata().setContentDisposition(fileName);
+    /*
+     * TODO provide metadata
+     */
+
+    String name = SEGMENTS + "/" + String.format("%06d", f.getNumber());
+    Map<String, String> userMetadata = new HashMap<String, String>();
+    //userMetadata.put("X-Detect-Content-Type", "true");
+    // @formatter:off
+    Blob blob = store.blobBuilder(name).payload(payload).userMetadata(userMetadata).build();
+    // @formatter:on
+    String eTag = store.putBlob(container, blob);
+    return eTag;
   }
+
 
   public String uploadFile(String container, byte[] bytes, String name, String fileName, String contentType) {
 
@@ -121,7 +157,7 @@ public class SwiftObjectStoreRepository {
     return success;
   }
 
-  public String creatreManifest(String segmentContainer, String segmentPath, String manifestContainer) {
+  public String createManifest(String segmentContainer, String segmentPath, String manifestContainer, String contentType) {
     SwiftApi swiftApi = getContext().unwrapApi(SwiftApi.class);
     StaticLargeObjectApi slo = swiftApi.getStaticLargeObjectApi(swiftProperties.getRegion(), manifestContainer);
     List<Segment> parts = new ArrayList<>();
@@ -132,6 +168,21 @@ public class SwiftObjectStoreRepository {
       Segment s = Segment.builder().path(segmentContainer + "/" + so.getName()).etag(so.getETag()).sizeBytes(size).build();
       parts.add(s);
     });
-    return slo.replaceManifest(segmentContainer, parts, ImmutableMap.of("parts_in", segmentContainer + "/" + segmentPath));
+    
+    Map<String,String> metadata = ImmutableMap.of("parts_in", segmentContainer + "/" + segmentPath);
+    Map<String,String> headers = ImmutableMap.of("Content-Type", contentType);
+    return slo.replaceManifest("content", parts, metadata, headers);
+  }
+
+
+  public String createManifest(File file) {
+    String contentType= "application/octet-stream";
+    if(file.getFormat()!=null)
+    {
+      contentType = file.getFormat();
+    }
+    
+    return createManifest(file.getId().toString(), SEGMENTS, file.getId().toString(), contentType);
+
   }
 }

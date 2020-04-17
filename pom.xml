@@ -69,6 +69,11 @@
 			<groupId>org.elasticsearch.client</groupId>
 			<artifactId>elasticsearch-rest-high-level-client</artifactId>
 		</dependency>
+		
+		<dependency>
+		    <groupId>com.fasterxml.jackson.datatype</groupId>
+		    <artifactId>jackson-datatype-jdk8</artifactId>
+		</dependency>
 
 		<!-- jclouds dependencies -->
 		<dependency>
@@ -109,6 +114,11 @@
 			<artifactId>commons-fileupload</artifactId>
 			<version>1.4</version>
 		</dependency>
+		<dependency>
+		    <groupId>org.apache.httpcomponents</groupId>
+		    <artifactId>fluent-hc</artifactId>
+		</dependency>
+		
 
 		<dependency>
 			<groupId>org.springframework.boot</groupId>

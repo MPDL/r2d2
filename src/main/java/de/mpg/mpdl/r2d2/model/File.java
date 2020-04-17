@@ -1,8 +1,11 @@
 package de.mpg.mpdl.r2d2.model;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+
+import org.hibernate.annotations.Type;
 
 @Entity
 public class File extends BaseDb {
@@ -14,7 +17,11 @@ public class File extends BaseDb {
   }
 
   @Enumerated(EnumType.STRING)
-  private File.UploadState state = UploadState.INITIATED;
+  private UploadState state = UploadState.INITIATED;
+
+  @Type(type = "jsonb")
+  @Column(columnDefinition = "jsonb")
+  private FileUploadStatus stateInfo = new FileUploadStatus();
 
   private String filename;
 
@@ -25,10 +32,6 @@ public class File extends BaseDb {
   private String format;
 
   private long size;
-
-  private int totalParts;
-
-  private int completedParts;
 
   // Date uploaded = BaseDb.creationDate
 
@@ -72,28 +75,22 @@ public class File extends BaseDb {
     this.size = size;
   }
 
-  public File.UploadState getState() {
+  public UploadState getState() {
     return state;
   }
 
-  public void setState(File.UploadState state) {
+  public void setState(UploadState state) {
     this.state = state;
   }
 
-  public int getTotalParts() {
-    return totalParts;
+  public FileUploadStatus getStateInfo() {
+    return stateInfo;
   }
 
-  public void setTotalParts(int totalParts) {
-    this.totalParts = totalParts;
+  public void setStateInfo(FileUploadStatus stateInfo) {
+    this.stateInfo = stateInfo;
   }
 
-  public int getCompletedParts() {
-    return completedParts;
-  }
 
-  public void setCompletedParts(int completedParts) {
-    this.completedParts = completedParts;
-  }
 
 }
