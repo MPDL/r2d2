@@ -41,8 +41,7 @@ public class ChunkedFileInputStream extends FileInputStream {
    * @param endOffset the ending offset
    * @throws FileNotFoundException if the requested file was not found
    */
-  public ChunkedFileInputStream(File file, long offset, long endOffset)
-      throws FileNotFoundException {
+  public ChunkedFileInputStream(File file, long offset, long endOffset) throws FileNotFoundException {
     super(file);
     this.offset = offset;
     this.currentOffset = offset;
@@ -69,31 +68,29 @@ public class ChunkedFileInputStream extends FileInputStream {
     }
     return super.read();
   }
-  
-  
+
+
   public int read(byte b[]) throws IOException {
     return read(b, 0, b.length);
   }
-  
+
   public int read(byte b[], int off, int len) throws IOException {
-    
+
     if (currentOffset >= endOffset) {
       return -1;
-    }
-    else
-    {
-      len = (currentOffset + len >= endOffset) ? (int)(endOffset-currentOffset) : len;
-      int bytesRead =  super.read(b, off, len);
+    } else {
+      len = (currentOffset + len >= endOffset) ? (int) (endOffset - currentOffset) : len;
+      int bytesRead = super.read(b, off, len);
       logger.info("Bytes " + currentOffset + " - " + (currentOffset + bytesRead));
 
       currentOffset += bytesRead;
-      
+
       return bytesRead;
     }
-    
-   
-    
-}
+
+
+
+  }
 
   /**
    * get the ending offset

@@ -5,7 +5,7 @@ public class FileChunk {
   private int number;
 
   private String clientEtag;
-  
+
   private String serverEtag;
 
   private long size;

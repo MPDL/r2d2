@@ -21,10 +21,10 @@ public interface DatasetVersionService extends GenericService<DatasetVersion> {
   public DatasetVersion create(DatasetVersion object, R2D2Principal user)
       throws R2d2TechnicalException, ValidationException, AuthorizationException;
 
-  public DatasetVersion update(DatasetVersion object, R2D2Principal user) throws R2d2TechnicalException, OptimisticLockingException,
-      ValidationException, NotFoundException, InvalidStateException, AuthorizationException;
+  public DatasetVersion update(UUID id, DatasetVersion object, R2D2Principal user) throws R2d2TechnicalException,
+      OptimisticLockingException, ValidationException, NotFoundException, InvalidStateException, AuthorizationException;
 
-  public DatasetVersion createNewVersion(DatasetVersion object, R2D2Principal user) throws R2d2TechnicalException,
+  public DatasetVersion createNewVersion(UUID id, DatasetVersion object, R2D2Principal user) throws R2d2TechnicalException,
       OptimisticLockingException, ValidationException, NotFoundException, InvalidStateException, AuthorizationException;
 
   public void delete(UUID id, OffsetDateTime lastModificationDate, R2D2Principal user)
@@ -35,16 +35,16 @@ public interface DatasetVersionService extends GenericService<DatasetVersion> {
   public void publish(UUID id, OffsetDateTime lastModificationDate, R2D2Principal user) throws R2d2TechnicalException,
       OptimisticLockingException, ValidationException, NotFoundException, InvalidStateException, AuthorizationException;
 
-  public File addEmptyFile(UUID datasetId, File file, R2D2Principal user) throws R2d2TechnicalException, OptimisticLockingException,
+  public File initNewFile(UUID datasetId, File file, R2D2Principal user) throws R2d2TechnicalException, OptimisticLockingException,
       ValidationException, NotFoundException, InvalidStateException, AuthorizationException;
 
-  public FileChunk uploadChunk(UUID datasetId, UUID fileId, FileChunk chunk, InputStream fileStream, R2D2Principal user)
+  public FileChunk uploadFileChunk(UUID datasetId, UUID fileId, FileChunk chunk, InputStream fileStream, R2D2Principal user)
       throws R2d2TechnicalException, OptimisticLockingException, ValidationException, NotFoundException, InvalidStateException,
       AuthorizationException;
-  
-  
-  public InputStream getFileContent(UUID datasetId, UUID fileId, R2D2Principal user) throws R2d2TechnicalException, OptimisticLockingException,
-  ValidationException, NotFoundException, InvalidStateException, AuthorizationException;
+
+
+  public InputStream getFileContent(UUID datasetId, UUID fileId, R2D2Principal user) throws R2d2TechnicalException,
+      OptimisticLockingException, ValidationException, NotFoundException, InvalidStateException, AuthorizationException;
 
 
 }

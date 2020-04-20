@@ -59,16 +59,34 @@ public class DatasetController {
   @Autowired
   private DatasetVersionService datasetVersionService;
 
-  @GetMapping(path = "/dataset/{id}")
-  public DatasetVersion getDataset(@PathVariable("id") String uuid, Principal p) throws R2d2TechnicalException, R2d2ApplicationException {
 
-    return datasetVersionService.get(UUID.fromString(uuid), Utils.toCustomPrincipal(p));
+  @PostMapping(path = "/dataset")
+  public ResponseEntity<DatasetVersion> createDataset(@RequestBody DatasetVersion givenDatasetVersion, Principal prinz)
+      throws R2d2TechnicalException, R2d2ApplicationException {
+
+    DatasetVersion createdDv = datasetVersionService.create(givenDatasetVersion, Utils.toCustomPrincipal(prinz));
+    return new ResponseEntity<DatasetVersion>(createdDv, HttpStatus.CREATED);
+  }
+
+
+  @PostMapping(path = "/dataset/{id}")
+  public ResponseEntity<DatasetVersion> updateDataset(@PathVariable("id") String id, @RequestBody DatasetVersion givenDatasetVersion,
+      Principal prinz) throws R2d2TechnicalException, R2d2ApplicationException {
+
+    DatasetVersion createdDv = datasetVersionService.update(UUID.fromString(id), givenDatasetVersion, Utils.toCustomPrincipal(prinz));
+    return new ResponseEntity<DatasetVersion>(createdDv, HttpStatus.CREATED);
+  }
+
+  @GetMapping(path = "/dataset/{id}")
+  public DatasetVersion getDataset(@PathVariable("id") String id, Principal p) throws R2d2TechnicalException, R2d2ApplicationException {
+
+    return datasetVersionService.get(UUID.fromString(id), Utils.toCustomPrincipal(p));
 
   }
 
 
   @PostMapping("/dataset/{id}/files")
-  public ResponseEntity<File> addEmptyFile(@PathVariable("id") String id, @RequestHeader("X-File-Name") String fileName,
+  public ResponseEntity<File> initNewFile(@PathVariable("id") String id, @RequestHeader("X-File-Name") String fileName,
       @RequestHeader("X-File-Total-Chunks") int totalChunks, @RequestHeader(name = "X-File-Total-Size", required = false) Long size,
       Principal prinz) throws R2d2ApplicationException, AuthorizationException, R2d2TechnicalException {
 
@@ -79,14 +97,15 @@ public class DatasetController {
     }
 
     f.getStateInfo().setExpectedNumberOfChunks(totalChunks);
-    f = datasetVersionService.addEmptyFile(UUID.fromString(id), f, Utils.toCustomPrincipal(prinz));
+    f = datasetVersionService.initNewFile(UUID.fromString(id), f, Utils.toCustomPrincipal(prinz));
 
     return new ResponseEntity<File>(f, HttpStatus.CREATED);
   }
 
   @PostMapping("/dataset/{id}/files/{fileId}")
-  public ResponseEntity<FileChunk> uploadChunk(@PathVariable("id") String id, @PathVariable("fileId") String fileId,
-      @RequestHeader("X-File-Chunk-Number") int part, @RequestHeader(name= "etag", required=false) String etag,  @RequestHeader(name= "Content-Length", required=false) Long contentLength, HttpServletRequest req, Principal prinz)
+  public ResponseEntity<FileChunk> uploadFileChunk(@PathVariable("id") String id, @PathVariable("fileId") String fileId,
+      @RequestHeader("X-File-Chunk-Number") int part, @RequestHeader(name = "etag", required = false) String etag,
+      @RequestHeader(name = "Content-Length", required = false) Long contentLength, HttpServletRequest req, Principal prinz)
       throws R2d2ApplicationException, AuthorizationException, R2d2TechnicalException {
 
     InputStream is;
@@ -100,25 +119,25 @@ public class DatasetController {
     FileChunk chunk = new FileChunk();
     chunk.setClientEtag(etag);
     chunk.setNumber(part);
-    if(contentLength!=null)
-    {
+    if (contentLength != null) {
       chunk.setSize(contentLength);
     }
-    FileChunk resultChunk = datasetVersionService.uploadChunk(UUID.fromString(id), UUID.fromString(fileId), chunk, is, Utils.toCustomPrincipal(prinz));
+    FileChunk resultChunk =
+        datasetVersionService.uploadFileChunk(UUID.fromString(id), UUID.fromString(fileId), chunk, is, Utils.toCustomPrincipal(prinz));
 
     ResponseEntity<FileChunk> re = new ResponseEntity<FileChunk>(resultChunk, HttpStatus.CREATED);
     re.getHeaders().add("etag", resultChunk.getServerEtag());
-    
-    
+
+
     return re;
   }
 
-  
+
   @GetMapping("/dataset/{id}/files/{fileId}")
-  public ResponseEntity<?> download(@PathVariable("id") String datasetId, @PathVariable("fileId") String fileId,
-       Principal prinz) throws R2d2ApplicationException, AuthorizationException, R2d2TechnicalException {
-    InputStreamResource inputStreamResource =
-        new InputStreamResource(datasetVersionService.getFileContent(UUID.fromString(datasetId), UUID.fromString(fileId), Utils.toCustomPrincipal(prinz)));
+  public ResponseEntity<?> download(@PathVariable("id") String datasetId, @PathVariable("fileId") String fileId, Principal prinz)
+      throws R2d2ApplicationException, AuthorizationException, R2d2TechnicalException {
+    InputStreamResource inputStreamResource = new InputStreamResource(
+        datasetVersionService.getFileContent(UUID.fromString(datasetId), UUID.fromString(fileId), Utils.toCustomPrincipal(prinz)));
     return new ResponseEntity<InputStreamResource>(inputStreamResource, HttpStatus.OK);
   }
 

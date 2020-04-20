@@ -64,11 +64,10 @@ public class SwiftObjectStoreRepository {
 
     Payload payload = new InputStreamPayload(is);
     //payload.getContentMetadata().setContentLength(f.getSize());
-    if(f.getClientEtag()!=null)
-    {
+    if (f.getClientEtag() != null) {
       payload.getContentMetadata().setContentMD5(HashCode.fromString(f.getClientEtag()));
     }
-    
+
     //payload.getContentMetadata().setContentType(contentType);
     //payload.getContentMetadata().setContentDisposition(fileName);
     /*
@@ -168,20 +167,19 @@ public class SwiftObjectStoreRepository {
       Segment s = Segment.builder().path(segmentContainer + "/" + so.getName()).etag(so.getETag()).sizeBytes(size).build();
       parts.add(s);
     });
-    
-    Map<String,String> metadata = ImmutableMap.of("parts_in", segmentContainer + "/" + segmentPath);
-    Map<String,String> headers = ImmutableMap.of("Content-Type", contentType);
+
+    Map<String, String> metadata = ImmutableMap.of("parts_in", segmentContainer + "/" + segmentPath);
+    Map<String, String> headers = ImmutableMap.of("Content-Type", contentType);
     return slo.replaceManifest("content", parts, metadata, headers);
   }
 
 
   public String createManifest(File file) {
-    String contentType= "application/octet-stream";
-    if(file.getFormat()!=null)
-    {
+    String contentType = "application/octet-stream";
+    if (file.getFormat() != null) {
       contentType = file.getFormat();
     }
-    
+
     return createManifest(file.getId().toString(), SEGMENTS, file.getId().toString(), contentType);
 
   }

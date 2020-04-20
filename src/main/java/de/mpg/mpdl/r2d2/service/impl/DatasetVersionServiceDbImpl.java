@@ -77,17 +77,17 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
 
   @Override
   @Transactional(rollbackFor = Throwable.class)
-  public DatasetVersion update(DatasetVersion datasetVersion, R2D2Principal user) throws R2d2TechnicalException, OptimisticLockingException,
-      ValidationException, NotFoundException, InvalidStateException, AuthorizationException {
+  public DatasetVersion update(UUID id, DatasetVersion datasetVersion, R2D2Principal user) throws R2d2TechnicalException,
+      OptimisticLockingException, ValidationException, NotFoundException, InvalidStateException, AuthorizationException {
 
-    return update(datasetVersion, user, false);
+    return update(id, datasetVersion, user, false);
   }
 
   @Override
   @Transactional(rollbackFor = Throwable.class)
-  public DatasetVersion createNewVersion(DatasetVersion datasetVersion, R2D2Principal user) throws R2d2TechnicalException,
+  public DatasetVersion createNewVersion(UUID id, DatasetVersion datasetVersion, R2D2Principal user) throws R2d2TechnicalException,
       OptimisticLockingException, ValidationException, NotFoundException, InvalidStateException, AuthorizationException {
-    return update(datasetVersion, user, true);
+    return update(id, datasetVersion, user, true);
   }
 
   @Override
@@ -132,7 +132,7 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
 
   @Override
   @Transactional(rollbackFor = Throwable.class)
-  public File addEmptyFile(UUID datasetId, File file, R2D2Principal user) throws R2d2TechnicalException, OptimisticLockingException,
+  public File initNewFile(UUID datasetId, File file, R2D2Principal user) throws R2d2TechnicalException, OptimisticLockingException,
       ValidationException, NotFoundException, InvalidStateException, AuthorizationException {
     DatasetVersion dv = get(datasetId, user);
 
@@ -156,7 +156,7 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
 
   @Override
   @Transactional(rollbackFor = Throwable.class)
-  public FileChunk uploadChunk(UUID datasetId, UUID fileId, FileChunk chunk, InputStream fileStream, R2D2Principal user)
+  public FileChunk uploadFileChunk(UUID datasetId, UUID fileId, FileChunk chunk, InputStream fileStream, R2D2Principal user)
       throws R2d2TechnicalException, OptimisticLockingException, ValidationException, NotFoundException, InvalidStateException,
       AuthorizationException {
     DatasetVersion dv = get(datasetId, user);
@@ -183,23 +183,23 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
 
   }
 
-  
-  public InputStream getFileContent(UUID datasetId, UUID fileId, R2D2Principal user) throws R2d2TechnicalException, OptimisticLockingException,
-  ValidationException, NotFoundException, InvalidStateException, AuthorizationException
-  {
+
+  public InputStream getFileContent(UUID datasetId, UUID fileId, R2D2Principal user) throws R2d2TechnicalException,
+      OptimisticLockingException, ValidationException, NotFoundException, InvalidStateException, AuthorizationException {
     DatasetVersion dv = get(datasetId, user);
     File file = fileRepository.findById(fileId).orElseThrow(() -> new NotFoundException("File with id " + fileId + " not found"));
-  //TODO Auth
+    //TODO Auth
 
-   return  objectStoreRepository.downloadFile(fileId.toString(), "content");
-    
-    
+    return objectStoreRepository.downloadFile(fileId.toString(), "content");
+
+
   }
 
-  private DatasetVersion update(DatasetVersion datasetVersion, R2D2Principal user, boolean createNewVersion) throws R2d2TechnicalException,
-      OptimisticLockingException, ValidationException, NotFoundException, InvalidStateException, AuthorizationException {
+  private DatasetVersion update(UUID id, DatasetVersion datasetVersion, R2D2Principal user, boolean createNewVersion)
+      throws R2d2TechnicalException, OptimisticLockingException, ValidationException, NotFoundException, InvalidStateException,
+      AuthorizationException {
 
-    DatasetVersion datasetVersionToBeUpdated = get(datasetVersion.getId(), user);
+    DatasetVersion datasetVersionToBeUpdated = get(id, user);
     DatasetVersion latestVersion = datasetVersionRepository.getLatestVersion(datasetVersionToBeUpdated.getDataset().getId());
 
     if (!datasetVersionToBeUpdated.getId().equals(latestVersion.getId())) {
