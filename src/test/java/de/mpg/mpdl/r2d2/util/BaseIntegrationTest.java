@@ -7,12 +7,12 @@ import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-@ExtendWith(SpringExtension.class)
+@ExtendWith({SpringExtension.class, DeleteSearchIndexExtension.class})
 @SpringBootTest
 @DirtiesContext(classMode = ClassMode.AFTER_CLASS)
 @ContextConfiguration(initializers = {DataBaseLauncher.Initializer.class, SearchEngineLauncher.Initializer.class})
 public abstract class BaseIntegrationTest {
 
-  //TODO: Stop/Reset/Clear DB/ES container after test?
+  //TODO: Stop DB/ES container after test?
 
 }

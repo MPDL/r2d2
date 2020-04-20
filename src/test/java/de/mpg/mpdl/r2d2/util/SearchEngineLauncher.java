@@ -9,7 +9,7 @@ public class SearchEngineLauncher {
 
   private static final String DOCKER_IMAGE_NAME = "docker.elastic.co/elasticsearch/elasticsearch:7.5.2";
 
-  private static ElasticsearchContainer ELASTIC_SEARCH_CONTAINER = creatAndStartElasticSearchContainer();
+  public static final ElasticsearchContainer ELASTIC_SEARCH_CONTAINER = creatAndStartElasticSearchContainer();
 
   private static ElasticsearchContainer creatAndStartElasticSearchContainer() {
     ElasticsearchContainer elasticSearchContainer = new ElasticsearchContainer(DOCKER_IMAGE_NAME);
