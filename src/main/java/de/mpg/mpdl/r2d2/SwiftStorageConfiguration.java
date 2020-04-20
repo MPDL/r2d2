@@ -1,6 +1,7 @@
 package de.mpg.mpdl.r2d2;
 
 import java.io.IOException;
+import java.util.NoSuchElementException;
 import java.util.Properties;
 
 import javax.annotation.PostConstruct;
@@ -25,6 +26,7 @@ public class SwiftStorageConfiguration {
 
   private final Logger LOGGER = LoggerFactory.getLogger(getClass());
 
+
   private BlobStoreContext blobStoreContext;
 
   @Bean
@@ -34,28 +36,35 @@ public class SwiftStorageConfiguration {
 
   @PostConstruct
   public void init() {
-    final Properties overrides = new Properties();
-    overrides.put(KeystoneProperties.KEYSTONE_VERSION, "3");
-    overrides.put(KeystoneProperties.SCOPE, swiftProperties().getScope());
 
-    Iterable<Module> modules = ImmutableSet.<Module>of(new SLF4JLoggingModule());
-
-    blobStoreContext = ContextBuilder.newBuilder(swiftProperties().getProvider()).endpoint(swiftProperties().getEndpoint())
-        .credentials(swiftProperties().getIdentity(), swiftProperties().getCredentials()).modules(modules).overrides(overrides)
-        .build(BlobStoreContext.class);
-
-    LOGGER.info("successfully initialized Swift BlobStoreContext 4 " + swiftProperties().getIdentity());
 
   }
 
   @PreDestroy
   public void destroy() throws IOException {
-    blobStoreContext.close();
+    blobStoreContext().close();
     LOGGER.info("successfully closed Swift BlobStoreContext");
   }
 
   @Bean
   public BlobStoreContext blobStoreContext() {
-    return blobStoreContext;
+    try {
+      final Properties overrides = new Properties();
+      overrides.put(KeystoneProperties.KEYSTONE_VERSION, "3");
+      overrides.put(KeystoneProperties.SCOPE, swiftProperties().getScope());
+
+      Iterable<Module> modules = ImmutableSet.<Module>of(new SLF4JLoggingModule());
+
+      LOGGER.info("authenticating with " + swiftProperties().getIdentity());
+      blobStoreContext = ContextBuilder.newBuilder(swiftProperties().getProvider()).endpoint(swiftProperties().getEndpoint())
+          .credentials(swiftProperties().getIdentity(), swiftProperties().getCredentials()).modules(modules).overrides(overrides)
+          .build(BlobStoreContext.class);
+
+      LOGGER.info("successfully initialized Swift BlobStoreContext 4 " + swiftProperties().getIdentity());
+      return blobStoreContext;
+    } catch (Exception e) {
+      LOGGER.error("Error creating blobStoreContext", e);
+    }
+    return null;
   }
 }
