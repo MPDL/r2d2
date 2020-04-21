@@ -3,6 +3,7 @@ package de.mpg.mpdl.r2d2.rest.controller;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.Principal;
+import java.time.OffsetDateTime;
 import java.util.Collections;
 import java.util.UUID;
 
@@ -75,6 +76,14 @@ public class DatasetController {
 
     DatasetVersion createdDv = datasetVersionService.update(UUID.fromString(id), givenDatasetVersion, Utils.toCustomPrincipal(prinz));
     return new ResponseEntity<DatasetVersion>(createdDv, HttpStatus.CREATED);
+  }
+
+  @PostMapping(path = "/dataset/{id}")
+  public ResponseEntity<DatasetVersion> publish(@PathVariable("id") String id, @RequestParam(name = "lmd") OffsetDateTime lmd,
+      Principal prinz) throws R2d2TechnicalException, R2d2ApplicationException {
+
+    DatasetVersion publishedDv = datasetVersionService.publish(UUID.fromString(id), lmd, Utils.toCustomPrincipal(prinz));
+    return new ResponseEntity<DatasetVersion>(publishedDv, HttpStatus.CREATED);
   }
 
   @GetMapping(path = "/dataset/{id}")

@@ -32,7 +32,7 @@ public interface DatasetVersionService extends GenericService<DatasetVersion> {
 
   public DatasetVersion get(UUID id, R2D2Principal user) throws R2d2TechnicalException, NotFoundException, AuthorizationException;
 
-  public void publish(UUID id, OffsetDateTime lastModificationDate, R2D2Principal user) throws R2d2TechnicalException,
+  public DatasetVersion publish(UUID id, OffsetDateTime lastModificationDate, R2D2Principal user) throws R2d2TechnicalException,
       OptimisticLockingException, ValidationException, NotFoundException, InvalidStateException, AuthorizationException;
 
   public File initNewFile(UUID datasetId, File file, R2D2Principal user) throws R2d2TechnicalException, OptimisticLockingException,

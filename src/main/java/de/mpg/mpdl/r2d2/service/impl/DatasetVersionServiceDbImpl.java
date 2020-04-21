@@ -58,8 +58,6 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
   public DatasetVersion create(DatasetVersion datasetVersion, R2D2Principal principal)
       throws R2d2TechnicalException, ValidationException, AuthorizationException {
 
-    // TODO authorization?
-
     DatasetVersion datasetVersionToCreate = buildDatasetVersionToCreate(datasetVersion, principal.getUserAccount(), 1, null);
 
     checkAa("create", principal, datasetVersionToCreate);
@@ -67,10 +65,12 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
 
     try {
       datasetVersionToCreate = datasetVersionRepository.save(datasetVersionToCreate);
-      datasetVersionIndexDao.createImmediately(datasetVersionToCreate.getId().toString(), datasetVersionToCreate);
+
     } catch (Exception e) {
       throw new R2d2TechnicalException(e);
     }
+
+    datasetVersionIndexDao.createImmediately(datasetVersionToCreate.getId().toString(), datasetVersionToCreate);
 
     return datasetVersionToCreate;
   }
@@ -103,7 +103,7 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
     //TODO Authorization
     datasetVersionRepository.deleteById(id);
     datasetVersionIndexDao.delete(id.toString());
-    // TODO Auto-generated method stub
+    //TODO delete dataset object, not only version?
 
   }
 
@@ -122,9 +122,35 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
 
   @Override
   @Transactional(rollbackFor = Throwable.class)
-  public void publish(UUID id, OffsetDateTime lastModificationDate, R2D2Principal user)
-      throws R2d2TechnicalException, OptimisticLockingException, ValidationException, NotFoundException, InvalidStateException {
-    // TODO Auto-generated method stub
+  public DatasetVersion publish(UUID id, OffsetDateTime lastModificationDate, R2D2Principal user) throws R2d2TechnicalException,
+      OptimisticLockingException, ValidationException, NotFoundException, InvalidStateException, AuthorizationException {
+
+    DatasetVersion datasetVersionToBeUpdated = get(id, user);
+    DatasetVersion latestVersion = datasetVersionRepository.getLatestVersion(datasetVersionToBeUpdated.getDataset().getId());
+
+    checkAa("publish", user, latestVersion);
+
+
+    if (!id.equals(latestVersion.getId())) {
+      throw new InvalidStateException("Only the latest dataset version can be published. Given version: "
+          + datasetVersionToBeUpdated.getVersionNumber() + "; Latest version: " + latestVersion.getVersionNumber());
+    }
+
+    checkEqualModificationDate(lastModificationDate, datasetVersionToBeUpdated.getDataset().getModificationDate());
+
+    latestVersion.setModifier(user.getUserAccount());
+    latestVersion.getDataset().setModifier(user.getUserAccount());
+
+    latestVersion.setState(State.PUBLIC);
+
+    try {
+      datasetVersionToBeUpdated = datasetVersionRepository.save(datasetVersionToBeUpdated);
+    } catch (Exception e) {
+      throw new R2d2TechnicalException(e);
+    }
+    datasetVersionIndexDao.updateImmediately(datasetVersionToBeUpdated.getId().toString(), datasetVersionToBeUpdated);
+
+    return datasetVersionToBeUpdated;
 
   }
 
@@ -207,6 +233,7 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
           + datasetVersionToBeUpdated.getVersionNumber() + "; Latest version: " + latestVersion.getVersionNumber());
     }
 
+    checkAa("update", user, datasetVersion);
     // TODO authorization
     // TODO validation
     checkEqualModificationDate(datasetVersion.getDataset().getModificationDate(),
@@ -219,16 +246,18 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
 
       datasetVersionToBeUpdated = buildDatasetVersionToCreate(datasetVersion, user.getUserAccount(),
           datasetVersionToBeUpdated.getVersionNumber() + 1, datasetVersionToBeUpdated.getDataset());
+      datasetVersionToBeUpdated.setFiles(latestVersion.getFiles());
+
     } else {
       datasetVersionToBeUpdated = updateDatasetVersion(datasetVersion, datasetVersionToBeUpdated, user.getUserAccount());
     }
 
     try {
       datasetVersionToBeUpdated = datasetVersionRepository.save(datasetVersionToBeUpdated);
-      datasetVersionIndexDao.updateImmediately(datasetVersionToBeUpdated.getId().toString(), datasetVersionToBeUpdated);
     } catch (Exception e) {
       throw new R2d2TechnicalException(e);
     }
+    datasetVersionIndexDao.updateImmediately(datasetVersionToBeUpdated.getId().toString(), datasetVersionToBeUpdated);
 
     return datasetVersionToBeUpdated;
   }
