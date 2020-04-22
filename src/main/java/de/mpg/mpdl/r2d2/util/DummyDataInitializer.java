@@ -19,6 +19,7 @@ import de.mpg.mpdl.r2d2.model.Dataset.State;
 import de.mpg.mpdl.r2d2.model.aa.LocalUserAccount;
 import de.mpg.mpdl.r2d2.model.aa.UserAccount;
 import de.mpg.mpdl.r2d2.model.aa.UserAccount.Role;
+import de.mpg.mpdl.r2d2.model.aa.UserAccountRO;
 import de.mpg.mpdl.r2d2.search.dao.DatasetVersionDaoEs;
 
 @Component
@@ -45,8 +46,8 @@ public class DummyDataInitializer {
     user.setEmail("testuser@mpdl.mpg.de");
     user.setName("Test Admin");
     user.setId(UUID.fromString("2d0dd850-eabb-43fe-8b8f-1a1b54018738"));
-    user.setCreator(user);
-    user.setModifier(user);
+    user.setCreator(new UserAccountRO(user));
+    user.setModifier(new UserAccountRO(user));
     user.getRoles().add(Role.ADMIN);
 
 
@@ -62,8 +63,8 @@ public class DummyDataInitializer {
 
     DatasetVersion dv = new DatasetVersion();
     dv.setId(UUID.fromString("a6124f2a-9a06-489d-a7e2-40b583ebbd23"));
-    dv.setCreator(user);
-    dv.setModifier(user);
+    dv.setCreator(new UserAccountRO(user));
+    dv.setModifier(new UserAccountRO(user));
     dv.getMetadata().setTitle("Test title");
 
     Person author = new Person();
@@ -73,8 +74,9 @@ public class DummyDataInitializer {
 
     Dataset dataset = new Dataset();
     dataset.setId(UUID.fromString("9cdb1d04-8527-4c32-8e00-4e4730861cbb"));
-    dataset.setCreator(user);
-    dataset.setModifier(user);
+    dataset.setCreator(new UserAccountRO(user));
+    dataset.setModifier(new UserAccountRO(user));
+    dataset.getDatamanager().add(new UserAccountRO(user));
 
     dv.setDataset(dataset);
 
@@ -84,8 +86,8 @@ public class DummyDataInitializer {
     DatasetVersion dv2 = new DatasetVersion();
     dv2.setState(State.PUBLIC);
     dv2.setId(UUID.fromString("a6124f2a-9a06-489d-a7e2-40b583ebbd24"));
-    dv2.setCreator(user);
-    dv2.setModifier(user);
+    dv2.setCreator(new UserAccountRO(user));
+    dv2.setModifier(new UserAccountRO(user));
     dv2.getMetadata().setTitle("Test title 2");
 
     Person author2 = new Person();
@@ -95,8 +97,8 @@ public class DummyDataInitializer {
 
     Dataset dataset2 = new Dataset();
     dataset2.setId(UUID.fromString("9cdb1d04-8527-4c32-8e00-4e4730861cbc"));
-    dataset2.setCreator(user);
-    dataset2.setModifier(user);
+    dataset2.setCreator(new UserAccountRO(user));
+    dataset2.setModifier(new UserAccountRO(user));
     dataset2.setState(State.PUBLIC);
 
     dv2.setDataset(dataset);

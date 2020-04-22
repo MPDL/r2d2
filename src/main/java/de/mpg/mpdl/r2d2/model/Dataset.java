@@ -1,16 +1,21 @@
 package de.mpg.mpdl.r2d2.model;
 
+import java.util.ArrayList;
 import java.util.List;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.ManyToMany;
 
+import org.hibernate.annotations.Type;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import de.mpg.mpdl.r2d2.model.aa.UserAccount;
+import de.mpg.mpdl.r2d2.model.aa.UserAccountRO;
 
 @Entity
 public class Dataset extends BaseDb {
@@ -25,16 +30,16 @@ public class Dataset extends BaseDb {
   @Enumerated(EnumType.STRING)
   private Dataset.State state = State.PRIVATE;
 
-  @ManyToMany(fetch = FetchType.EAGER)
-  @JsonIgnoreProperties(value = {"creationDate", "creator", "modificationDate", "modifier", "email", "roles"})
-  private List<UserAccount> datamanager;
+  @Type(type = "jsonb")
+  @Column(columnDefinition = "jsonb")
+  private List<UserAccountRO> datamanager = new ArrayList<UserAccountRO>();
 
 
-  private List<UserAccount> getDatamanager() {
+  public List<UserAccountRO> getDatamanager() {
     return datamanager;
   }
 
-  private void setDatamanager(List<UserAccount> datamanager) {
+  public void setDatamanager(List<UserAccountRO> datamanager) {
     this.datamanager = datamanager;
   }
 

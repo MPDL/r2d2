@@ -4,19 +4,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.security.Principal;
 import java.time.OffsetDateTime;
-import java.util.Collections;
+import java.util.Map;
 import java.util.UUID;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.elasticsearch.action.search.SearchResponse;
-import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.unit.TimeValue;
-import org.elasticsearch.common.xcontent.ToXContent;
-import org.elasticsearch.common.xcontent.XContentBuilder;
-import org.elasticsearch.common.xcontent.XContentFactory;
-import org.elasticsearch.search.SearchModule;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,6 +33,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.ImmutableMap;
 
 import de.mpg.mpdl.r2d2.exceptions.AuthorizationException;
 import de.mpg.mpdl.r2d2.exceptions.R2d2ApplicationException;
@@ -78,7 +74,7 @@ public class DatasetController {
     return new ResponseEntity<DatasetVersion>(createdDv, HttpStatus.CREATED);
   }
 
-  @PostMapping(path = "/dataset/{id}")
+  @PostMapping(path = "/dataset/{id}/publish")
   public ResponseEntity<DatasetVersion> publish(@PathVariable("id") String id, @RequestParam(name = "lmd") OffsetDateTime lmd,
       Principal prinz) throws R2d2TechnicalException, R2d2ApplicationException {
 
@@ -134,8 +130,8 @@ public class DatasetController {
     FileChunk resultChunk =
         datasetVersionService.uploadFileChunk(UUID.fromString(id), UUID.fromString(fileId), chunk, is, Utils.toCustomPrincipal(prinz));
 
-    ResponseEntity<FileChunk> re = new ResponseEntity<FileChunk>(resultChunk, HttpStatus.CREATED);
-    re.getHeaders().add("etag", resultChunk.getServerEtag());
+    ResponseEntity<FileChunk> re = ResponseEntity.status(HttpStatus.CREATED).header("etag", resultChunk.getServerEtag()).body(resultChunk);
+
 
 
     return re;

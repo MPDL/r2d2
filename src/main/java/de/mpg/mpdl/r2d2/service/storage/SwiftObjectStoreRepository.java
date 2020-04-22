@@ -62,6 +62,7 @@ public class SwiftObjectStoreRepository {
   public String uploadChunk(String container, FileChunk f, InputStream is) {
 
 
+    logger.info("Uploading Chunk to container " + container);
     Payload payload = new InputStreamPayload(is);
     //payload.getContentMetadata().setContentLength(f.getSize());
     if (f.getClientEtag() != null) {
@@ -81,6 +82,7 @@ public class SwiftObjectStoreRepository {
     Blob blob = store.blobBuilder(name).payload(payload).userMetadata(userMetadata).build();
     // @formatter:on
     String eTag = store.putBlob(container, blob);
+    logger.info("Cloud server returned etag " + eTag);
     return eTag;
   }
 

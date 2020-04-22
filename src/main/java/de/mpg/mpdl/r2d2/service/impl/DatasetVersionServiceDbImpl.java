@@ -27,6 +27,7 @@ import de.mpg.mpdl.r2d2.model.Dataset;
 import de.mpg.mpdl.r2d2.model.Dataset.State;
 import de.mpg.mpdl.r2d2.model.aa.R2D2Principal;
 import de.mpg.mpdl.r2d2.model.aa.UserAccount;
+import de.mpg.mpdl.r2d2.model.aa.UserAccountRO;
 import de.mpg.mpdl.r2d2.model.DatasetVersion;
 import de.mpg.mpdl.r2d2.model.File;
 import de.mpg.mpdl.r2d2.model.File.UploadState;
@@ -138,8 +139,8 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
 
     checkEqualModificationDate(lastModificationDate, datasetVersionToBeUpdated.getDataset().getModificationDate());
 
-    latestVersion.setModifier(user.getUserAccount());
-    latestVersion.getDataset().setModifier(user.getUserAccount());
+    latestVersion.setModifier(new UserAccountRO(user.getUserAccount()));
+    latestVersion.getDataset().setModifier(new UserAccountRO(user.getUserAccount()));
 
     latestVersion.setState(State.PUBLIC);
 
@@ -162,11 +163,11 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
       ValidationException, NotFoundException, InvalidStateException, AuthorizationException {
     DatasetVersion dv = get(datasetId, user);
 
-    //TODO Auth, check latest version
+    checkAa("upload", user, dv);
 
     file.setId(null);
-    file.setCreator(user.getUserAccount());
-    file.setModifier(user.getUserAccount());
+    file.setCreator(new UserAccountRO(user.getUserAccount()));
+    file.setModifier(new UserAccountRO(user.getUserAccount()));
 
 
     File f = fileRepository.save(file);
@@ -186,6 +187,8 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
       throws R2d2TechnicalException, OptimisticLockingException, ValidationException, NotFoundException, InvalidStateException,
       AuthorizationException {
     DatasetVersion dv = get(datasetId, user);
+
+    checkAa("upload", user, dv);
 
     File file = fileRepository.findById(fileId).orElseThrow(() -> new NotFoundException("File with id " + fileId + " not found"));
     //TODO Auth, check latest version
@@ -214,7 +217,7 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
       OptimisticLockingException, ValidationException, NotFoundException, InvalidStateException, AuthorizationException {
     DatasetVersion dv = get(datasetId, user);
     File file = fileRepository.findById(fileId).orElseThrow(() -> new NotFoundException("File with id " + fileId + " not found"));
-    //TODO Auth
+    checkAa("download", user, dv);
 
     return objectStoreRepository.downloadFile(fileId.toString(), "content");
 
@@ -264,10 +267,10 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
 
   private DatasetVersion updateDatasetVersion(DatasetVersion givenDatasetVersion, DatasetVersion latestVersion, UserAccount modifier) {
 
-    latestVersion.setModifier(modifier);
+    latestVersion.setModifier(new UserAccountRO(modifier));
     latestVersion.setMetadata(givenDatasetVersion.getMetadata());
 
-    latestVersion.getDataset().setModifier(modifier);
+    latestVersion.getDataset().setModifier(new UserAccountRO(modifier));
 
     return latestVersion;
   }
@@ -278,18 +281,18 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
     DatasetVersion datasetVersionToCreate = new DatasetVersion();
     datasetVersionToCreate.setState(State.PRIVATE);
     datasetVersionToCreate.setMetadata(givenDatasetVersion.getMetadata());
-    datasetVersionToCreate.setCreator(creator);
-    datasetVersionToCreate.setModifier(creator);
+    datasetVersionToCreate.setCreator(new UserAccountRO(creator));
+    datasetVersionToCreate.setModifier(new UserAccountRO(creator));
     datasetVersionToCreate.setVersionNumber(versionNumber);
 
     Dataset datasetToCreate = dataset;
     if (datasetToCreate == null) {
       datasetToCreate = new Dataset();
       datasetToCreate.setState(State.PRIVATE);
-      datasetToCreate.setCreator(creator);
+      datasetToCreate.setCreator(new UserAccountRO(creator));
     }
 
-    datasetToCreate.setModifier(creator);
+    datasetToCreate.setModifier(new UserAccountRO(creator));
     datasetVersionToCreate.setDataset(datasetToCreate);
 
     return datasetVersionToCreate;

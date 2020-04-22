@@ -47,7 +47,7 @@ public class DatasetVersion extends BaseDb {
   @Column(columnDefinition = "jsonb")
   private DatasetVersionMetadata metadata = new DatasetVersionMetadata();
 
-  @ManyToMany
+  @ManyToMany(fetch = FetchType.EAGER, cascade = {CascadeType.ALL})
   private List<File> files;
 
   public int getVersionNumber() {

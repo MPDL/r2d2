@@ -13,10 +13,12 @@
 				"user" : {
 					"role" : "ADMIN"
 				}
-			},
+			}
+		],
+		"update" : [
 			{
 				"user" : {
-					"role" : "USER"
+					"role" : "ADMIN"
 				}
 			}
 		],
@@ -35,6 +37,27 @@
 					"field_user_id_match" : "datasetVersion.dataset.creator.id"
 				},
 				"datasetVersion.state" : ["PRIVATE"]
+			}
+		],
+		"publish" : [
+			{
+				"user" : {
+					"role" : "ADMIN"
+				}
+			}
+		],
+		"upload" : [
+			{
+				"user" : {
+					"role" : "ADMIN"
+				}
+			}
+		],
+		"download" : [
+			{
+				"user" : {
+					"role" : "ADMIN"
+				}
 			}
 		]
 		}		

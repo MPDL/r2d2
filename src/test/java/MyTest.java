@@ -9,6 +9,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.MessageDigest;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 import javax.xml.bind.DatatypeConverter;
 
@@ -41,9 +43,10 @@ public class MyTest {
         Request.Post(host + "/login").bodyString("{" + "    \"username\" : \"testuser@mpdl.mpg.de\"," + "    \"password\" : \"test\"" + "}",
             ContentType.APPLICATION_JSON).execute().returnResponse().getFirstHeader("Authorization").getValue();
 
+    Logger.info("Retrieved Token: " + token);
     //Init upload
     String res = Request.Post(host + "/api/datasets/dataset/a6124f2a-9a06-489d-a7e2-40b583ebbd23/files").addHeader("Authorization", token)
-        .addHeader("X-File-Name", "test.jpg").addHeader("X-File-Total-Chunks", "2").execute().returnContent().asString();
+        .addHeader("X-File-Name", "scripts.zip").addHeader("X-File-Total-Chunks", "2").execute().returnContent().asString();
 
 
     Logger.info(res);
@@ -51,10 +54,10 @@ public class MyTest {
     File f = objectMapper.readValue(res, File.class);
     String fileId = f.getId().toString();
 
-    String filePath = "C:\\mytmp";
-    Path p = Paths.get(filePath, "Jellyfish.jpg");
+    String filePath = "C:\\Users\\haarlae1\\Downloads\\scripts.zip";
+    Path p = Paths.get(filePath);
 
-    ChunkedFileInputStream cfis1 = new ChunkedFileInputStream(p.toFile(), 0, 500 * 1024);
+    ChunkedFileInputStream cfis1 = new ChunkedFileInputStream(p.toFile(), 0, 25 * 1024);
 
     //FileInputStream cfis1 = new FileInputStream(p.toFile());
 
@@ -66,7 +69,7 @@ public class MyTest {
 
 
 
-    ChunkedFileInputStream cfis2 = new ChunkedFileInputStream(p.toFile(), 500 * 1024, 0);
+    ChunkedFileInputStream cfis2 = new ChunkedFileInputStream(p.toFile(), 25 * 1024, 0);
 
 
     res = Request.Post(host + "/api/datasets/dataset/a6124f2a-9a06-489d-a7e2-40b583ebbd23/files/" + fileId)
@@ -87,12 +90,21 @@ public class MyTest {
     byte[] hash = MessageDigest.getInstance("MD5").digest(b);
     Logger.info("MD5 Checksum: " + DatatypeConverter.printHexBinary(hash));
 
-    String res = Request.Head("https://cloud.mpcdf.mpg.de:8080/swift/v1/25ed2abc-1112-4809-8bc9-3d6c7314a660/content")
+    InputStream res = Request.Get("https://cloud.mpcdf.mpg.de:8080/swift/v1/9f5978ae-02a2-4d93-a0e1-15e3c5f67a8d/content")
 
-        .addHeader("X-Auth-Token", "6e1235ed88384aa1b531dbe595b34407")
+        .addHeader("X-Auth-Token", "2760090de4a84eaeb1b2f011e81bceea")
         //.addHeader("Range", "bytes=450000-7000000")
-        .execute().returnContent().asString();
-    Logger.info(res);
+        .execute().returnContent().asStream();
+    ZipInputStream zipStream = new ZipInputStream(res);
+
+    ZipEntry zipEntry = zipStream.getNextEntry();
+    while (zipEntry != null) {
+      Logger.info("File found:" + zipEntry.getName());
+      //Logger.info("File found:" + zipEntry.);
+      zipEntry = zipStream.getNextEntry();
+    }
+    zipStream.closeEntry();
+    zipStream.close();
   }
 
 }
