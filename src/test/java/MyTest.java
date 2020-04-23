@@ -34,19 +34,28 @@ public class MyTest {
 
   ObjectMapper objectMapper = new ObjectMapper();
 
-  //@Test
-  public void testFileUpload() throws Exception {
-
+  @Test
+  public void test() throws Exception {
     objectMapper.findAndRegisterModules();
-    //Login
-    String token =
-        Request.Post(host + "/login").bodyString("{" + "    \"username\" : \"testuser@mpdl.mpg.de\"," + "    \"password\" : \"test\"" + "}",
-            ContentType.APPLICATION_JSON).execute().returnResponse().getFirstHeader("Authorization").getValue();
 
-    Logger.info("Retrieved Token: " + token);
-    //Init upload
+    String filePath = "C:\\Users\\haarlae1\\Downloads\\scripts.zip";
+    Path p = Paths.get(filePath);
+    String token = login();
+
+    //chunkedFileUpload(p, 2, token);
+
+    singleFileUpload(p, token);
+
+
+  }
+
+  private String chunkedFileUpload(Path filePath, int chunks, String token) throws Exception {
+
+    long size = Files.size(filePath);
+
     String res = Request.Post(host + "/api/datasets/dataset/a6124f2a-9a06-489d-a7e2-40b583ebbd23/files").addHeader("Authorization", token)
-        .addHeader("X-File-Name", "scripts.zip").addHeader("X-File-Total-Chunks", "2").execute().returnContent().asString();
+        .addHeader("X-File-Name", filePath.getFileName().toString()).addHeader("X-File-Total-Chunks", Integer.toString(chunks))
+        .addHeader("X-File-Total-Size", Long.toString(size)).execute().returnContent().asString();
 
 
     Logger.info(res);
@@ -54,36 +63,58 @@ public class MyTest {
     File f = objectMapper.readValue(res, File.class);
     String fileId = f.getId().toString();
 
-    String filePath = "C:\\Users\\haarlae1\\Downloads\\scripts.zip";
-    Path p = Paths.get(filePath);
 
-    ChunkedFileInputStream cfis1 = new ChunkedFileInputStream(p.toFile(), 0, 25 * 1024);
-
-    //FileInputStream cfis1 = new FileInputStream(p.toFile());
+    long chunkSize = size / chunks;
 
 
-    res = Request.Post(host + "/api/datasets/dataset/a6124f2a-9a06-489d-a7e2-40b583ebbd23/files/" + fileId)
-        .addHeader("Authorization", token).addHeader("X-File-Chunk-Number", "1").bodyStream(cfis1).execute().returnContent().asString();
+    for (int currentChunk = 1; currentChunk <= chunks; currentChunk++) {
+      long start = (currentChunk - 1) * chunkSize;
+      long end = currentChunk * chunkSize;
+      if (currentChunk == chunkSize) {
+        end = 0;
 
-    Logger.info(res);
+      }
+      InputStream cfis1 = new ChunkedFileInputStream(filePath.toFile(), start, end);
+
+      //FileInputStream cfis1 = new FileInputStream(p.toFile());
 
 
+      res = Request.Post(host + "/api/datasets/dataset/a6124f2a-9a06-489d-a7e2-40b583ebbd23/files/" + fileId)
+          .addHeader("Authorization", token).addHeader("X-File-Chunk-Number", Integer.toString(currentChunk)).bodyStream(cfis1).execute()
+          .returnContent().asString();
 
-    ChunkedFileInputStream cfis2 = new ChunkedFileInputStream(p.toFile(), 25 * 1024, 0);
-
-
-    res = Request.Post(host + "/api/datasets/dataset/a6124f2a-9a06-489d-a7e2-40b583ebbd23/files/" + fileId)
-        .addHeader("Authorization", token).addHeader("X-File-Chunk-Number", "2").bodyStream(cfis2).execute().returnContent().asString();
-
-    Logger.info(res);
-
+      Logger.info(res);
+    }
 
     Logger.info("uploaded file " + fileId);
 
+    return fileId;
+
+  }
+
+  public String singleFileUpload(Path filePath, String token) throws Exception {
+    InputStream is = new FileInputStream(filePath.toFile());
+
+    //FileInputStream cfis1 = new FileInputStream(p.toFile());
+    long size = Files.size(filePath);
+
+    String res = Request.Post(host + "/api/datasets/dataset/a6124f2a-9a06-489d-a7e2-40b583ebbd23/files").addHeader("Authorization", token)
+        .addHeader("X-File-Name", filePath.getFileName().toString()).addHeader("X-File-Total-Size", Long.toString(size)).bodyStream(is)
+        .execute().returnContent().asString();
+
+
+    Logger.info(res);
+
+    File f = objectMapper.readValue(res, File.class);
+    String fileId = f.getId().toString();
+
+    Logger.info("uploaded file " + fileId);
+
+    return fileId;
   }
 
 
-  @Test
+  //@Test
   public void getData() throws Exception {
 
     byte[] b = Files.readAllBytes(Paths.get("C:\\mytmp\\Jellyfish.jpg"));
@@ -105,6 +136,17 @@ public class MyTest {
     }
     zipStream.closeEntry();
     zipStream.close();
+  }
+
+  private String login() throws Exception {
+    //Login
+    String token =
+        Request.Post(host + "/login").bodyString("{" + "    \"username\" : \"testuser@mpdl.mpg.de\"," + "    \"password\" : \"test\"" + "}",
+            ContentType.APPLICATION_JSON).execute().returnResponse().getFirstHeader("Authorization").getValue();
+
+    Logger.info("Retrieved Token: " + token);
+    return token;
+    //Init upload
   }
 
 }

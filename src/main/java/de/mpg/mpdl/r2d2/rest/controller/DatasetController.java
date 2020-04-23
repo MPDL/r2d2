@@ -92,8 +92,19 @@ public class DatasetController {
 
   @PostMapping("/dataset/{id}/files")
   public ResponseEntity<File> initNewFile(@PathVariable("id") String id, @RequestHeader("X-File-Name") String fileName,
-      @RequestHeader("X-File-Total-Chunks") int totalChunks, @RequestHeader(name = "X-File-Total-Size", required = false) Long size,
-      Principal prinz) throws R2d2ApplicationException, AuthorizationException, R2d2TechnicalException {
+      @RequestHeader(name = "X-File-Total-Chunks", required = false) Integer totalChunks,
+      @RequestHeader(name = "X-File-Total-Size") Long size, HttpServletRequest req, Principal prinz)
+      throws R2d2ApplicationException, AuthorizationException, R2d2TechnicalException {
+
+
+    InputStream is;
+
+    try {
+      is = req.getInputStream();
+    } catch (IOException e) {
+      throw new R2d2TechnicalException(e);
+    }
+
 
     File f = new File();
     f.setFilename(fileName);
@@ -101,8 +112,23 @@ public class DatasetController {
       f.setSize(size);
     }
 
-    f.getStateInfo().setExpectedNumberOfChunks(totalChunks);
-    f = datasetVersionService.initNewFile(UUID.fromString(id), f, Utils.toCustomPrincipal(prinz));
+    if (totalChunks != null) {
+      //Init chunked upload
+      try {
+        if (is.read() != -1) {
+          throw new R2d2ApplicationException("Body must be empty. Upload chunks after this initialization");
+        }
+      } catch (IOException e) {
+        throw new R2d2TechnicalException(e);
+      }
+
+      f.getStateInfo().setExpectedNumberOfChunks(totalChunks);
+      f = datasetVersionService.initNewFile(UUID.fromString(id), f, Utils.toCustomPrincipal(prinz));
+    } else {
+      //Upload single file
+      f = datasetVersionService.uploadSingleFile(UUID.fromString(id), f, is, Utils.toCustomPrincipal(prinz));
+    }
+
 
     return new ResponseEntity<File>(f, HttpStatus.CREATED);
   }

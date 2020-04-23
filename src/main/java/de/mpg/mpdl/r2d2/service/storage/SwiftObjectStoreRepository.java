@@ -59,14 +59,15 @@ public class SwiftObjectStoreRepository {
   }
 
 
-  public String uploadChunk(String container, FileChunk f, InputStream is) {
+  public String uploadChunk(File file, FileChunk chunk, InputStream is) {
 
 
-    logger.info("Uploading Chunk to container " + container);
+    logger.info("Uploading Chunk to container " + file.getId());
+    boolean containerCreated = createContainer(file.getId().toString());
     Payload payload = new InputStreamPayload(is);
     //payload.getContentMetadata().setContentLength(f.getSize());
-    if (f.getClientEtag() != null) {
-      payload.getContentMetadata().setContentMD5(HashCode.fromString(f.getClientEtag()));
+    if (chunk.getClientEtag() != null) {
+      payload.getContentMetadata().setContentMD5(HashCode.fromString(chunk.getClientEtag()));
     }
 
     //payload.getContentMetadata().setContentType(contentType);
@@ -75,16 +76,45 @@ public class SwiftObjectStoreRepository {
      * TODO provide metadata
      */
 
-    String name = SEGMENTS + "/" + String.format("%06d", f.getNumber());
+    String name = SEGMENTS + "/" + String.format("%06d", chunk.getNumber());
     Map<String, String> userMetadata = new HashMap<String, String>();
     //userMetadata.put("X-Detect-Content-Type", "true");
     // @formatter:off
     Blob blob = store.blobBuilder(name).payload(payload).userMetadata(userMetadata).build();
     // @formatter:on
-    String eTag = store.putBlob(container, blob);
+    String eTag = store.putBlob(file.getId().toString(), blob);
     logger.info("Cloud server returned etag " + eTag);
     return eTag;
   }
+
+
+  public String uploadFile(File file, InputStream is) {
+
+
+    logger.info("Uploading single file to container " + file.getId());
+    Payload payload = new InputStreamPayload(is);
+    //payload.getContentMetadata().setContentLength(f.getSize());
+    if (file.getChecksum() != null) {
+      payload.getContentMetadata().setContentMD5(HashCode.fromString(file.getChecksum()));
+    }
+
+    //payload.getContentMetadata().setContentType(contentType);
+    //payload.getContentMetadata().setContentDisposition(fileName);
+    /*
+     * TODO provide metadata
+     */
+
+    String name = "content";
+    Map<String, String> userMetadata = new HashMap<String, String>();
+    //userMetadata.put("X-Detect-Content-Type", "true");
+    // @formatter:off
+    Blob blob = store.blobBuilder(name).payload(payload).userMetadata(userMetadata).build();
+    // @formatter:on
+    String eTag = store.putBlob(file.getId().toString(), blob);
+    logger.info("Cloud server returned etag " + eTag);
+    return eTag;
+  }
+
 
 
   public String uploadFile(String container, byte[] bytes, String name, String fileName, String contentType) {

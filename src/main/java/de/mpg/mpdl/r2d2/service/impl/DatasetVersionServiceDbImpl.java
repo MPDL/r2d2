@@ -183,6 +183,38 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
 
   @Override
   @Transactional(rollbackFor = Throwable.class)
+  public File uploadSingleFile(UUID datasetId, File file, InputStream fileStream, R2D2Principal user) throws R2d2TechnicalException,
+      OptimisticLockingException, ValidationException, NotFoundException, InvalidStateException, AuthorizationException {
+    DatasetVersion dv = get(datasetId, user);
+
+    checkAa("upload", user, dv);
+
+    file.setId(null);
+    file.setCreator(new UserAccountRO(user.getUserAccount()));
+    file.setModifier(new UserAccountRO(user.getUserAccount()));
+
+
+    File f = fileRepository.save(file);
+    dv.getFiles().add(f);
+    datasetVersionRepository.save(dv);
+
+
+    objectStoreRepository.createContainer(file.getId().toString());
+    String etag = objectStoreRepository.uploadFile(file, fileStream);
+
+    f.setChecksum(etag);
+    f.setState(UploadState.COMPLETE);
+
+    //TODO post-processing
+
+    //datasetVersionIndexDao.updateImmediately(dv.getId().toString(), dv);
+    return f;
+
+  }
+
+
+  @Override
+  @Transactional(rollbackFor = Throwable.class)
   public FileChunk uploadFileChunk(UUID datasetId, UUID fileId, FileChunk chunk, InputStream fileStream, R2D2Principal user)
       throws R2d2TechnicalException, OptimisticLockingException, ValidationException, NotFoundException, InvalidStateException,
       AuthorizationException {
@@ -193,16 +225,23 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
     File file = fileRepository.findById(fileId).orElseThrow(() -> new NotFoundException("File with id " + fileId + " not found"));
     //TODO Auth, check latest version
 
-    String etag = objectStoreRepository.uploadChunk(file.getId().toString(), chunk, fileStream);
+    String etag = objectStoreRepository.uploadChunk(file, chunk, fileStream);
 
     chunk.setServerEtag(etag);
 
     file.getStateInfo().getChunks().add(chunk);
 
 
+    //LastChunk
     if (file.getStateInfo().getExpectedNumberOfChunks() == file.getStateInfo().getChunks().size()) {
       file.setState(UploadState.COMPLETE);
       objectStoreRepository.createManifest(file);
+
+      //TODO post-processing async?
+      //detect mime-type?
+      //create thumbnail depending on mime-type and save somewhere
+      //read zip structure if zip file and save somewhere?
+      //get final checksum from server and save?
     }
 
     file = fileRepository.save(file);
