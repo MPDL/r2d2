@@ -81,7 +81,6 @@ public class ChunkedFileInputStream extends FileInputStream {
     } else {
       len = (currentOffset + len >= endOffset) ? (int) (endOffset - currentOffset) : len;
       int bytesRead = super.read(b, off, len);
-      logger.info("Bytes " + currentOffset + " - " + (currentOffset + bytesRead));
 
       currentOffset += bytesRead;
 

@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.security.Principal;
 import java.time.OffsetDateTime;
-import java.util.Map;
 import java.util.UUID;
 
 import javax.servlet.http.HttpServletRequest;
@@ -21,6 +20,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.ResponseEntity.BodyBuilder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -33,7 +33,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.ImmutableMap;
 
 import de.mpg.mpdl.r2d2.exceptions.AuthorizationException;
 import de.mpg.mpdl.r2d2.exceptions.R2d2ApplicationException;
@@ -91,7 +90,7 @@ public class DatasetController {
 
 
   @PostMapping("/dataset/{id}/files")
-  public ResponseEntity<File> initNewFile(@PathVariable("id") String id, @RequestHeader("X-File-Name") String fileName,
+  public ResponseEntity<File> newFile(@PathVariable("id") String id, @RequestHeader("X-File-Name") String fileName,
       @RequestHeader(name = "X-File-Total-Chunks", required = false) Integer totalChunks,
       @RequestHeader(name = "X-File-Total-Size") Long size, HttpServletRequest req, Principal prinz)
       throws R2d2ApplicationException, AuthorizationException, R2d2TechnicalException {
@@ -112,6 +111,7 @@ public class DatasetController {
       f.setSize(size);
     }
 
+
     if (totalChunks != null) {
       //Init chunked upload
       try {
@@ -129,8 +129,14 @@ public class DatasetController {
       f = datasetVersionService.uploadSingleFile(UUID.fromString(id), f, is, Utils.toCustomPrincipal(prinz));
     }
 
+    BodyBuilder responseBuilder = ResponseEntity.status(HttpStatus.CREATED);
 
-    return new ResponseEntity<File>(f, HttpStatus.CREATED);
+    if(f.getChecksum()!=null)
+    {
+      responseBuilder.header("etag", f.getChecksum());
+    }
+    
+    return responseBuilder.body(f);
   }
 
   @PostMapping("/dataset/{id}/files/{fileId}")

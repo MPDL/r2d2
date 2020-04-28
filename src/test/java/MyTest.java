@@ -1,10 +1,7 @@
 
 
-import java.io.BufferedInputStream;
 import java.io.FileInputStream;
 import java.io.InputStream;
-import java.io.RandomAccessFile;
-import java.nio.channels.Channels;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -21,7 +18,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 
 import de.mpg.mpdl.r2d2.model.File;
 
@@ -37,14 +33,16 @@ public class MyTest {
   @Test
   public void test() throws Exception {
     objectMapper.findAndRegisterModules();
-
-    String filePath = "C:\\Users\\haarlae1\\Downloads\\scripts.zip";
+    String filePath = "C:\\mytmp\\video.mkv";
+    //String filePath = "C:\\Users\\haarlae1\\Downloads\\scripts.zip";
     Path p = Paths.get(filePath);
     String token = login();
 
-    //chunkedFileUpload(p, 2, token);
+    chunkedFileUpload(p, 20, token);
 
-    singleFileUpload(p, token);
+    //singleFileUpload(p, token);
+    
+    //getData();
 
 
   }
@@ -70,10 +68,11 @@ public class MyTest {
     for (int currentChunk = 1; currentChunk <= chunks; currentChunk++) {
       long start = (currentChunk - 1) * chunkSize;
       long end = currentChunk * chunkSize;
-      if (currentChunk == chunkSize) {
+      if (currentChunk == chunks) {
         end = 0;
 
       }
+      Logger.info("Upload from bytes " + start + " to " +end);
       InputStream cfis1 = new ChunkedFileInputStream(filePath.toFile(), start, end);
 
       //FileInputStream cfis1 = new FileInputStream(p.toFile());
@@ -123,7 +122,7 @@ public class MyTest {
 
     InputStream res = Request.Get("https://cloud.mpcdf.mpg.de:8080/swift/v1/9f5978ae-02a2-4d93-a0e1-15e3c5f67a8d/content")
 
-        .addHeader("X-Auth-Token", "2760090de4a84eaeb1b2f011e81bceea")
+        .addHeader("X-Auth-Token", "15ec3437147c42a0a1f061ac4fba1ccd")
         //.addHeader("Range", "bytes=450000-7000000")
         .execute().returnContent().asStream();
     ZipInputStream zipStream = new ZipInputStream(res);
