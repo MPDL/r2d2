@@ -16,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -74,7 +75,7 @@ public class DatasetController {
   }
 
   @PostMapping(path = "/dataset/{id}/publish")
-  public ResponseEntity<DatasetVersion> publish(@PathVariable("id") String id, @RequestParam(name = "lmd") OffsetDateTime lmd,
+  public ResponseEntity<DatasetVersion> publish(@PathVariable("id") String id, @RequestParam(name = "lmd") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime lmd,
       Principal prinz) throws R2d2TechnicalException, R2d2ApplicationException {
 
     DatasetVersion publishedDv = datasetVersionService.publish(UUID.fromString(id), lmd, Utils.toCustomPrincipal(prinz));
