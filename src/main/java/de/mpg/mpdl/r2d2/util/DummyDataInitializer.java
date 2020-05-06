@@ -101,7 +101,7 @@ public class DummyDataInitializer {
     dataset2.setModifier(new UserAccountRO(user));
     dataset2.setState(State.PUBLIC);
 
-    dv2.setDataset(dataset);
+    dv2.setDataset(dataset2);
 
     dv2 = datasetVersionRepository.save(dv2);
     datasetVersionDao.createImmediately(dv2.getId().toString(), dv2);
