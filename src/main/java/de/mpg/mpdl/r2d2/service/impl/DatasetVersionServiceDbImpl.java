@@ -4,6 +4,9 @@ import java.io.InputStream;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
@@ -53,6 +56,9 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
 
   @Autowired
   private SwiftObjectStoreRepository objectStoreRepository;
+
+  @PersistenceContext
+  private EntityManager em;
 
   @Override
   @Transactional(rollbackFor = Throwable.class)
@@ -109,7 +115,7 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
   }
 
   @Override
-  @Transactional(readOnly = true)
+  // @Transactional(readOnly = true)
   public DatasetVersion get(UUID id, R2D2Principal principal) throws R2d2TechnicalException, NotFoundException, AuthorizationException {
 
 
@@ -127,8 +133,8 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
       OptimisticLockingException, ValidationException, NotFoundException, InvalidStateException, AuthorizationException {
 
     DatasetVersion datasetVersionToBeUpdated = get(id, user);
+    em.detach(datasetVersionToBeUpdated);
     DatasetVersion latestVersion = datasetVersionRepository.getLatestVersion(datasetVersionToBeUpdated.getDataset().getId());
-
     checkAa("publish", user, latestVersion);
 
 
@@ -138,14 +144,14 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
     }
 
     checkEqualModificationDate(lastModificationDate, datasetVersionToBeUpdated.getDataset().getModificationDate());
-
+    // em.merge(datasetVersionToBeUpdated);
     latestVersion.setModifier(new UserAccountRO(user.getUserAccount()));
     latestVersion.getDataset().setModifier(new UserAccountRO(user.getUserAccount()));
 
     latestVersion.setState(State.PUBLIC);
 
     try {
-      datasetVersionToBeUpdated = datasetVersionRepository.save(datasetVersionToBeUpdated);
+      datasetVersionToBeUpdated = datasetVersionRepository.save(latestVersion);
     } catch (Exception e) {
       throw new R2d2TechnicalException(e);
     }

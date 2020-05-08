@@ -158,6 +158,7 @@ public abstract class ElasticSearchGenericDAOImpl<E> implements GenericDaoEs<E> 
   public String updateImmediately(String id, E entity) throws R2d2TechnicalException {
     try {
       UpdateRequest updateRequest = new UpdateRequest(indexName, id).setRefreshPolicy(RefreshPolicy.IMMEDIATE);
+      updateRequest.doc(mapper.writeValueAsBytes(entity), XContentType.JSON);
       UpdateResponse updateResponse = client.update(updateRequest, RequestOptions.DEFAULT);
       return Long.toString(updateResponse.getVersion());
     } catch (Exception e) {
