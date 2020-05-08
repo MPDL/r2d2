@@ -32,7 +32,7 @@ import de.mpg.mpdl.r2d2.model.aa.UserAccount;
  */
 public class JWTAuthenticationFilter extends BasicAuthenticationFilter {
 
-  private static Logger Logger = LoggerFactory.getLogger(JWTAuthenticationFilter.class);
+  private static Logger LOGGER = LoggerFactory.getLogger(JWTAuthenticationFilter.class);
 
   private UserAccountRepository userAccountRepository;
 

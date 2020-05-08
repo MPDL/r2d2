@@ -25,7 +25,7 @@ import de.mpg.mpdl.r2d2.search.es.connector.ElasticSearchAdminController;
 @Configuration
 public class ElasticSearchInitializer {
 
-  private static Logger Logger = LoggerFactory.getLogger(ElasticSearchInitializer.class);
+  private static Logger LOGGER = LoggerFactory.getLogger(ElasticSearchInitializer.class);
 
   @Autowired
   private ElasticSearchAdminController esAdminController;
@@ -44,7 +44,7 @@ public class ElasticSearchInitializer {
 
       esAdminController.createIndex(env.getProperty("index.dataset.name"), true, datasetIndexSettings, datasetIndexMapping);
     } catch (Exception e) {
-      Logger.error("Error while initialzing index", e);
+      LOGGER.error("Error while initialzing index", e);
     }
   }
 

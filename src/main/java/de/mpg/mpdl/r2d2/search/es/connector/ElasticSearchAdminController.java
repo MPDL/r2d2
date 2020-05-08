@@ -25,7 +25,7 @@ import de.mpg.mpdl.r2d2.exceptions.R2d2TechnicalException;
 @Component
 public class ElasticSearchAdminController {
 
-  private static Logger Logger = LoggerFactory.getLogger(ElasticSearchAdminController.class);
+  private static Logger LOGGER = LoggerFactory.getLogger(ElasticSearchAdminController.class);
 
   @Autowired
   private RestHighLevelClient client;
@@ -37,7 +37,7 @@ public class ElasticSearchAdminController {
    */
   public boolean createIndex(String indexName, boolean overwriteOld, String settings, String mapping) throws R2d2TechnicalException {
 
-    Logger.info("Trying to create elasticsearch index " + indexName);
+    LOGGER.info("Trying to create elasticsearch index " + indexName);
     try {
 
       if (overwriteOld) {
@@ -68,7 +68,7 @@ public class ElasticSearchAdminController {
    * @return boolean
    */
   public boolean deleteIndex(String index) throws R2d2TechnicalException {
-    Logger.info("Trying to delete  index with name " + index);
+    LOGGER.info("Trying to delete  index with name " + index);
     try {
       DeleteIndexRequest deleteIndexRequest = new DeleteIndexRequest(index);
       AcknowledgedResponse deleteIndexResponse = client.indices().delete(deleteIndexRequest, RequestOptions.DEFAULT);

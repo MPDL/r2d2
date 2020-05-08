@@ -59,7 +59,7 @@ import de.mpg.mpdl.r2d2.search.util.ElasticSearchIndexField.Type;
  */
 public abstract class ElasticSearchGenericDAOImpl<E> implements GenericDaoEs<E> {
 
-  private static final Logger logger = LoggerFactory.getLogger(ElasticSearchGenericDAOImpl.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(ElasticSearchGenericDAOImpl.class);
 
   @Autowired
   protected RestHighLevelClient client;
@@ -262,7 +262,7 @@ public abstract class ElasticSearchGenericDAOImpl<E> implements GenericDaoEs<E> 
           ssb.fetchSource(null, getSourceExclusions());
         }
 
-        logger.debug(ssb.toString());
+        LOGGER.debug(ssb.toString());
         searchResponse = client.search(sr, RequestOptions.DEFAULT);
       }
 
@@ -294,7 +294,7 @@ public abstract class ElasticSearchGenericDAOImpl<E> implements GenericDaoEs<E> 
         }
       }
 
-      logger.debug(searchRequest.toString());
+      LOGGER.debug(searchRequest.toString());
       return client.search(searchRequest, RequestOptions.DEFAULT);
     } catch (Exception e) {
       throw new R2d2TechnicalException(e.getMessage(), e);

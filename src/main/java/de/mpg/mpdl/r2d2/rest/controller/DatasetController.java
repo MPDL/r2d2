@@ -48,7 +48,7 @@ import de.mpg.mpdl.r2d2.util.Utils;
 @RequestMapping("api/datasets")
 public class DatasetController {
 
-  private static final Logger Logger = LoggerFactory.getLogger(DatasetController.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(DatasetController.class);
 
   @Autowired
   private ObjectMapper objectMapper;
