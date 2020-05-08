@@ -30,7 +30,7 @@ import de.mpg.mpdl.r2d2.model.aa.UserAccount.Role;
 @Service
 public class AuthorizationService {
 
-  private final static Logger Logger = LoggerFactory.getLogger(AuthorizationService.class);
+  private final static Logger LOGGER = LoggerFactory.getLogger(AuthorizationService.class);
 
   private Map<String, Object> aaMap;
 
@@ -431,7 +431,7 @@ public class AuthorizationService {
         if (val != null) {
           grantFieldMatchValues.add(val.toString());
         } else {
-          Logger.warn("getFieldValue for " + grantFieldMatch + "returned null!");
+          LOGGER.warn("getFieldValue for " + grantFieldMatch + "returned null!");
         }
 
 

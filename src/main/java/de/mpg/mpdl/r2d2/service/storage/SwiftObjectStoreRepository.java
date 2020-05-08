@@ -35,7 +35,7 @@ import de.mpg.mpdl.r2d2.model.FileChunk;
 @Repository
 public class SwiftObjectStoreRepository {
 
-  private static Logger logger = LoggerFactory.getLogger(SwiftObjectStoreRepository.class);
+  private static Logger LOGGER = LoggerFactory.getLogger(SwiftObjectStoreRepository.class);
 
   @Autowired
   SwiftStorageConfigurationProperties swiftProperties;
@@ -62,7 +62,7 @@ public class SwiftObjectStoreRepository {
   public String uploadChunk(File file, FileChunk chunk, InputStream is) {
 
 
-    logger.info("Uploading Chunk to container " + file.getId());
+    LOGGER.info("Uploading Chunk to container " + file.getId());
     boolean containerCreated = createContainer(file.getId().toString());
     Payload payload = new InputStreamPayload(is);
     //payload.getContentMetadata().setContentLength(f.getSize());
@@ -83,7 +83,7 @@ public class SwiftObjectStoreRepository {
     Blob blob = store.blobBuilder(name).payload(payload).userMetadata(userMetadata).build();
     // @formatter:on
     String eTag = store.putBlob(file.getId().toString(), blob);
-    logger.info("Cloud server returned etag " + eTag);
+    LOGGER.info("Cloud server returned etag " + eTag);
     return eTag;
   }
 
@@ -91,7 +91,7 @@ public class SwiftObjectStoreRepository {
   public String uploadFile(File file, InputStream is) {
 
 
-    logger.info("Uploading single file to container " + file.getId());
+    LOGGER.info("Uploading single file to container " + file.getId());
     Payload payload = new InputStreamPayload(is);
     //payload.getContentMetadata().setContentLength(f.getSize());
     if (file.getChecksum() != null) {
@@ -111,7 +111,7 @@ public class SwiftObjectStoreRepository {
     Blob blob = store.blobBuilder(name).payload(payload).userMetadata(userMetadata).build();
     // @formatter:on
     String eTag = store.putBlob(file.getId().toString(), blob);
-    logger.info("Cloud server returned etag " + eTag);
+    LOGGER.info("Cloud server returned etag " + eTag);
     return eTag;
   }
 
@@ -173,7 +173,7 @@ public class SwiftObjectStoreRepository {
   public boolean isContainerExist(String container) {
 
     boolean isExist = false;
-    logger.info("checking exists " + container);
+    LOGGER.info("checking exists " + container);
     isExist = store.containerExists(container);
     return isExist;
   }
@@ -181,7 +181,7 @@ public class SwiftObjectStoreRepository {
   public boolean createContainer(String name) {
 
     boolean success = false;
-    logger.info("attempting to create " + name);
+    LOGGER.info("attempting to create " + name);
     if (!isContainerExist(name)) {
       success = store.createContainerInLocation(null, name);
     }

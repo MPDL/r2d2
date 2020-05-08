@@ -21,7 +21,7 @@ import de.mpg.mpdl.r2d2.search.es.connector.ElasticSearchAdminController;
 @Configuration
 public class ElasticSearchConfiguration {
 
-  private static Logger Logger = LoggerFactory.getLogger(ElasticSearchConfiguration.class);
+  private static Logger LOGGER = LoggerFactory.getLogger(ElasticSearchConfiguration.class);
 
   @Autowired
   @Lazy

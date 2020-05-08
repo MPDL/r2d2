@@ -48,7 +48,7 @@ import de.mpg.mpdl.r2d2.util.Utils;
 @RequestMapping("api/datasets")
 public class DatasetController {
 
-  private static final Logger Logger = LoggerFactory.getLogger(DatasetController.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(DatasetController.class);
 
   @Autowired
   private ObjectMapper objectMapper;
@@ -75,8 +75,9 @@ public class DatasetController {
   }
 
   @PostMapping(path = "/dataset/{id}/publish")
-  public ResponseEntity<DatasetVersion> publish(@PathVariable("id") String id, @RequestParam(name = "lmd") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime lmd,
-      Principal prinz) throws R2d2TechnicalException, R2d2ApplicationException {
+  public ResponseEntity<DatasetVersion> publish(@PathVariable("id") String id,
+      @RequestParam(name = "lmd") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime lmd, Principal prinz)
+      throws R2d2TechnicalException, R2d2ApplicationException {
 
     DatasetVersion publishedDv = datasetVersionService.publish(UUID.fromString(id), lmd, Utils.toCustomPrincipal(prinz));
     return new ResponseEntity<DatasetVersion>(publishedDv, HttpStatus.CREATED);
@@ -132,11 +133,10 @@ public class DatasetController {
 
     BodyBuilder responseBuilder = ResponseEntity.status(HttpStatus.CREATED);
 
-    if(f.getChecksum()!=null)
-    {
+    if (f.getChecksum() != null) {
       responseBuilder.header("etag", f.getChecksum());
     }
-    
+
     return responseBuilder.body(f);
   }
 
