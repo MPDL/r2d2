@@ -1,6 +1,6 @@
 {
 	"index": {
-		"number_of_shards": "5",
+		"number_of_shards": "1",
 		"analysis": {
 			"normalizer": {
 				"sort": {
@@ -20,13 +20,28 @@
 						"html_char_filter"
 					],
 					"tokenizer": "standard"
-				}
+                },
+                "autocomplete": {
+                    "filter": [
+                      "lowercase",
+                      "autocomplete_filter"
+                    ],
+                    "type": "custom",
+                    "tokenizer": "standard"
+                  }
 			},
 			"char_filter": {
 				"html_char_filter": {
 					"type": "html_strip"
 				}
-			}
+			},
+			"filter": {
+            "autocomplete_filter": {
+              "type": "edge_ngram",
+              "min_gram": "2",
+              "max_gram": "8"
+            }
+          }
 		},
 		"number_of_replicas": "0"
 	}
