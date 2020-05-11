@@ -1,15 +1,135 @@
 {
-    "dynamic": "strict",
-    "properties": {
-        "creationDate": {
-            "type": "date"
-        },
-        "creator": {
-            "properties": {
-                "id": {
-                    "type": "keyword"
+	"dynamic": "strict",
+	"properties": {
+		"creationDate": {
+			"type": "date"
+		},
+		"creator": {
+			"properties": {
+				"id": {
+					"type": "keyword"
+				},
+				"name": {
+					"type": "text",
+					"fields": {
+						"keyword": {
+							"type": "keyword",
+							"normalizer": "sort"
+						},
+						"auto": {
+							"type": "text",
+							"analyzer": "autocomplete",
+							"search_analyzer": "standard"
+						}
+					}
+				}
+			}
+		},
+		"id": {
+			"type": "keyword"
+		},
+		"metadata": {
+			"dynamic": "false",
+			"properties": {
+				"authors": {
+					"type": "nested",
+					"include_in_parent": true,
+					"properties": {
+						"familyName": {
+							"type": "text",
+							"fields": {
+								"keyword": {
+									"type": "keyword",
+									"normalizer": "sort"
+								},
+								"auto": {
+									"type": "text",
+									"analyzer": "autocomplete",
+									"search_analyzer": "standard"
+								}
+							}
+						},
+						"givenName": {
+							"type": "text",
+							"fields": {
+								"keyword": {
+									"type": "keyword",
+									"normalizer": "sort"
+								},
+								"auto": {
+									"type": "text",
+									"analyzer": "autocomplete",
+									"search_analyzer": "standard"
+								}
+							}
+						},
+						"nameIdentifier": {
+							"type": "text",
+							"fields": {
+								"keyword": {
+									"type": "keyword",
+									"normalizer": "sort"
+								}
+							}
+						},
+						"affiliations": {
+							"type": "nested",
+							"include_in_parent": true,
+							"properties": {
+								"id": {
+									"type": "keyword"
+								},
+								"organization": {
+									"type": "text",
+									"fields": {
+										"keyword": {
+											"type": "keyword",
+											"normalizer": "sort"
+										},
+										"auto": {
+											"type": "text",
+											"analyzer": "autocomplete",
+											"search_analyzer": "standard"
+										}
+									}
+								},
+								"department": {
+									"type": "text",
+									"fields": {
+										"keyword": {
+											"type": "keyword",
+											"normalizer": "sort"
+										},
+										"auto": {
+											"type": "text",
+											"analyzer": "autocomplete",
+											"search_analyzer": "standard"
+										}
+									}
+								}
+							}
+						}
+					}
+				},
+				"title": {
+					"type": "text",
+					"fields": {
+						"keyword": {
+							"type": "keyword",
+							"normalizer": "sort"
+						},
+						"auto": {
+							"type": "text",
+							"analyzer": "autocomplete",
+							"search_analyzer": "standard"
+						}
+					}
+				},
+                "description": {
+                    "type": "text",
+                    "analyzer": "html_standard_analyzer"
                 },
-                "name": {
+                "genres": {
                     "type": "text",
                     "fields": {
                         "keyword": {
@@ -22,96 +142,8 @@
                             "search_analyzer": "standard"
                         }
                     }
-                }
-            }
-        },
-        "id": {
-            "type": "keyword"
-        },
-        "metadata": {
-            "dynamic": "false",
-            "properties": {
-                "authors": {
-                    "type": "nested",
-                    "include_in_parent": true,
-                    "properties": {
-                        "familyName": {
-                            "type": "text",
-                            "fields": {
-                                "keyword": {
-                                    "type": "keyword",
-                                    "normalizer": "sort"
-                                },
-                                "auto": {
-                                    "type": "text",
-                                    "analyzer": "autocomplete",
-                                    "search_analyzer": "standard"
-                                }
-                            }
-                        },
-                        "givenName": {
-                            "type": "text",
-                            "fields": {
-                                "keyword": {
-                                    "type": "keyword",
-                                    "normalizer": "sort"
-                                },
-                                "auto": {
-                                    "type": "text",
-                                    "analyzer": "autocomplete",
-                                    "search_analyzer": "standard"
-                                }
-                            }
-                        },
-                        "nameIdentifier": {
-                            "type": "text",
-                            "fields": {
-                                "keyword": {
-                                    "type": "keyword",
-                                    "normalizer": "sort"
-                                }
-                            }
-                        },
-                        "affiliation": {
-                            "type": "nested",
-                            "include_in_parent": true,
-                            "properties": {
-                                "id": {
-                                    "type": "keyword"
-                                },
-                                "organization": {
-                                    "type": "text",
-                                    "fields": {
-                                        "keyword": {
-                                            "type": "keyword",
-                                            "normalizer": "sort"
-                                        },
-                                        "auto": {
-                                            "type": "text",
-                                            "analyzer": "autocomplete",
-                                            "search_analyzer": "standard"
-                                        }
-                                    }
-                                },
-                                "department": {
-                                    "type": "text",
-                                    "fields": {
-                                        "keyword": {
-                                            "type": "keyword",
-                                            "normalizer": "sort"
-                                        },
-                                        "auto": {
-                                            "type": "text",
-                                            "analyzer": "autocomplete",
-                                            "search_analyzer": "standard"
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
                 },
-                "title": {
+                "keywords": {
                     "type": "text",
                     "fields": {
                         "keyword": {
@@ -124,30 +156,8 @@
                             "search_analyzer": "standard"
                         }
                     }
-                }
-            }
-        },
-        "modificationDate": {
-            "type": "date"
-        },
-        "publicationDate": {
-            "type": "date"
-        },
-        "doi": {
-            "type": "text",
-            "fields": {
-                "keyword": {
-                    "type": "keyword",
-                    "normalizer": "sort"
-                }
-            }
-        },
-        "modifier": {
-            "properties": {
-                "id": {
-                    "type": "keyword"
                 },
-                "name": {
+                "license": {
                     "type": "text",
                     "fields": {
                         "keyword": {
@@ -160,120 +170,202 @@
                             "search_analyzer": "standard"
                         }
                     }
-                }
-            }
-        },
-        "parent": {
-            "properties": {
-                "creationDate": {
-                    "type": "date"
                 },
-                "creator": {
-                    "properties": {
-                        "id": {
-                            "type": "keyword"
-                        },
-                        "name": {
-                            "type": "text",
-                            "fields": {
-                                "keyword": {
-                                    "type": "keyword",
-                                    "normalizer": "sort"
-                                },
-                                "auto": {
-                                    "type": "text",
-                                    "analyzer": "autocomplete",
-                                    "search_analyzer": "standard"
-                                }
-                            }
-                        }
-                    }
-                },
-                "id": {
-                    "type": "keyword"
-                },
-                "modificationDate": {
-                    "type": "date"
-                },
-                "modifier": {
-                    "properties": {
-                        "id": {
-                            "type": "keyword"
-                        },
-                        "name": {
-                            "type": "text",
-                            "fields": {
-                                "keyword": {
-                                    "type": "keyword",
-                                    "normalizer": "sort"
-                                },
-                                "auto": {
-                                    "type": "text",
-                                    "analyzer": "autocomplete",
-                                    "search_analyzer": "standard"
-                                }
-                            }
-                        }
-                    }
-                },
-                "datamanager": {
-                    "properties": {
-                        "id": {
-                            "type": "keyword"
-                        },
-                        "name": {
-                            "type": "text",
-                            "fields": {
-                                "keyword": {
-                                    "type": "keyword",
-                                    "normalizer": "sort"
-                                },
-                                "auto": {
-                                    "type": "text",
-                                    "analyzer": "autocomplete",
-                                    "search_analyzer": "standard"
-                                }
-                            }
-                        }
-                    }
-                },
-                "state": {
-                    "type": "keyword"
-                }
-            }
-        },
-        "state": {
-            "type": "keyword"
-        },
-        "versionNumber": {
-            "type": "long"
-        },
-        "files": {
-            "dynamic": "false",
-            "type": "nested",
-            "properties": {
-                "id": {
-                    "type": "keyword"
-                },
-                "filename": {
+                "language": {
                     "type": "text",
                     "fields": {
                         "keyword": {
                             "type": "keyword",
                             "normalizer": "sort"
+                        },
+                        "auto": {
+                            "type": "text",
+                            "analyzer": "autocomplete",
+                            "search_analyzer": "standard"
                         }
                     }
                 },
-                "format": {
-                    "type": "text",
-                    "fields": {
-                        "keyword": {
-                            "type": "keyword",
-                            "normalizer": "sort"
+                "correspondingPapers": {
+                    "properties": {
+                        "title": {
+                            "type": "text",
+                            "fields": {
+                                "keyword": {
+                                    "type": "keyword",
+                                    "normalizer": "sort"
+                                },
+                                "auto": {
+                                    "type": "text",
+                                    "analyzer": "autocomplete",
+                                    "search_analyzer": "standard"
+                                }
+                            }
+                        },
+                        "type": {
+                            "type": "text",
+                            "fields": {
+                                "keyword": {
+                                    "type": "keyword",
+                                    "normalizer": "sort"
+                                },
+                                "auto": {
+                                    "type": "text",
+                                    "analyzer": "autocomplete",
+                                    "search_analyzer": "standard"
+                                }
+                            }
                         }
                     }
                 }
-            }
-        }
-    }
+			}
+		},
+		"modificationDate": {
+			"type": "date"
+		},
+		"publicationDate": {
+			"type": "date"
+		},
+		"doi": {
+			"type": "text",
+			"fields": {
+				"keyword": {
+					"type": "keyword",
+					"normalizer": "sort"
+				}
+			}
+		},
+		"modifier": {
+			"properties": {
+				"id": {
+					"type": "keyword"
+				},
+				"name": {
+					"type": "text",
+					"fields": {
+						"keyword": {
+							"type": "keyword",
+							"normalizer": "sort"
+						},
+						"auto": {
+							"type": "text",
+							"analyzer": "autocomplete",
+							"search_analyzer": "standard"
+						}
+					}
+				}
+			}
+		},
+		"parent": {
+			"properties": {
+				"creationDate": {
+					"type": "date"
+				},
+				"creator": {
+					"properties": {
+						"id": {
+							"type": "keyword"
+						},
+						"name": {
+							"type": "text",
+							"fields": {
+								"keyword": {
+									"type": "keyword",
+									"normalizer": "sort"
+								},
+								"auto": {
+									"type": "text",
+									"analyzer": "autocomplete",
+									"search_analyzer": "standard"
+								}
+							}
+						}
+					}
+				},
+				"id": {
+					"type": "keyword"
+				},
+				"modificationDate": {
+					"type": "date"
+				},
+				"modifier": {
+					"properties": {
+						"id": {
+							"type": "keyword"
+						},
+						"name": {
+							"type": "text",
+							"fields": {
+								"keyword": {
+									"type": "keyword",
+									"normalizer": "sort"
+								},
+								"auto": {
+									"type": "text",
+									"analyzer": "autocomplete",
+									"search_analyzer": "standard"
+								}
+							}
+						}
+					}
+				},
+				"datamanager": {
+					"properties": {
+						"id": {
+							"type": "keyword"
+						},
+						"name": {
+							"type": "text",
+							"fields": {
+								"keyword": {
+									"type": "keyword",
+									"normalizer": "sort"
+								},
+								"auto": {
+									"type": "text",
+									"analyzer": "autocomplete",
+									"search_analyzer": "standard"
+								}
+							}
+						}
+					}
+				},
+				"state": {
+					"type": "keyword"
+				}
+			}
+		},
+		"state": {
+			"type": "keyword"
+		},
+		"versionNumber": {
+			"type": "long"
+		},
+		"files": {
+			"dynamic": "false",
+			"type": "nested",
+			"properties": {
+				"id": {
+					"type": "keyword"
+				},
+				"filename": {
+					"type": "text",
+					"fields": {
+						"keyword": {
+							"type": "keyword",
+							"normalizer": "sort"
+						}
+					}
+				},
+				"format": {
+					"type": "text",
+					"fields": {
+						"keyword": {
+							"type": "keyword",
+							"normalizer": "sort"
+						}
+					}
+				}
+			}
+		}
+	}
 }

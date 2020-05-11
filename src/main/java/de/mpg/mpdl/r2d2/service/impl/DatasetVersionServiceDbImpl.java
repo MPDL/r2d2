@@ -283,7 +283,7 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
 
     checkAa("update", user, datasetVersion);
     // TODO validation
-    checkEqualModificationDate(datasetVersion.getDataset().getModificationDate(),
+    checkEqualModificationDate(latestVersion.getDataset().getModificationDate(),
         datasetVersionToBeUpdated.getDataset().getModificationDate());
 
     if (createNewVersion) {
