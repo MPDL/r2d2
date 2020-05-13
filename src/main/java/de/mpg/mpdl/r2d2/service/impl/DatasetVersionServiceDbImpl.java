@@ -33,6 +33,7 @@ import de.mpg.mpdl.r2d2.search.dao.DatasetVersionDaoEs;
 import de.mpg.mpdl.r2d2.search.dao.GenericDaoEs;
 import de.mpg.mpdl.r2d2.service.DatasetVersionService;
 import de.mpg.mpdl.r2d2.service.storage.SwiftObjectStoreRepository;
+import de.mpg.mpdl.r2d2.util.Utils;
 
 @Service
 public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVersion> implements DatasetVersionService {
@@ -309,7 +310,6 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
   private DatasetVersion buildDatasetVersionToCreate(DatasetVersion givenDatasetVersion, UserAccount creator, int versionNumber,
       Dataset dataset) {
 
-    OffsetDateTime currentTime = OffsetDateTime.now();
     DatasetVersion datasetVersionToCreate = new DatasetVersion();
     
     datasetVersionToCreate.setState(State.PRIVATE);
@@ -337,7 +337,7 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
   
   protected void setBasicCreationProperties(DatasetVersion baseObject, UserAccount creator)
   {
-    OffsetDateTime dateTime = OffsetDateTime.now();
+    OffsetDateTime dateTime = Utils.generateCurrentDateTimeForDatabase();
     super.setBasicCreationProperties(baseObject, creator, dateTime);
     if(baseObject.getDataset().getId()==null)
     {
@@ -352,7 +352,7 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
   
   protected void setBasicModificationProperties(DatasetVersion baseObject, UserAccount creator)
   {
-    OffsetDateTime dateTime = OffsetDateTime.now();
+    OffsetDateTime dateTime = Utils.generateCurrentDateTimeForDatabase();
     super.setBasicModificationProperties(baseObject, creator, dateTime);
     super.setBasicModificationProperties(baseObject.getDataset(), creator, dateTime);
     LOGGER.info("Set modification date to " + dateTime);

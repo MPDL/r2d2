@@ -3,6 +3,7 @@ package de.mpg.mpdl.r2d2.service.impl;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.stream.Stream;
 
@@ -23,6 +24,7 @@ import de.mpg.mpdl.r2d2.model.aa.R2D2Principal;
 import de.mpg.mpdl.r2d2.model.aa.UserAccount;
 import de.mpg.mpdl.r2d2.model.aa.UserAccountRO;
 import de.mpg.mpdl.r2d2.search.dao.GenericDaoEs;
+import de.mpg.mpdl.r2d2.util.Utils;
 
 public abstract class GenericServiceDbImpl<E> {
 
@@ -74,7 +76,8 @@ public abstract class GenericServiceDbImpl<E> {
   
   protected void setBasicCreationProperties(BaseDb baseObject, UserAccount creator)
   {
-    setBasicCreationProperties(baseObject, creator, OffsetDateTime.now());
+    //Truncate to microseconds, as the database doesn't support more
+    setBasicCreationProperties(baseObject, creator, Utils.generateCurrentDateTimeForDatabase());
   }
   
   protected void setBasicCreationProperties(BaseDb baseObject, UserAccount creator, OffsetDateTime dateTime)
@@ -86,7 +89,8 @@ public abstract class GenericServiceDbImpl<E> {
   
   protected void setBasicModificationProperties(BaseDb baseObject, UserAccount creator)
   {
-    setBasicModificationProperties(baseObject, creator,  OffsetDateTime.now());
+    //Truncate to microseconds, as the database doesn't support more
+    setBasicModificationProperties(baseObject, creator,  Utils.generateCurrentDateTimeForDatabase());
   }
   
   protected void setBasicModificationProperties(BaseDb baseObject, UserAccount creator, OffsetDateTime dateTime)

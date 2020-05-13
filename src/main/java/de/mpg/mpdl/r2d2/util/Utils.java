@@ -2,6 +2,8 @@ package de.mpg.mpdl.r2d2.util;
 
 import java.io.IOException;
 import java.security.Principal;
+import java.time.OffsetDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.Collections;
 
 import org.elasticsearch.common.settings.Settings;
@@ -36,6 +38,11 @@ public class Utils {
     }
     return searchSourceBuilder;
 
+  }
+  
+  public static OffsetDateTime generateCurrentDateTimeForDatabase()
+  {
+    return OffsetDateTime.now().truncatedTo(ChronoUnit.MICROS);
   }
 
 }
