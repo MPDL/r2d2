@@ -2,6 +2,7 @@ package de.mpg.mpdl.r2d2.service.impl;
 
 import java.io.InputStream;
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
 import java.util.UUID;
 
 import javax.persistence.EntityManager;
@@ -128,7 +129,7 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
       OptimisticLockingException, ValidationException, NotFoundException, InvalidStateException, AuthorizationException {
 
     DatasetVersion datasetVersionToBeUpdated = get(id, user);
-    DatasetVersion latestVersion = datasetVersionRepository.getLatestVersion(datasetVersionToBeUpdated.getDataset().getId());
+    DatasetVersion latestVersion = datasetVersionRepository.findLatestVersion(datasetVersionToBeUpdated.getDataset().getId());
     checkAa("publish", user, latestVersion);
 
 
@@ -264,9 +265,9 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
       AuthorizationException {
 
     DatasetVersion datasetVersionToBeUpdated = get(id, user);
-    DatasetVersion latestVersion = datasetVersionRepository.getLatestVersion(datasetVersionToBeUpdated.getDataset().getId());
-    
-    
+    UUID datasetId = datasetVersionToBeUpdated.getDataset().getId();
+    DatasetVersion latestVersion = datasetVersionRepository.findLatestVersion(datasetId);
+
     if (!datasetVersionToBeUpdated.getId().equals(latestVersion.getId())) {
       throw new InvalidStateException("Only the latest dataset version can be updated. Given version: "
           + datasetVersionToBeUpdated.getVersionNumber() + "; Latest version: " + latestVersion.getVersionNumber());
@@ -274,44 +275,56 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
 
     checkAa("update", user, datasetVersionToBeUpdated);
     // TODO validation
-    checkEqualModificationDate(datasetVersion.getModificationDate(),
-        datasetVersionToBeUpdated.getDataset().getModificationDate());
+    checkEqualModificationDate(datasetVersion.getModificationDate(), datasetVersionToBeUpdated.getDataset().getModificationDate());
 
     if (createNewVersion) {
       if (!State.PUBLIC.equals(datasetVersionToBeUpdated.getState())) {
         throw new InvalidStateException("A new version can only be created if the state of the latest version is public.");
       }
 
+      //em.detach(datasetVersionToBeUpdated);
+      //em.detach(latestVersion);
       datasetVersionToBeUpdated = buildDatasetVersionToCreate(datasetVersion, user.getUserAccount(),
           datasetVersionToBeUpdated.getVersionNumber() + 1, datasetVersionToBeUpdated.getDataset());
-      datasetVersionToBeUpdated.setFiles(latestVersion.getFiles());
       setBasicCreationProperties(datasetVersionToBeUpdated, user.getUserAccount());
+
+      datasetVersion.setFiles(new ArrayList<File>(latestVersion.getFiles()));
+
+      try {
+        datasetVersionToBeUpdated = datasetVersionRepository.saveAndFlush(datasetVersionToBeUpdated);
+      } catch (Exception e) {
+        throw new R2d2TechnicalException(e);
+      }
+
+      datasetVersionIndexDao.createImmediately(datasetVersionToBeUpdated.getId().toString(), datasetVersionToBeUpdated);
 
     } else {
       datasetVersionToBeUpdated.setMetadata(datasetVersion.getMetadata());
       setBasicModificationProperties(datasetVersionToBeUpdated, user.getUserAccount());
 
+      try {
+        datasetVersionToBeUpdated = datasetVersionRepository.saveAndFlush(datasetVersionToBeUpdated);
+      } catch (Exception e) {
+        throw new R2d2TechnicalException(e);
+      }
+
+      datasetVersionIndexDao.updateImmediately(datasetVersionToBeUpdated.getId().toString(), datasetVersionToBeUpdated);
+
     }
 
-    try {
-      datasetVersionToBeUpdated = datasetVersionRepository.saveAndFlush(datasetVersionToBeUpdated);
-    } catch (Exception e) {
-      throw new R2d2TechnicalException(e);
-    }
-    datasetVersionIndexDao.updateImmediately(datasetVersionToBeUpdated.getId().toString(), datasetVersionToBeUpdated);
 
 
     return datasetVersionToBeUpdated;
-    
+
   }
 
- 
+
 
   private DatasetVersion buildDatasetVersionToCreate(DatasetVersion givenDatasetVersion, UserAccount creator, int versionNumber,
       Dataset dataset) {
 
     DatasetVersion datasetVersionToCreate = new DatasetVersion();
-    
+
     datasetVersionToCreate.setState(State.PRIVATE);
     datasetVersionToCreate.setMetadata(givenDatasetVersion.getMetadata());
     datasetVersionToCreate.setVersionNumber(versionNumber);
@@ -320,7 +333,7 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
     if (datasetToCreate == null) {
       datasetToCreate = new Dataset();
       datasetToCreate.setState(State.PRIVATE);
-      
+
     }
     datasetVersionToCreate.setDataset(datasetToCreate);
     setBasicCreationProperties(datasetVersionToCreate, creator);
@@ -333,29 +346,23 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
   protected GenericDaoEs<DatasetVersion> getIndexDao() {
     return datasetVersionIndexDao;
   }
-  
-  
-  protected void setBasicCreationProperties(DatasetVersion baseObject, UserAccount creator)
-  {
+
+
+  protected void setBasicCreationProperties(DatasetVersion baseObject, UserAccount creator) {
     OffsetDateTime dateTime = Utils.generateCurrentDateTimeForDatabase();
     super.setBasicCreationProperties(baseObject, creator, dateTime);
-    if(baseObject.getDataset().getId()==null)
-    {
+    if (baseObject.getDataset().getId() == null) {
       super.setBasicCreationProperties(baseObject.getDataset(), creator, dateTime);
-    }
-    else
-    {
+    } else {
       super.setBasicModificationProperties(baseObject.getDataset(), creator, dateTime);
     }
-    
+
   }
-  
-  protected void setBasicModificationProperties(DatasetVersion baseObject, UserAccount creator)
-  {
+
+  protected void setBasicModificationProperties(DatasetVersion baseObject, UserAccount creator) {
     OffsetDateTime dateTime = Utils.generateCurrentDateTimeForDatabase();
     super.setBasicModificationProperties(baseObject, creator, dateTime);
     super.setBasicModificationProperties(baseObject.getDataset(), creator, dateTime);
-    LOGGER.info("Set modification date to " + dateTime);
 
   }
 

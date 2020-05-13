@@ -45,9 +45,9 @@ public class DummyDataInitializer {
 
   @PostConstruct
   public void initialize() throws R2d2TechnicalException {
-    
-    OffsetDateTime currentDateTime = OffsetDateTime.now();
-    
+
+    OffsetDateTime currentDateTime = Utils.generateCurrentDateTimeForDatabase();
+
     UserAccount user = new UserAccount();
     user.setEmail("testuser@mpdl.mpg.de");
     user.setName("Test Admin");

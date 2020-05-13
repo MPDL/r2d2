@@ -39,9 +39,8 @@ public class Utils {
     return searchSourceBuilder;
 
   }
-  
-  public static OffsetDateTime generateCurrentDateTimeForDatabase()
-  {
+
+  public static OffsetDateTime generateCurrentDateTimeForDatabase() {
     return OffsetDateTime.now().truncatedTo(ChronoUnit.MICROS);
   }
 

@@ -31,7 +31,7 @@ public class DatasetVersionRepositoryTest extends BaseIntegrationTest {
     datasetVersionRepository.saveAll(Arrays.asList(datasetVersion1, datasetVersion2));
 
     //When
-    DatasetVersion latestDatasetVersion = datasetVersionRepository.getLatestVersion(dataset.getId());
+    DatasetVersion latestDatasetVersion = datasetVersionRepository.findLatestVersion(dataset.getId());
 
     //Then
     assertThat(latestDatasetVersion.getVersionNumber()).isEqualTo(latestVersionNumber);

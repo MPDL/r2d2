@@ -12,6 +12,6 @@ import de.mpg.mpdl.r2d2.model.DatasetVersion;
 public interface DatasetVersionRepository extends JpaRepository<DatasetVersion, UUID> {
 
   @Query("SELECT datasetVersion FROM DatasetVersion datasetVersion WHERE datasetVersion.dataset.id=:datasetId AND datasetVersion.versionNumber=(SELECT MAX(datasetVersion.versionNumber) FROM DatasetVersion datasetVersion WHERE datasetVersion.dataset.id=:datasetId)")
-  public DatasetVersion getLatestVersion(@Param("datasetId") UUID datasetId);
+  public DatasetVersion findLatestVersion(@Param("datasetId") UUID datasetId);
 
 }

@@ -10,6 +10,8 @@ import java.util.stream.Stream;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.fasterxml.jackson.databind.introspect.TypeResolutionContext.Basic;
@@ -28,6 +30,7 @@ import de.mpg.mpdl.r2d2.util.Utils;
 
 public abstract class GenericServiceDbImpl<E> {
 
+  private static final Logger LOGGER = LoggerFactory.getLogger(GenericServiceDbImpl.class);
 
   @Autowired
   private AuthorizationService aaService;
@@ -58,6 +61,7 @@ public abstract class GenericServiceDbImpl<E> {
 
 
   protected void checkEqualModificationDate(OffsetDateTime date1, OffsetDateTime date2) throws OptimisticLockingException {
+    LOGGER.debug("Compare date " + date1 + " with " + date2);
     if (date1 == null || date2 == null || !date1.toInstant().equals(date2.toInstant())) {
       throw new OptimisticLockingException("Object changed in the meantime: " + date1 + "  does not equal  " + date2);
     }
@@ -73,32 +77,28 @@ public abstract class GenericServiceDbImpl<E> {
     aaService.checkAuthorization(this.getClass().getCanonicalName(), method, objects);
   }
 
-  
-  protected void setBasicCreationProperties(BaseDb baseObject, UserAccount creator)
-  {
+
+  protected void setBasicCreationProperties(BaseDb baseObject, UserAccount creator) {
     //Truncate to microseconds, as the database doesn't support more
     setBasicCreationProperties(baseObject, creator, Utils.generateCurrentDateTimeForDatabase());
   }
-  
-  protected void setBasicCreationProperties(BaseDb baseObject, UserAccount creator, OffsetDateTime dateTime)
-  {
+
+  protected void setBasicCreationProperties(BaseDb baseObject, UserAccount creator, OffsetDateTime dateTime) {
     baseObject.setCreator(new UserAccountRO(creator));
     baseObject.setCreationDate(dateTime);
     setBasicModificationProperties(baseObject, creator, dateTime);
   }
-  
-  protected void setBasicModificationProperties(BaseDb baseObject, UserAccount creator)
-  {
+
+  protected void setBasicModificationProperties(BaseDb baseObject, UserAccount creator) {
     //Truncate to microseconds, as the database doesn't support more
-    setBasicModificationProperties(baseObject, creator,  Utils.generateCurrentDateTimeForDatabase());
+    setBasicModificationProperties(baseObject, creator, Utils.generateCurrentDateTimeForDatabase());
   }
-  
-  protected void setBasicModificationProperties(BaseDb baseObject, UserAccount creator, OffsetDateTime dateTime)
-  {
+
+  protected void setBasicModificationProperties(BaseDb baseObject, UserAccount creator, OffsetDateTime dateTime) {
     baseObject.setModifier(new UserAccountRO(creator));
     baseObject.setModificationDate(dateTime);
   }
-  
+
   protected abstract GenericDaoEs<E> getIndexDao();
 
 }
