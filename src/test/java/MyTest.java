@@ -41,7 +41,7 @@ public class MyTest {
     chunkedFileUpload(p, 20, token);
 
     //singleFileUpload(p, token);
-    
+
     //getData();
 
 
@@ -72,7 +72,7 @@ public class MyTest {
         end = 0;
 
       }
-      Logger.info("Upload from bytes " + start + " to " +end);
+      Logger.info("Upload from bytes " + start + " to " + end);
       InputStream cfis1 = new ChunkedFileInputStream(filePath.toFile(), start, end);
 
       //FileInputStream cfis1 = new FileInputStream(p.toFile());

@@ -44,12 +44,11 @@ public class BaseDb {
   @GeneratedValue(generator = "UseExistingIdOtherwiseGenerateUsingUUID")
   private UUID id;
 
-  @CreationTimestamp
+
   @Column(columnDefinition = "TIMESTAMP WITH TIME ZONE", nullable = false, updatable = false)
   private OffsetDateTime creationDate;
 
-  @UpdateTimestamp
-  @Column(columnDefinition = "TIMESTAMP WITH TIME ZONE")
+  @Column(columnDefinition = "TIMESTAMP WITH TIME ZONE", nullable = false)
   private OffsetDateTime modificationDate;
 
 

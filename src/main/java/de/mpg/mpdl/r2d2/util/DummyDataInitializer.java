@@ -1,5 +1,8 @@
 package de.mpg.mpdl.r2d2.util;
 
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.UUID;
 
 import javax.annotation.PostConstruct;
@@ -42,12 +45,17 @@ public class DummyDataInitializer {
 
   @PostConstruct
   public void initialize() throws R2d2TechnicalException {
+    
+    OffsetDateTime currentDateTime = OffsetDateTime.now();
+    
     UserAccount user = new UserAccount();
     user.setEmail("testuser@mpdl.mpg.de");
     user.setName("Test Admin");
     user.setId(UUID.fromString("2d0dd850-eabb-43fe-8b8f-1a1b54018738"));
     user.setCreator(new UserAccountRO(user));
     user.setModifier(new UserAccountRO(user));
+    user.setCreationDate(currentDateTime);
+    user.setModificationDate(currentDateTime);
     user.getRoles().add(Role.ADMIN);
 
 
@@ -65,6 +73,8 @@ public class DummyDataInitializer {
     dv.setId(UUID.fromString("a6124f2a-9a06-489d-a7e2-40b583ebbd23"));
     dv.setCreator(new UserAccountRO(user));
     dv.setModifier(new UserAccountRO(user));
+    dv.setCreationDate(currentDateTime);
+    dv.setModificationDate(currentDateTime);
     dv.getMetadata().setTitle("Test title");
 
     Person author = new Person();
@@ -76,6 +86,8 @@ public class DummyDataInitializer {
     dataset.setId(UUID.fromString("9cdb1d04-8527-4c32-8e00-4e4730861cbb"));
     dataset.setCreator(new UserAccountRO(user));
     dataset.setModifier(new UserAccountRO(user));
+    dataset.setCreationDate(currentDateTime);
+    dataset.setModificationDate(currentDateTime);
     dataset.getDatamanager().add(new UserAccountRO(user));
 
     dv.setDataset(dataset);
@@ -88,6 +100,8 @@ public class DummyDataInitializer {
     dv2.setId(UUID.fromString("a6124f2a-9a06-489d-a7e2-40b583ebbd24"));
     dv2.setCreator(new UserAccountRO(user));
     dv2.setModifier(new UserAccountRO(user));
+    dv2.setCreationDate(currentDateTime);
+    dv2.setModificationDate(currentDateTime);
     dv2.getMetadata().setTitle("Test title 2");
 
     Person author2 = new Person();
@@ -99,6 +113,8 @@ public class DummyDataInitializer {
     dataset2.setId(UUID.fromString("9cdb1d04-8527-4c32-8e00-4e4730861cbc"));
     dataset2.setCreator(new UserAccountRO(user));
     dataset2.setModifier(new UserAccountRO(user));
+    dataset2.setCreationDate(currentDateTime);
+    dataset2.setModificationDate(currentDateTime);
     dataset2.setState(State.PUBLIC);
 
     dv2.setDataset(dataset2);

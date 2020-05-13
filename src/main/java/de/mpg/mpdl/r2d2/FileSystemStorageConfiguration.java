@@ -20,7 +20,7 @@ import org.springframework.context.annotation.Configuration;
 @ConditionalOnProperty(value = "r2d2.storage", havingValue = "fs")
 public class FileSystemStorageConfiguration {
 
-  private final Logger LOGGER = LoggerFactory.getLogger(getClass());
+  private static final Logger LOGGER = LoggerFactory.getLogger(FileSystemStorageConfiguration.class);
 
   private BlobStoreContext blobStoreContext;
 

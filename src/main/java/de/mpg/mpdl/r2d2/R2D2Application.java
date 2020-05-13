@@ -1,21 +1,25 @@
 package de.mpg.mpdl.r2d2;
 
-import javax.annotation.PostConstruct;
+import java.io.IOException;
+import java.time.OffsetDateTime;
+import java.time.format.DateTimeFormatter;
 
-import org.apache.http.HttpHost;
-import org.elasticsearch.client.RestClient;
-import org.elasticsearch.client.RestHighLevelClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.Environment;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 @SpringBootApplication
@@ -33,10 +37,17 @@ public class R2D2Application {
 
 
 
+  /**
+   * Overwrites the default Jackson ObjectMapper from Spring Boot
+   * @return
+   */
   @Bean
+  @Primary
   public ObjectMapper jsonObjectMapper() {
     ObjectMapper jsonObjectMapper = new ObjectMapper();
-    jsonObjectMapper.registerModule(new JavaTimeModule());
+    JavaTimeModule timeModule = new JavaTimeModule();
+    
+    jsonObjectMapper.registerModule(timeModule);
     jsonObjectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     jsonObjectMapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
     jsonObjectMapper.enable(SerializationFeature.INDENT_OUTPUT);

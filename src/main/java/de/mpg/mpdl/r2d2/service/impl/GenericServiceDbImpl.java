@@ -1,5 +1,7 @@
 package de.mpg.mpdl.r2d2.service.impl;
 
+import java.time.Instant;
+import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.Arrays;
 import java.util.stream.Stream;
@@ -9,12 +11,17 @@ import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.fasterxml.jackson.databind.introspect.TypeResolutionContext.Basic;
+
 import de.mpg.mpdl.r2d2.aa.AuthorizationService;
 import de.mpg.mpdl.r2d2.exceptions.AuthorizationException;
 import de.mpg.mpdl.r2d2.exceptions.OptimisticLockingException;
 import de.mpg.mpdl.r2d2.exceptions.R2d2ApplicationException;
 import de.mpg.mpdl.r2d2.exceptions.R2d2TechnicalException;
+import de.mpg.mpdl.r2d2.model.BaseDb;
 import de.mpg.mpdl.r2d2.model.aa.R2D2Principal;
+import de.mpg.mpdl.r2d2.model.aa.UserAccount;
+import de.mpg.mpdl.r2d2.model.aa.UserAccountRO;
 import de.mpg.mpdl.r2d2.search.dao.GenericDaoEs;
 
 public abstract class GenericServiceDbImpl<E> {
@@ -49,7 +56,7 @@ public abstract class GenericServiceDbImpl<E> {
 
 
   protected void checkEqualModificationDate(OffsetDateTime date1, OffsetDateTime date2) throws OptimisticLockingException {
-    if (date1 == null || date2 == null || !date1.isEqual(date2)) {
+    if (date1 == null || date2 == null || !date1.toInstant().equals(date2.toInstant())) {
       throw new OptimisticLockingException("Object changed in the meantime: " + date1 + "  does not equal  " + date2);
     }
   }
@@ -64,6 +71,30 @@ public abstract class GenericServiceDbImpl<E> {
     aaService.checkAuthorization(this.getClass().getCanonicalName(), method, objects);
   }
 
+  
+  protected void setBasicCreationProperties(BaseDb baseObject, UserAccount creator)
+  {
+    setBasicCreationProperties(baseObject, creator, OffsetDateTime.now());
+  }
+  
+  protected void setBasicCreationProperties(BaseDb baseObject, UserAccount creator, OffsetDateTime dateTime)
+  {
+    baseObject.setCreator(new UserAccountRO(creator));
+    baseObject.setCreationDate(dateTime);
+    setBasicModificationProperties(baseObject, creator, dateTime);
+  }
+  
+  protected void setBasicModificationProperties(BaseDb baseObject, UserAccount creator)
+  {
+    setBasicModificationProperties(baseObject, creator,  OffsetDateTime.now());
+  }
+  
+  protected void setBasicModificationProperties(BaseDb baseObject, UserAccount creator, OffsetDateTime dateTime)
+  {
+    baseObject.setModifier(new UserAccountRO(creator));
+    baseObject.setModificationDate(dateTime);
+  }
+  
   protected abstract GenericDaoEs<E> getIndexDao();
 
 }

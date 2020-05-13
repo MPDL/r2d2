@@ -67,11 +67,20 @@ public class DatasetController {
   }
 
 
+  
   @PutMapping(path = "/{id}")
-  public ResponseEntity<DatasetVersion> updateDataset(@PathVariable("id") String id, @RequestBody DatasetVersion givenDatasetVersion,
+  public ResponseEntity<DatasetVersion> updateDataset(@PathVariable("id") String id, @RequestParam(name = "createNewVersion", defaultValue = "false") Boolean createNewVersion, @RequestBody DatasetVersion givenDatasetVersion,
       Principal prinz) throws R2d2TechnicalException, R2d2ApplicationException {
 
-    DatasetVersion createdDv = datasetVersionService.update(UUID.fromString(id), givenDatasetVersion, Utils.toCustomPrincipal(prinz));
+    DatasetVersion createdDv = null;
+    if(createNewVersion)
+    {
+      createdDv = datasetVersionService.createNewVersion(UUID.fromString(id), givenDatasetVersion, Utils.toCustomPrincipal(prinz));
+    }
+    else
+    {
+      createdDv = datasetVersionService.update(UUID.fromString(id), givenDatasetVersion, Utils.toCustomPrincipal(prinz));
+    }
     return new ResponseEntity<DatasetVersion>(createdDv, HttpStatus.CREATED);
   }
 
