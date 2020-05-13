@@ -25,6 +25,7 @@ import org.springframework.http.ResponseEntity.BodyBuilder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -45,7 +46,7 @@ import de.mpg.mpdl.r2d2.service.DatasetVersionService;
 import de.mpg.mpdl.r2d2.util.Utils;
 
 @RestController
-@RequestMapping("api/datasets")
+@RequestMapping("datasets")
 public class DatasetController {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(DatasetController.class);
@@ -57,7 +58,7 @@ public class DatasetController {
   private DatasetVersionService datasetVersionService;
 
 
-  @PostMapping(path = "/dataset")
+  @PostMapping(path = "")
   public ResponseEntity<DatasetVersion> createDataset(@RequestBody DatasetVersion givenDatasetVersion, Principal prinz)
       throws R2d2TechnicalException, R2d2ApplicationException {
 
@@ -66,7 +67,7 @@ public class DatasetController {
   }
 
 
-  @PostMapping(path = "/dataset/{id}")
+  @PutMapping(path = "/{id}")
   public ResponseEntity<DatasetVersion> updateDataset(@PathVariable("id") String id, @RequestBody DatasetVersion givenDatasetVersion,
       Principal prinz) throws R2d2TechnicalException, R2d2ApplicationException {
 
@@ -74,7 +75,7 @@ public class DatasetController {
     return new ResponseEntity<DatasetVersion>(createdDv, HttpStatus.CREATED);
   }
 
-  @PostMapping(path = "/dataset/{id}/publish")
+  @PutMapping(path = "/{id}/publish")
   public ResponseEntity<DatasetVersion> publish(@PathVariable("id") String id,
       @RequestParam(name = "lmd") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime lmd, Principal prinz)
       throws R2d2TechnicalException, R2d2ApplicationException {
@@ -83,7 +84,7 @@ public class DatasetController {
     return new ResponseEntity<DatasetVersion>(publishedDv, HttpStatus.CREATED);
   }
 
-  @GetMapping(path = "/dataset/{id}")
+  @GetMapping(path = "/{id}")
   public DatasetVersion getDataset(@PathVariable("id") String id, Principal p) throws R2d2TechnicalException, R2d2ApplicationException {
 
     return datasetVersionService.get(UUID.fromString(id), Utils.toCustomPrincipal(p));
@@ -91,7 +92,7 @@ public class DatasetController {
   }
 
 
-  @PostMapping("/dataset/{id}/files")
+  @PostMapping("/{id}/files")
   public ResponseEntity<File> newFile(@PathVariable("id") String id, @RequestHeader("X-File-Name") String fileName,
       @RequestHeader(name = "X-File-Total-Chunks", required = false) Integer totalChunks,
       @RequestHeader(name = "X-File-Total-Size") Long size, HttpServletRequest req, Principal prinz)
@@ -140,7 +141,7 @@ public class DatasetController {
     return responseBuilder.body(f);
   }
 
-  @PostMapping("/dataset/{id}/files/{fileId}")
+  @PutMapping("/{id}/files/{fileId}")
   public ResponseEntity<FileChunk> uploadFileChunk(@PathVariable("id") String id, @PathVariable("fileId") String fileId,
       @RequestHeader("X-File-Chunk-Number") int part, @RequestHeader(name = "etag", required = false) String etag,
       @RequestHeader(name = "Content-Length", required = false) Long contentLength, HttpServletRequest req, Principal prinz)
@@ -171,7 +172,7 @@ public class DatasetController {
   }
 
 
-  @GetMapping("/dataset/{id}/files/{fileId}")
+  @GetMapping("/{id}/files/{fileId}")
   public ResponseEntity<?> download(@PathVariable("id") String datasetId, @PathVariable("fileId") String fileId, Principal prinz)
       throws R2d2ApplicationException, AuthorizationException, R2d2TechnicalException {
     InputStreamResource inputStreamResource = new InputStreamResource(
@@ -179,7 +180,7 @@ public class DatasetController {
     return new ResponseEntity<InputStreamResource>(inputStreamResource, HttpStatus.OK);
   }
 
-  @RequestMapping(value = "/elasticsearch", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE,
+  @RequestMapping(value = "/search", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE,
       produces = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<String> searchDetailed(@RequestBody JsonNode searchSource,
       @RequestParam(name = "scroll", required = false) String scrollTimeValue, HttpServletResponse httpResponse, Principal p)
