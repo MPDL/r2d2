@@ -130,17 +130,23 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
 
     DatasetVersion datasetVersionToBeUpdated = get(id, user);
     DatasetVersion latestVersion = datasetVersionRepository.findLatestVersion(datasetVersionToBeUpdated.getDataset().getId());
-    checkAa("publish", user, latestVersion);
 
+    checkAa("publish", user, latestVersion);
+    checkEqualModificationDate(lastModificationDate, datasetVersionToBeUpdated.getDataset().getModificationDate());
 
     if (!id.equals(latestVersion.getId())) {
       throw new InvalidStateException("Only the latest dataset version can be published. Given version: "
           + datasetVersionToBeUpdated.getVersionNumber() + "; Latest version: " + latestVersion.getVersionNumber());
     }
 
-    checkEqualModificationDate(lastModificationDate, datasetVersionToBeUpdated.getDataset().getModificationDate());
+    if (!State.PRIVATE.equals(datasetVersionToBeUpdated.getState())) {
+      throw new InvalidStateException("Dataset in state " + datasetVersionToBeUpdated.getState() + "cannot be published.");
+    }
+
+
 
     latestVersion.setState(State.PUBLIC);
+    latestVersion.getDataset().setState(State.PUBLIC);
     setBasicModificationProperties(latestVersion, user.getUserAccount());
 
     try {
