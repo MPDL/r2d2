@@ -1,6 +1,7 @@
 package de.mpg.mpdl.r2d2.model;
 
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.CascadeType;
@@ -41,14 +42,13 @@ public class DatasetVersion extends BaseDb {
   @Column(columnDefinition = "TIMESTAMP WITH TIME ZONE")
   private OffsetDateTime publicationDate;
 
-  private String doi;
 
   @Type(type = "jsonb")
   @Column(columnDefinition = "jsonb")
   private DatasetVersionMetadata metadata = new DatasetVersionMetadata();
 
   @ManyToMany(fetch = FetchType.EAGER, cascade = {CascadeType.ALL})
-  private List<File> files;
+  private List<File> files = new ArrayList<>();
 
   public int getVersionNumber() {
     return versionNumber;
@@ -80,14 +80,6 @@ public class DatasetVersion extends BaseDb {
 
   public void setPublicationDate(OffsetDateTime publicationDate) {
     this.publicationDate = publicationDate;
-  }
-
-  public String getDoi() {
-    return doi;
-  }
-
-  public void setDoi(String doi) {
-    this.doi = doi;
   }
 
   public DatasetVersionMetadata getMetadata() {
