@@ -10,7 +10,7 @@ public class DatasetVersionMetadata {
   // creator is in BaseDB
 
   private List<Person> authors = new ArrayList<>();
-  
+
   private String doi;
 
   private String description;
@@ -44,7 +44,7 @@ public class DatasetVersionMetadata {
   public void setAuthors(List<Person> authors) {
     this.authors = authors;
   }
-  
+
   public String getDoi() {
     return doi;
   }

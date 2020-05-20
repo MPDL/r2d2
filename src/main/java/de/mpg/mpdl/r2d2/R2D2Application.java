@@ -39,6 +39,7 @@ public class R2D2Application {
 
   /**
    * Overwrites the default Jackson ObjectMapper from Spring Boot
+   * 
    * @return
    */
   @Bean
@@ -46,7 +47,7 @@ public class R2D2Application {
   public ObjectMapper jsonObjectMapper() {
     ObjectMapper jsonObjectMapper = new ObjectMapper();
     JavaTimeModule timeModule = new JavaTimeModule();
-    
+
     jsonObjectMapper.registerModule(timeModule);
     jsonObjectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     jsonObjectMapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);

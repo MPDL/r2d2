@@ -8,6 +8,7 @@ import java.util.UUID;
 import javax.annotation.PostConstruct;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
 
@@ -26,6 +27,7 @@ import de.mpg.mpdl.r2d2.model.aa.UserAccountRO;
 import de.mpg.mpdl.r2d2.search.dao.DatasetVersionDaoEs;
 
 @Component
+@ConditionalOnProperty(value = "init.data.creation", havingValue = "true")
 public class DummyDataInitializer {
 
   @Autowired
