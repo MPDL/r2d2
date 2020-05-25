@@ -15,23 +15,23 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping({ErrorController.ERROR_PATH})
 public class ErrorController extends AbstractErrorController {
-	
-	static final String ERROR_PATH = "/error";
-	
-	public ErrorController(ErrorAttributes errorAttributes) {
-		super(errorAttributes, Collections.emptyList());
-	}
 
-	@RequestMapping
-    public ResponseEntity<Map<String, Object>> error(HttpServletRequest request) {
-        Map<String, Object> body = this.getErrorAttributes(request, false);
-        HttpStatus status = this.getStatus(request);
-        return new ResponseEntity<>(body, status);
-    }
-	
-	@Override
-	public String getErrorPath() {
-		return ERROR_PATH;
-	}
+  static final String ERROR_PATH = "/error";
+
+  public ErrorController(ErrorAttributes errorAttributes) {
+    super(errorAttributes, Collections.emptyList());
+  }
+
+  @RequestMapping
+  public ResponseEntity<Map<String, Object>> error(HttpServletRequest request) {
+    Map<String, Object> body = this.getErrorAttributes(request, false);
+    HttpStatus status = this.getStatus(request);
+    return new ResponseEntity<>(body, status);
+  }
+
+  @Override
+  public String getErrorPath() {
+    return ERROR_PATH;
+  }
 
 }
