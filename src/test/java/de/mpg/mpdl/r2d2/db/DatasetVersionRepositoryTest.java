@@ -2,6 +2,7 @@ package de.mpg.mpdl.r2d2.db;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.time.OffsetDateTime;
 import java.util.Arrays;
 
 import org.junit.jupiter.api.Test;
@@ -10,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import de.mpg.mpdl.r2d2.model.Dataset;
 import de.mpg.mpdl.r2d2.model.DatasetVersion;
 import de.mpg.mpdl.r2d2.util.BaseIntegrationTest;
+import de.mpg.mpdl.r2d2.util.Utils;
 
 public class DatasetVersionRepositoryTest extends BaseIntegrationTest {
 
@@ -19,12 +21,22 @@ public class DatasetVersionRepositoryTest extends BaseIntegrationTest {
   @Test
   public void testGetLatestVersion() {
     //Given
+    OffsetDateTime currentDateTime = Utils.generateCurrentDateTimeForDatabase();
+
     Dataset dataset = new Dataset();
+    dataset.setCreationDate(currentDateTime);
+    dataset.setModificationDate(currentDateTime);
+
     DatasetVersion datasetVersion1 = new DatasetVersion();
+    datasetVersion1.setCreationDate(currentDateTime);
+    datasetVersion1.setModificationDate(currentDateTime);
     datasetVersion1.setDataset(dataset);
 
     DatasetVersion datasetVersion2 = new DatasetVersion();
+    datasetVersion2.setCreationDate(currentDateTime);
+    datasetVersion2.setModificationDate(currentDateTime);
     datasetVersion2.setDataset(dataset);
+
     int latestVersionNumber = 2;
     datasetVersion2.setVersionNumber(latestVersionNumber);
 
