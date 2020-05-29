@@ -155,7 +155,7 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
     } catch (Exception e) {
       throw new R2d2TechnicalException(e);
     }
-    datasetVersionIndexDao.updateImmediately(datasetVersionToBeUpdated.getId().toString(), datasetVersionToBeUpdated);
+    datasetVersionIndexDao.createImmediately(datasetVersionToBeUpdated.getId().toString(), datasetVersionToBeUpdated);
 
     return datasetVersionToBeUpdated;
 
@@ -211,7 +211,7 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
 
     //TODO post-processing
 
-    //datasetVersionIndexDao.updateImmediately(dv.getId().toString(), dv);
+    //datasetVersionIndexDao.createImmediately(dv.getId().toString(), dv);
     return f;
 
   }
@@ -250,7 +250,7 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
 
     file = fileRepository.save(file);
 
-    //datasetVersionIndexDao.updateImmediately(dv.getId().toString(), dv);
+    //datasetVersionIndexDao.createImmediately(dv.getId().toString(), dv);
     return chunk;
 
   }
@@ -297,28 +297,21 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
 
       datasetVersion.setFiles(new ArrayList<File>(latestVersion.getFiles()));
 
-      try {
-        datasetVersionToBeUpdated = datasetVersionRepository.saveAndFlush(datasetVersionToBeUpdated);
-      } catch (Exception e) {
-        throw new R2d2TechnicalException(e);
-      }
-
-      datasetVersionIndexDao.createImmediately(datasetVersionToBeUpdated.getId().toString(), datasetVersionToBeUpdated);
+     
 
     } else {
       datasetVersionToBeUpdated.setMetadata(datasetVersion.getMetadata());
       setBasicModificationProperties(datasetVersionToBeUpdated, user.getUserAccount());
 
-      try {
-        datasetVersionToBeUpdated = datasetVersionRepository.saveAndFlush(datasetVersionToBeUpdated);
-      } catch (Exception e) {
-        throw new R2d2TechnicalException(e);
-      }
-
-      datasetVersionIndexDao.updateImmediately(datasetVersionToBeUpdated.getId().toString(), datasetVersionToBeUpdated);
-
     }
 
+    try {
+      datasetVersionToBeUpdated = datasetVersionRepository.saveAndFlush(datasetVersionToBeUpdated);
+    } catch (Exception e) {
+      throw new R2d2TechnicalException(e);
+    }
+
+    datasetVersionIndexDao.createImmediately(datasetVersionToBeUpdated.getId().toString(), datasetVersionToBeUpdated);
 
 
     return datasetVersionToBeUpdated;
