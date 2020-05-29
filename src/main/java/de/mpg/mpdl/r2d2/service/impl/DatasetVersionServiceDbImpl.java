@@ -3,6 +3,7 @@ package de.mpg.mpdl.r2d2.service.impl;
 import java.io.InputStream;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
+import java.util.Objects;
 import java.util.UUID;
 
 import javax.persistence.EntityManager;
@@ -327,8 +328,11 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
 
 
   private DatasetVersion buildDatasetVersionToCreate(DatasetVersion givenDatasetVersion, UserAccount creator, int versionNumber,
-      Dataset dataset) {
-
+      Dataset dataset) throws ValidationException {
+	  
+	  if (Objects.isNull(givenDatasetVersion.getMetadata().getTitle())) {
+		  throw new ValidationException("Title is required!");
+	  }
     DatasetVersion datasetVersionToCreate = new DatasetVersion();
 
     datasetVersionToCreate.setState(State.PRIVATE);
