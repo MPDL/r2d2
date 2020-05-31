@@ -151,7 +151,7 @@ public class DatasetController {
   @PutMapping("/{id}/files/{fileId}")
   public ResponseEntity<FileChunk> uploadFileChunk(@PathVariable("id") String id, @PathVariable("fileId") String fileId,
       @RequestHeader("X-File-Chunk-Number") int part, @RequestHeader(name = "etag", required = false) String etag,
-      @RequestHeader(name = "Content-Length", required = false) Long contentLength, HttpServletRequest req, Principal prinz)
+      @RequestHeader(name = "X-File-Chunk-Size", required = false) Long contentLength, HttpServletRequest req, Principal prinz)
       throws R2d2ApplicationException, AuthorizationException, R2d2TechnicalException {
 
     InputStream is;
