@@ -15,6 +15,8 @@ public class LocalUserAccount {
 
   String password;
 
+  boolean active = false;
+
   public String getPassword() {
     return password;
   }
@@ -39,6 +41,12 @@ public class LocalUserAccount {
     this.user = user;
   }
 
+  public boolean isActive() {
+    return active;
+  }
 
+  public void setActive(boolean active) {
+    this.active = active;
+  }
 
 }
