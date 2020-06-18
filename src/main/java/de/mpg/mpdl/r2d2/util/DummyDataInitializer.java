@@ -67,6 +67,7 @@ public class DummyDataInitializer {
     internalUser.setUser(user);
     internalUser.setUsername("testuser@mpdl.mpg.de");
     internalUser.setPassword(passwordEncoder.encode("test"));
+    internalUser.setActive(true);
 
     internalUserRepository.save(internalUser);
 

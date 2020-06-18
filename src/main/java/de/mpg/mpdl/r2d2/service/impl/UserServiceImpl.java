@@ -52,7 +52,7 @@ public class UserServiceImpl implements UserService {
     account.setModifier(new UserAccountRO(account));
     account.setCreationDate(Utils.generateCurrentDateTimeForDatabase());
     account.setModificationDate(Utils.generateCurrentDateTimeForDatabase());
-    account.getRoles().add(Role.ADMIN);
+    account.getRoles().add(Role.USER);
 
     account = accountRepository.save(account);
 
