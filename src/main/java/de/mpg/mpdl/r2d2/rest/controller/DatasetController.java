@@ -22,6 +22,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.ResponseEntity.BodyBuilder;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -42,6 +43,7 @@ import de.mpg.mpdl.r2d2.exceptions.R2d2TechnicalException;
 import de.mpg.mpdl.r2d2.model.DatasetVersion;
 import de.mpg.mpdl.r2d2.model.File;
 import de.mpg.mpdl.r2d2.model.FileChunk;
+import de.mpg.mpdl.r2d2.model.aa.R2D2Principal;
 import de.mpg.mpdl.r2d2.service.DatasetVersionService;
 import de.mpg.mpdl.r2d2.util.Utils;
 
@@ -190,8 +192,8 @@ public class DatasetController {
   @RequestMapping(value = "/search", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE,
       produces = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<String> searchDetailed(@RequestBody JsonNode searchSource,
-      @RequestParam(name = "scroll", required = false) String scrollTimeValue, HttpServletResponse httpResponse, Principal p)
-      throws AuthorizationException, R2d2TechnicalException, IOException {
+      @RequestParam(name = "scroll", required = false) String scrollTimeValue, HttpServletResponse httpResponse,
+      @AuthenticationPrincipal R2D2Principal p) throws AuthorizationException, R2d2TechnicalException, IOException {
 
     String searchSourceText = objectMapper.writeValueAsString(searchSource);
     long scrollTime = -1;
@@ -203,7 +205,8 @@ public class DatasetController {
 
     SearchSourceBuilder ssb = Utils.parseJsonToSearchSourceBuilder(searchSourceText);
 
-    SearchResponse resp = datasetVersionService.searchDetailed(ssb, scrollTime, Utils.toCustomPrincipal(p));
+    // SearchResponse resp = datasetVersionService.searchDetailed(ssb, scrollTime, Utils.toCustomPrincipal(p));
+    SearchResponse resp = datasetVersionService.searchDetailed(ssb, scrollTime, p);
 
 
     httpResponse.setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);

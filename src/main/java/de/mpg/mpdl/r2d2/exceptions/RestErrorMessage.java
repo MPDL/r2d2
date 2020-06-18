@@ -3,6 +3,7 @@ package de.mpg.mpdl.r2d2.exceptions;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import org.springframework.boot.web.error.ErrorAttributeOptions;
 import org.springframework.boot.web.servlet.error.DefaultErrorAttributes;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.WebRequest;
@@ -11,8 +12,8 @@ import org.springframework.web.context.request.WebRequest;
 public class RestErrorMessage extends DefaultErrorAttributes {
 
   @Override
-  public Map<String, Object> getErrorAttributes(WebRequest webRequest, boolean includeStackTrace) {
-    final Map<String, Object> errorAttributes = super.getErrorAttributes(webRequest, includeStackTrace);
+  public Map<String, Object> getErrorAttributes(WebRequest webRequest, ErrorAttributeOptions options) {
+    final Map<String, Object> errorAttributes = super.getErrorAttributes(webRequest, ErrorAttributeOptions.defaults());
     final Map<String, Object> restErrorAttributes = new LinkedHashMap<>();
     restErrorAttributes.put("status", errorAttributes.getOrDefault("status", "500"));
     restErrorAttributes.put("error", errorAttributes.getOrDefault("error", "n/a"));
