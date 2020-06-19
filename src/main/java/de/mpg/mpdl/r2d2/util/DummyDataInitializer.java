@@ -75,6 +75,30 @@ public class DummyDataInitializer {
     internalUserRepository.save(internalUser);
 
 
+    UserAccount user2 = new UserAccount();
+    user2.setEmail("testuser2@mpdl.mpg.de");
+    Person person2 = new Person();
+    person2.setGivenName("Test");
+    person2.setFamilyName("User");
+    user2.setPerson(person2);
+    user2.setId(UUID.fromString("2d0dd850-eabb-43fe-8b8f-1a1b54018739"));
+    user2.setCreator(new UserAccountRO(user));
+    user2.setModifier(new UserAccountRO(user));
+    user2.setCreationDate(currentDateTime);
+    user2.setModificationDate(currentDateTime);
+    user2.getRoles().add(Role.USER);
+
+
+    user2 = userRepository.save(user2);
+
+    LocalUserAccount internalUser2 = new LocalUserAccount();
+    internalUser2.setUser(user2);
+    internalUser2.setUsername("testuser2@mpdl.mpg.de");
+    internalUser2.setPassword(passwordEncoder.encode("test"));
+    internalUser2.setActive(true);
+
+    internalUserRepository.save(internalUser2);
+
     DatasetVersion dv = new DatasetVersion();
     dv.setId(UUID.fromString("a6124f2a-9a06-489d-a7e2-40b583ebbd23"));
     dv.setCreator(new UserAccountRO(user));
@@ -127,6 +151,35 @@ public class DummyDataInitializer {
 
     dv2 = datasetVersionRepository.save(dv2);
     datasetVersionDao.createImmediately(dv2.getId().toString(), dv2);
+
+
+
+    DatasetVersion dv3 = new DatasetVersion();
+    dv3.setState(State.PRIVATE);
+    dv3.setId(UUID.fromString("a6124f2a-9a06-489d-a7e2-40b583ebbd25"));
+    dv3.setCreator(new UserAccountRO(user2));
+    dv3.setModifier(new UserAccountRO(user2));
+    dv3.setCreationDate(currentDateTime);
+    dv3.setModificationDate(currentDateTime);
+    dv3.getMetadata().setTitle("Test private item from user");
+
+    Person author3 = new Person();
+    author3.setFamilyName("Last Name 2");
+    author3.setGivenName("First Name 2");
+    dv3.getMetadata().getAuthors().add(author3);
+
+    Dataset dataset3 = new Dataset();
+    dataset3.setId(UUID.fromString("9cdb1d04-8527-4c32-8e00-4e4730861cbd"));
+    dataset3.setCreator(new UserAccountRO(user2));
+    dataset3.setModifier(new UserAccountRO(user2));
+    dataset3.setCreationDate(currentDateTime);
+    dataset3.setModificationDate(currentDateTime);
+    dataset3.setState(State.PUBLIC);
+
+    dv3.setDataset(dataset3);
+
+    dv3 = datasetVersionRepository.save(dv3);
+    datasetVersionDao.createImmediately(dv3.getId().toString(), dv3);
 
   }
 

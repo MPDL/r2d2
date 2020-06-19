@@ -3,7 +3,7 @@
 		"technical" : {
 			"order" : ["user", "datasetVersion"],
 			"indices" : {
-				"datasetVersion.dataset.creator.objectId" : "creator.id",
+				"datasetVersion.dataset.creator.id" : "creator.id",
 				"datasetVersion.state" : "state",
 				"datsetVersion.dataset.state" : "parent.state"
 			}
@@ -13,12 +13,22 @@
 				"user" : {
 					"role" : "ADMIN"
 				}
+			},
+			{
+				"user" : {
+					"role" : "USER"
+				}
 			}
 		],
 		"update" : [
 			{
 				"user" : {
 					"role" : "ADMIN"
+				}
+			},
+			{
+				"user" : {
+					"field_user_id_match" : "datasetVersion.dataset.creator.id"
 				}
 			}
 		],
@@ -44,12 +54,23 @@
 				"user" : {
 					"role" : "ADMIN"
 				}
+			},
+			{
+				"user" : {
+					"field_user_id_match" : "datasetVersion.dataset.creator.id"
+				},
+				"datasetVersion.state" : ["PRIVATE"]
 			}
 		],
 		"upload" : [
 			{
 				"user" : {
 					"role" : "ADMIN"
+				}
+			},
+			{
+				"user" : {
+					"field_user_id_match" : "datasetVersion.dataset.creator.id"
 				}
 			}
 		],
@@ -58,6 +79,15 @@
 				"user" : {
 					"role" : "ADMIN"
 				}
+			},
+			{
+				"datasetVersion.state" : ["PUBLIC"]
+			},
+			{
+				"user" : {
+					"field_user_id_match" : "datasetVersion.dataset.creator.id"
+				},
+				"datasetVersion.state" : ["PRIVATE"]
 			}
 		]
 		}		

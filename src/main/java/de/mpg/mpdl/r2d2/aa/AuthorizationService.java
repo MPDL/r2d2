@@ -143,7 +143,7 @@ public class AuthorizationService {
               if (userMap.containsKey("field_user_id_match")) {
                 String value = (String) userMap.get("field_user_id_match");
 
-                subQb.must(QueryBuilders.termQuery(indices.get(value), userAccount.getId()));
+                subQb.must(QueryBuilders.termQuery(indices.get(value), userAccount.getId().toString()));
                 userMatch = true;
 
               }
@@ -413,7 +413,7 @@ public class AuthorizationService {
       Object userId = getFieldValueOrString(order, objects, userIdFieldMatch);
       String expectedUserId = (userId != null ? userId.toString() : null);
 
-      if (expectedUserId == null || !expectedUserId.equals(userAccount.getId())) {
+      if (expectedUserId == null || !expectedUserId.equals(userAccount.getId().toString())) {
         throw new AuthorizationException("User is not owner of object.");
       }
     }
