@@ -297,7 +297,7 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
 
       datasetVersion.setFiles(new ArrayList<File>(latestVersion.getFiles()));
 
-     
+
 
     } else {
       datasetVersionToBeUpdated.setMetadata(datasetVersion.getMetadata());
@@ -322,10 +322,10 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
 
   private DatasetVersion buildDatasetVersionToCreate(DatasetVersion givenDatasetVersion, UserAccount creator, int versionNumber,
       Dataset dataset) throws ValidationException {
-	  
-	  if (Objects.isNull(givenDatasetVersion.getMetadata().getTitle())) {
-		  throw new ValidationException("Title is required!");
-	  }
+
+    if (Objects.isNull(givenDatasetVersion.getMetadata().getTitle())) {
+      throw new ValidationException("Title is required!");
+    }
     DatasetVersion datasetVersionToCreate = new DatasetVersion();
 
     datasetVersionToCreate.setState(State.PRIVATE);

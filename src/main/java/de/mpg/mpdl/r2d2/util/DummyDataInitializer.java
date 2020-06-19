@@ -52,7 +52,10 @@ public class DummyDataInitializer {
 
     UserAccount user = new UserAccount();
     user.setEmail("testuser@mpdl.mpg.de");
-    user.setName("Test Admin");
+    Person person = new Person();
+    person.setGivenName("Test");
+    person.setFamilyName("Admin");
+    user.setPerson(person);
     user.setId(UUID.fromString("2d0dd850-eabb-43fe-8b8f-1a1b54018738"));
     user.setCreator(new UserAccountRO(user));
     user.setModifier(new UserAccountRO(user));

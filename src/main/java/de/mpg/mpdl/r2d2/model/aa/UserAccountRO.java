@@ -27,7 +27,7 @@ public class UserAccountRO {
 
   public UserAccountRO(UserAccount userAccount) {
     this.id = userAccount.getId();
-    this.name = userAccount.getName();
+    this.name = userAccount.getPerson().getGivenName() + " " + userAccount.getPerson().getFamilyName();
   }
 
 

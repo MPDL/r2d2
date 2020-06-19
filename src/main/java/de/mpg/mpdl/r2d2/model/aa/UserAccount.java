@@ -12,6 +12,7 @@ import javax.persistence.Table;
 import org.hibernate.annotations.Type;
 
 import de.mpg.mpdl.r2d2.model.BaseDb;
+import de.mpg.mpdl.r2d2.model.Person;
 
 @Entity
 @Table(name = "user_account")
@@ -26,7 +27,9 @@ public class UserAccount extends BaseDb {
   @Column(unique = true)
   private String email;
 
-  private String name;
+  @Type(type = "jsonb")
+  @Column(columnDefinition = "jsonb")
+  private Person person;
 
   @Type(type = "jsonb")
   @Column(columnDefinition = "jsonb")
@@ -40,12 +43,12 @@ public class UserAccount extends BaseDb {
     this.email = email;
   }
 
-  public String getName() {
-    return name;
+  public Person getPerson() {
+    return person;
   }
 
-  public void setName(String name) {
-    this.name = name;
+  public void setPerson(Person p) {
+    this.person = p;
   }
 
   public List<Role> getRoles() {

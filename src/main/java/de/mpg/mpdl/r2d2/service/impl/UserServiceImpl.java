@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import de.mpg.mpdl.r2d2.db.LocalUserAccountRepository;
 import de.mpg.mpdl.r2d2.db.RegistrationConfirmationTokenRepository;
 import de.mpg.mpdl.r2d2.db.UserAccountRepository;
+import de.mpg.mpdl.r2d2.model.Person;
 import de.mpg.mpdl.r2d2.model.aa.LocalUserAccount;
 import de.mpg.mpdl.r2d2.model.aa.UserAccount;
 import de.mpg.mpdl.r2d2.model.aa.UserAccountRO;
@@ -47,7 +48,10 @@ public class UserServiceImpl implements UserService {
     }
     UserAccount account = new UserAccount();
     account.setEmail(request.getEmail());
-    account.setName(request.getFirst() + " " + request.getLast());
+    Person person = new Person();
+    person.setFamilyName(request.getLast());
+    person.setGivenName(request.getFirst());
+    account.setPerson(person);
     account.setCreator(new UserAccountRO(account));
     account.setModifier(new UserAccountRO(account));
     account.setCreationDate(Utils.generateCurrentDateTimeForDatabase());
