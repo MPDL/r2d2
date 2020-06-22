@@ -23,9 +23,10 @@ public class UserAccount extends BaseDb {
     ADMIN
   }
 
-
   @Column(unique = true)
   private String email;
+
+  boolean active = false;
 
   @Type(type = "jsonb")
   @Column(columnDefinition = "jsonb")
@@ -59,6 +60,12 @@ public class UserAccount extends BaseDb {
     this.roles = roles;
   }
 
+  public boolean isActive() {
+    return active;
+  }
 
+  public void setActive(boolean active) {
+    this.active = active;
+  }
 
 }

@@ -19,9 +19,11 @@ public class R2D2Principal extends User {
     // TODO Auto-generated constructor stub
   }
 
+  public R2D2Principal(String username, String password, boolean enabled, Collection<? extends GrantedAuthority> authorities) {
+    super(username, password, enabled, true, true, true, authorities);
+  }
+
   private UserAccount userAccount;
-
-
 
   public UserAccount getUserAccount() {
     return userAccount;
@@ -30,7 +32,5 @@ public class R2D2Principal extends User {
   public void setUserAccount(UserAccount userAccount) {
     this.userAccount = userAccount;
   }
-
-
 
 }

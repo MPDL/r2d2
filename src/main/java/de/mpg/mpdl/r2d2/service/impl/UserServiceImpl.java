@@ -52,12 +52,14 @@ public class UserServiceImpl implements UserService {
     person.setFamilyName(request.getLast());
     person.setGivenName(request.getFirst());
     account.setPerson(person);
-    account.setCreator(new UserAccountRO(account));
-    account.setModifier(new UserAccountRO(account));
     account.setCreationDate(Utils.generateCurrentDateTimeForDatabase());
     account.setModificationDate(Utils.generateCurrentDateTimeForDatabase());
     account.getRoles().add(Role.USER);
 
+    account = accountRepository.save(account);
+    
+    account.setCreator(new UserAccountRO(account));
+    account.setModifier(new UserAccountRO(account));
     account = accountRepository.save(account);
 
     LocalUserAccount user = new LocalUserAccount();
@@ -125,7 +127,7 @@ public class UserServiceImpl implements UserService {
       return "EXPIRED";
     }
 
-    user.setActive(true);
+    user.getUser().setActive(true);
     // tokenRepository.delete(token2check);
     userRepository.save(user);
     return "VALID";

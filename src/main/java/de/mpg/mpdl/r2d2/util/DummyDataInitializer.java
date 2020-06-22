@@ -52,6 +52,7 @@ public class DummyDataInitializer {
 
     UserAccount user = new UserAccount();
     user.setEmail("testuser@mpdl.mpg.de");
+    user.setActive(true);
     Person person = new Person();
     person.setGivenName("Test");
     person.setFamilyName("Admin");
@@ -70,13 +71,13 @@ public class DummyDataInitializer {
     internalUser.setUser(user);
     internalUser.setUsername("testuser@mpdl.mpg.de");
     internalUser.setPassword(passwordEncoder.encode("test"));
-    internalUser.setActive(true);
 
     internalUserRepository.save(internalUser);
 
 
     UserAccount user2 = new UserAccount();
     user2.setEmail("testuser2@mpdl.mpg.de");
+    user2.setActive(true);
     Person person2 = new Person();
     person2.setGivenName("Test");
     person2.setFamilyName("User");
@@ -95,7 +96,6 @@ public class DummyDataInitializer {
     internalUser2.setUser(user2);
     internalUser2.setUsername("testuser2@mpdl.mpg.de");
     internalUser2.setPassword(passwordEncoder.encode("test"));
-    internalUser2.setActive(true);
 
     internalUserRepository.save(internalUser2);
 
