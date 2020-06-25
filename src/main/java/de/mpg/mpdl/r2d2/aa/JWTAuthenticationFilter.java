@@ -3,6 +3,7 @@ package de.mpg.mpdl.r2d2.aa;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -14,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 
@@ -68,7 +70,9 @@ public class JWTAuthenticationFilter extends BasicAuthenticationFilter {
         UserAccount ua = userAccountRepository.findById(UUID.fromString(userId)).get();
         R2D2Principal p = new R2D2Principal(ua.getEmail(), "", new ArrayList<>());
         p.setUserAccount(ua);
-        return new UsernamePasswordAuthenticationToken(p, null, new ArrayList<>());
+        // return new UsernamePasswordAuthenticationToken(p, null, new ArrayList<>());
+        return new UsernamePasswordAuthenticationToken(p, null, ua.getRoles().stream().map(role -> new SimpleGrantedAuthority("ROLE_" + role.name())).collect(Collectors.toList()));
+
       }
       return null;
     }

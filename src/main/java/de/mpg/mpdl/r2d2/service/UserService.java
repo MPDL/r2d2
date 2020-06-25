@@ -2,6 +2,7 @@ package de.mpg.mpdl.r2d2.service;
 
 import javax.persistence.EntityExistsException;
 
+import de.mpg.mpdl.r2d2.exceptions.R2d2ApplicationException;
 import de.mpg.mpdl.r2d2.model.aa.LocalUserAccount;
 import de.mpg.mpdl.r2d2.registration.RegistrationConfirmationToken;
 import de.mpg.mpdl.r2d2.registration.RegistrationRequest;

@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.UUID;
 
+import javax.persistence.EntityExistsException;
 import javax.persistence.EntityNotFoundException;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
@@ -46,7 +47,8 @@ public class RegistrationController {
   }
 
   @PostMapping
-  public ResponseEntity<?> register(@Valid @RequestBody RegistrationRequest userRequest, HttpServletRequest servletRequest) {
+  public ResponseEntity<?> register(@Valid @RequestBody RegistrationRequest userRequest, HttpServletRequest servletRequest)
+      throws EntityExistsException {
 
     LocalUserAccount user = userService.registerNewUser(userRequest);
     if (user != null) {

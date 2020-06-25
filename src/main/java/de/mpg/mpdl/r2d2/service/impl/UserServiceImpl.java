@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import de.mpg.mpdl.r2d2.db.LocalUserAccountRepository;
 import de.mpg.mpdl.r2d2.db.RegistrationConfirmationTokenRepository;
 import de.mpg.mpdl.r2d2.db.UserAccountRepository;
+import de.mpg.mpdl.r2d2.exceptions.R2d2ApplicationException;
 import de.mpg.mpdl.r2d2.model.Person;
 import de.mpg.mpdl.r2d2.model.aa.LocalUserAccount;
 import de.mpg.mpdl.r2d2.model.aa.UserAccount;
@@ -44,7 +45,7 @@ public class UserServiceImpl implements UserService {
   public LocalUserAccount registerNewUser(RegistrationRequest request) throws EntityExistsException {
 
     if (emailExist(request.getEmail())) {
-      throw new EntityExistsException(request.getEmail() + " is already a registered user.");
+      throw new EntityExistsException(String.format("%s is already a registered user.", request.getEmail()));
     }
     UserAccount account = new UserAccount();
     account.setEmail(request.getEmail());
@@ -57,7 +58,7 @@ public class UserServiceImpl implements UserService {
     account.getRoles().add(Role.USER);
 
     account = accountRepository.save(account);
-    
+
     account.setCreator(new UserAccountRO(account));
     account.setModifier(new UserAccountRO(account));
     account = accountRepository.save(account);
