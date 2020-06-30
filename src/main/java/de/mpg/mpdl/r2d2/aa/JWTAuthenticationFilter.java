@@ -71,7 +71,8 @@ public class JWTAuthenticationFilter extends BasicAuthenticationFilter {
         R2D2Principal p = new R2D2Principal(ua.getEmail(), "", new ArrayList<>());
         p.setUserAccount(ua);
         // return new UsernamePasswordAuthenticationToken(p, null, new ArrayList<>());
-        return new UsernamePasswordAuthenticationToken(p, null, ua.getRoles().stream().map(role -> new SimpleGrantedAuthority("ROLE_" + role.name())).collect(Collectors.toList()));
+        return new UsernamePasswordAuthenticationToken(p, null,
+            ua.getRoles().stream().map(role -> new SimpleGrantedAuthority("ROLE_" + role.name())).collect(Collectors.toList()));
 
       }
       return null;

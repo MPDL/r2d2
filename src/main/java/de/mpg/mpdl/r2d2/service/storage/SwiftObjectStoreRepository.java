@@ -6,10 +6,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.jclouds.blobstore.BlobStore;
 import org.jclouds.blobstore.BlobStoreContext;
 import org.jclouds.blobstore.domain.Blob;
+import org.jclouds.blobstore.domain.PageSet;
+import org.jclouds.blobstore.domain.StorageMetadata;
 import org.jclouds.io.Payload;
 import org.jclouds.io.payloads.ByteArrayPayload;
 import org.jclouds.io.payloads.InputStreamPayload;
@@ -24,11 +27,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Repository;
 
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.hash.HashCode;
 import com.google.common.hash.Hashing;
 
 import de.mpg.mpdl.r2d2.SwiftStorageConfigurationProperties;
+import de.mpg.mpdl.r2d2.exceptions.NotFoundException;
 import de.mpg.mpdl.r2d2.model.File;
 import de.mpg.mpdl.r2d2.model.FileChunk;
 
@@ -148,6 +155,37 @@ public class SwiftObjectStoreRepository {
     }
     return inputStream;
   }
+  
+  public List<String> listAllContainers() {
+	 PageSet<? extends StorageMetadata> set = store.list();
+	 return set.stream().map(smd -> smd.getName()).collect(Collectors.toList());
+  }
+
+  public List<Object> listContainer(String container) throws NotFoundException {
+	  if (!isContainerExist(container)) {
+		  throw new NotFoundException(String.format("Container with id %s does not exist.", container));
+	  }
+    ObjectMapper mapper = new ObjectMapper();
+    mapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
+    mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+    mapper.setSerializationInclusion(Include.NON_NULL);
+    mapper.setSerializationInclusion(Include.NON_EMPTY);
+    PageSet<? extends StorageMetadata> set =
+        store.list(container, org.jclouds.blobstore.options.ListContainerOptions.Builder.recursive().withDetails());
+    return set.stream().map(smd -> mapper.valueToTree(smd)).collect(Collectors.toList());
+  }
+  
+  public boolean deleteContainer(String container) throws NotFoundException {
+	  if (!isContainerExist(container)) {
+		  throw new NotFoundException(String.format("Container with id %s does not exist.", container));
+	  }
+	  boolean isContainerGone = false;
+	  store.deleteContainer(container);
+	  if (!isContainerExist(container)) {
+		  isContainerGone = true;
+	  }
+	  return isContainerGone;
+  }
 
   public Blob getFile(String container, String name) {
     return store.getBlob(container, name);
@@ -173,7 +211,6 @@ public class SwiftObjectStoreRepository {
   public boolean isContainerExist(String container) {
 
     boolean isExist = false;
-    LOGGER.info("checking exists " + container);
     isExist = store.containerExists(container);
     return isExist;
   }
@@ -181,7 +218,6 @@ public class SwiftObjectStoreRepository {
   public boolean createContainer(String name) {
 
     boolean success = false;
-    LOGGER.info("attempting to create " + name);
     if (!isContainerExist(name)) {
       success = store.createContainerInLocation(null, name);
     }
