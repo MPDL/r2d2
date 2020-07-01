@@ -92,14 +92,4 @@ public class RegistrationRequest {
     this.identifier = identifier;
   }
 
-  @Override
-  public String toString() {
-    final StringBuilder builder = new StringBuilder();
-    //@formatter:off
-    builder.append("RegistrationRequest {first = ").append(first).append(", last = ").append(last).append(", email = ").append(email)
-        .append(", pass = ").append(pass).append(", match = ").append(match).append("]");
-    //@formatter:on
-    return builder.toString();
-  }
-
 }

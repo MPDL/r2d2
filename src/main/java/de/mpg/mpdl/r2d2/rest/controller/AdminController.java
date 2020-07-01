@@ -63,7 +63,7 @@ public class AdminController {
     service.deleteUser(uuid);
     return new ResponseEntity<>(HttpStatus.GONE);
   }
-  
+
   @GetMapping(value = "/store/clear")
   public ResponseEntity<?> clearObjectStore() throws AuthorizationException, NotFoundException {
     Map<String, Object> details = service.clearObjectStore();
@@ -75,13 +75,13 @@ public class AdminController {
     List<Object> details = service.listContainerContent(id);
     return new ResponseEntity<>(details, HttpStatus.OK);
   }
-  
+
   @DeleteMapping(value = "/store/{id}")
   public ResponseEntity<?> deleteContainer(@PathVariable("id") String uuid) throws AuthorizationException, NotFoundException {
-    boolean acknowledged =  service.deleteContainer(uuid);
+    boolean acknowledged = service.deleteContainer(uuid);
     return new ResponseEntity<>(Collections.singletonMap("acknowledged", acknowledged), HttpStatus.GONE);
   }
-  
+
   @GetMapping(value = "/datasets")
   public ResponseEntity<?> listAllDatasets(HttpServletRequest request) throws AuthorizationException {
     List<DatasetVersion> list = service.listAllDatasets();
@@ -94,10 +94,10 @@ public class AdminController {
     DatasetVersion dataset = service.listDatasetById(uuid);
     return new ResponseEntity<>(dataset, HttpStatus.OK);
   }
-  
+
   @DeleteMapping(value = "/datasets/{id}")
   public ResponseEntity<?> deleteDataset(@PathVariable("id") String uuid) throws AuthorizationException, NotFoundException {
-   service.deleteDataset(uuid);
+    service.deleteDataset(uuid);
     return new ResponseEntity<>(HttpStatus.GONE);
   }
 }

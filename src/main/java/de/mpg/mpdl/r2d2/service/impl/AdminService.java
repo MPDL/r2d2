@@ -29,104 +29,104 @@ import de.mpg.mpdl.r2d2.service.storage.SwiftObjectStoreRepository;
 @Service
 @PreAuthorize("hasRole('ROLE_ADMIN')")
 public class AdminService {
-	
-	  private static Logger LOGGER = LoggerFactory.getLogger(AdminService.class);
 
-	@Autowired
-	UserAccountRepository users;
-	
-	@Autowired
-	DatasetVersionRepository datasets;
-	
-	@Autowired
-	FileRepository files;
+  private static Logger LOGGER = LoggerFactory.getLogger(AdminService.class);
 
-	@Autowired
-	SwiftObjectStoreRepository objectStore;
+  @Autowired
+  UserAccountRepository users;
 
-	public String test() {
-		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-		return authentication.getName() + authentication.getAuthorities();
-	}
+  @Autowired
+  DatasetVersionRepository datasets;
 
-	public List<UserAccount> listAllUsers() {
-		List<UserAccount> userList = new ArrayList<>();
-		users.findAll().iterator().forEachRemaining(userList::add);
-		return userList;
-	}
+  @Autowired
+  FileRepository files;
 
-	public UserAccount listUserById(String id) throws NotFoundException {
-		return users.findById(UUID.fromString(id))
-				.orElseThrow(() -> new NotFoundException(String.format("User with id %s NOT FOUND", id)));
-	}
+  @Autowired
+  SwiftObjectStoreRepository objectStore;
 
-	public UserAccount updateUser(UserAccount user2update) {
-		return users.save(user2update);
-	}
+  public String test() {
+    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    return authentication.getName() + authentication.getAuthorities();
+  }
 
-	public void deleteUser(String id) {
-		users.deleteById(UUID.fromString(id));
-	}
-	
-	public List<DatasetVersion> listAllDatasets() {
-		List<DatasetVersion> datasetList = new ArrayList<>();
-		datasets.findAll().iterator().forEachRemaining(datasetList::add);
-		return datasetList;
-	}
-	
-	public DatasetVersion listDatasetById(String id) throws NotFoundException {
-		return datasets.findById(UUID.fromString(id))
-				.orElseThrow(() -> new NotFoundException(String.format("Dataset with id %s NOT FOUND", id)));
-	}
+  public List<UserAccount> listAllUsers() {
+    List<UserAccount> userList = new ArrayList<>();
+    users.findAll().iterator().forEachRemaining(userList::add);
+    return userList;
+  }
 
-	public void deleteDataset(String id) throws NotFoundException {
-		DatasetVersion dataset = datasets.findById(UUID.fromString(id)).orElseThrow(() -> new NotFoundException(String.format("Dataset with id %s NOT FOUND", id)));
-		List<File> files = dataset.getFiles();
-		files.forEach(file -> {
-			try {
-				deleteContainer(file.getId().toString());
-			} catch (NotFoundException e) {
-				LOGGER.warn(String.format("File with id %s for dataset %s NOT FOUND.", file.getId().toString(), id));
-			}
-		});
-		datasets.deleteById(UUID.fromString(id));
-	}
-	
-	public List<String> listAllFiles() {
-		List<String> fileIds = new ArrayList<>();
-		files.findAll().iterator().forEachRemaining(file -> fileIds.add(file.getId().toString()));
-		return fileIds;
-	}
-	
-	public List<String> listAllContainers() {
-		return objectStore.listAllContainers();
-	}
-	
-	public Map<String, Object> clearObjectStore() {
-		Map<String, Object> response = new LinkedHashMap<>();
-		List<String> containers = listAllContainers();
-		response.put("containers", containers.size());
-		List<String> files = listAllFiles();
-		response.put("files", files.size());
-		containers.removeAll(files);
-		response.put("2 be cleared", containers.size());
-		/*
-		containers.forEach(id -> {
-			try {
-				deleteContainer(id);
-			} catch (NotFoundException e) {
-				LOGGER.warn(String.format("Container with id %s NOT FOUND.", id));
-			}
-		});
-		*/
-		return response;
-	}
+  public UserAccount listUserById(String id) throws NotFoundException {
+    return users.findById(UUID.fromString(id)).orElseThrow(() -> new NotFoundException(String.format("User with id %s NOT FOUND", id)));
+  }
 
-	public List<Object> listContainerContent(String id) throws NotFoundException {
-		return objectStore.listContainer(id);
-	}
+  public UserAccount updateUser(UserAccount user2update) {
+    return users.save(user2update);
+  }
 
-	public boolean deleteContainer(String id) throws NotFoundException {
-		return objectStore.deleteContainer(id);
-	}
+  public void deleteUser(String id) {
+    users.deleteById(UUID.fromString(id));
+  }
+
+  public List<DatasetVersion> listAllDatasets() {
+    List<DatasetVersion> datasetList = new ArrayList<>();
+    datasets.findAll().iterator().forEachRemaining(datasetList::add);
+    return datasetList;
+  }
+
+  public DatasetVersion listDatasetById(String id) throws NotFoundException {
+    return datasets.findById(UUID.fromString(id))
+        .orElseThrow(() -> new NotFoundException(String.format("Dataset with id %s NOT FOUND", id)));
+  }
+
+  public void deleteDataset(String id) throws NotFoundException {
+    DatasetVersion dataset =
+        datasets.findById(UUID.fromString(id)).orElseThrow(() -> new NotFoundException(String.format("Dataset with id %s NOT FOUND", id)));
+    List<File> files = dataset.getFiles();
+    files.forEach(file -> {
+      try {
+        deleteContainer(file.getId().toString());
+      } catch (NotFoundException e) {
+        LOGGER.warn(String.format("File with id %s for dataset %s NOT FOUND.", file.getId().toString(), id));
+      }
+    });
+    datasets.deleteById(UUID.fromString(id));
+  }
+
+  public List<String> listAllFiles() {
+    List<String> fileIds = new ArrayList<>();
+    files.findAll().iterator().forEachRemaining(file -> fileIds.add(file.getId().toString()));
+    return fileIds;
+  }
+
+  public List<String> listAllContainers() {
+    return objectStore.listAllContainers();
+  }
+
+  public Map<String, Object> clearObjectStore() {
+    Map<String, Object> response = new LinkedHashMap<>();
+    List<String> containers = listAllContainers();
+    response.put("containers", containers.size());
+    List<String> files = listAllFiles();
+    response.put("files", files.size());
+    containers.removeAll(files);
+    response.put("2 be cleared", containers.size());
+    /*
+    containers.forEach(id -> {
+    	try {
+    		deleteContainer(id);
+    	} catch (NotFoundException e) {
+    		LOGGER.warn(String.format("Container with id %s NOT FOUND.", id));
+    	}
+    });
+    */
+    return response;
+  }
+
+  public List<Object> listContainerContent(String id) throws NotFoundException {
+    return objectStore.listContainer(id);
+  }
+
+  public boolean deleteContainer(String id) throws NotFoundException {
+    return objectStore.deleteContainer(id);
+  }
 }
