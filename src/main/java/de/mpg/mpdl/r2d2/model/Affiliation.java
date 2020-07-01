@@ -1,11 +1,14 @@
 package de.mpg.mpdl.r2d2.model;
 
+import javax.validation.constraints.NotBlank;
+
 public class Affiliation {
 
   //grid ID
   private String id;
 
   //organization/institute
+  @NotBlank(message = "{organization.not.blank}")
   private String organization;
 
   //department/group

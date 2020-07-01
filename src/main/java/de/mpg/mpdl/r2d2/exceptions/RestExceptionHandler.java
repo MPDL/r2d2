@@ -30,10 +30,10 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
     Map<String, Object> body = new LinkedHashMap<>();
     body.put("time", LocalDateTime.now());
     body.put("status", status.value());
-
-    List<String> errors = ex.getBindingResult().getFieldErrors().stream().map(x -> x.getDefaultMessage()).collect(Collectors.toList());
-
-    body.put("errors", errors);
+    // List<String> globalErrors = ex.getBindingResult().getGlobalErrors().stream().map(x -> x.getDefaultMessage()).collect(Collectors.toList());
+    // body.put("global errors", globalErrors);
+    List<String> fieldErrors = ex.getBindingResult().getAllErrors().stream().map(x -> x.getDefaultMessage()).collect(Collectors.toList());
+    body.put("errors", fieldErrors);
 
     return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
   }

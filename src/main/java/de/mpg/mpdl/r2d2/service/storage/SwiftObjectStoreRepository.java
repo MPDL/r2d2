@@ -155,16 +155,16 @@ public class SwiftObjectStoreRepository {
     }
     return inputStream;
   }
-  
+
   public List<String> listAllContainers() {
-	 PageSet<? extends StorageMetadata> set = store.list();
-	 return set.stream().map(smd -> smd.getName()).collect(Collectors.toList());
+    PageSet<? extends StorageMetadata> set = store.list();
+    return set.stream().map(smd -> smd.getName()).collect(Collectors.toList());
   }
 
   public List<Object> listContainer(String container) throws NotFoundException {
-	  if (!isContainerExist(container)) {
-		  throw new NotFoundException(String.format("Container with id %s does not exist.", container));
-	  }
+    if (!isContainerExist(container)) {
+      throw new NotFoundException(String.format("Container with id %s does not exist.", container));
+    }
     ObjectMapper mapper = new ObjectMapper();
     mapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
     mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
@@ -174,17 +174,17 @@ public class SwiftObjectStoreRepository {
         store.list(container, org.jclouds.blobstore.options.ListContainerOptions.Builder.recursive().withDetails());
     return set.stream().map(smd -> mapper.valueToTree(smd)).collect(Collectors.toList());
   }
-  
+
   public boolean deleteContainer(String container) throws NotFoundException {
-	  if (!isContainerExist(container)) {
-		  throw new NotFoundException(String.format("Container with id %s does not exist.", container));
-	  }
-	  boolean isContainerGone = false;
-	  store.deleteContainer(container);
-	  if (!isContainerExist(container)) {
-		  isContainerGone = true;
-	  }
-	  return isContainerGone;
+    if (!isContainerExist(container)) {
+      throw new NotFoundException(String.format("Container with id %s does not exist.", container));
+    }
+    boolean isContainerGone = false;
+    store.deleteContainer(container);
+    if (!isContainerExist(container)) {
+      isContainerGone = true;
+    }
+    return isContainerGone;
   }
 
   public Blob getFile(String container, String name) {

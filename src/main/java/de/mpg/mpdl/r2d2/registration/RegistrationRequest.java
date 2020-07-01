@@ -1,30 +1,40 @@
 package de.mpg.mpdl.r2d2.registration;
 
+import java.util.List;
+
+import javax.validation.GroupSequence;
+import javax.validation.Valid;
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
+import de.mpg.mpdl.r2d2.model.Affiliation;
+import de.mpg.mpdl.r2d2.registration.validation.FirstConstraint;
 import de.mpg.mpdl.r2d2.registration.validation.PasswordMatches;
+import de.mpg.mpdl.r2d2.registration.validation.SecondConstraint;
 import de.mpg.mpdl.r2d2.registration.validation.ValidEmail;
 
 
-@PasswordMatches
+@PasswordMatches(groups = SecondConstraint.class)
+@GroupSequence({RegistrationRequest.class, FirstConstraint.class, SecondConstraint.class})
 public class RegistrationRequest {
 
-  private final String NOT_EMPTY_MSG = "MUST not be empty!";
-
-  @NotNull
-  @Size(min = 1, message = NOT_EMPTY_MSG)
+  @NotBlank(message = "{first.not.blank}")
   private String first;
-  @NotNull
-  @Size(min = 1, message = NOT_EMPTY_MSG)
+  @NotBlank(message = "{last.not.blank}")
   private String last;
-  @NotNull
-  @ValidEmail
+  @NotBlank(message = "{email.not.blank}")
+  @ValidEmail(groups = SecondConstraint.class)
   private String email;
-  @NotNull
-  @Size(min = 8, message = "MUST be at least 8 characters ...")
+  @NotBlank(message = "{pass.not.blank}")
+  @Size(min = 8, message = "{pass.min}")
   private String pass;
   private String match;
+
+  @Valid
+  private List<Affiliation> affiliations;
+
+  private String identifier;
 
   public String getFirst() {
     return first;
@@ -66,6 +76,22 @@ public class RegistrationRequest {
     this.match = match;
   }
 
+  public List<Affiliation> getAffiliations() {
+    return affiliations;
+  }
+
+  public void setAffiliations(List<Affiliation> affiliations) {
+    this.affiliations = affiliations;
+  }
+
+  public String getIdentifier() {
+    return identifier;
+  }
+
+  public void setIdentifier(String identifier) {
+    this.identifier = identifier;
+  }
+
   @Override
   public String toString() {
     final StringBuilder builder = new StringBuilder();
@@ -75,4 +101,5 @@ public class RegistrationRequest {
     //@formatter:on
     return builder.toString();
   }
+
 }

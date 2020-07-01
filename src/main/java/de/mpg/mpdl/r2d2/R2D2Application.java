@@ -3,15 +3,21 @@ package de.mpg.mpdl.r2d2;
 import java.io.IOException;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Locale;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.web.servlet.WebMvcProperties.LocaleResolver;
+import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.context.support.ReloadableResourceBundleMessageSource;
 import org.springframework.core.env.Environment;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
+import org.springframework.web.servlet.i18n.SessionLocaleResolver;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -63,6 +69,26 @@ public class R2D2Application {
     return new BCryptPasswordEncoder();
   }
 
-
+  @Bean
+  public MessageSource messageSource() {
+	  ReloadableResourceBundleMessageSource messageSource = new ReloadableResourceBundleMessageSource();
+	  messageSource.setBasenames("classpath:messages/registration", "classpath:messages/other");
+	  messageSource.setDefaultEncoding("UTF-8");
+	  return messageSource;
+  }
+  
+  @Bean
+  public LocalValidatorFactoryBean validator(MessageSource messageSource) {
+	  LocalValidatorFactoryBean validationBean = new LocalValidatorFactoryBean();
+	  validationBean.setValidationMessageSource(messageSource);
+	  return validationBean;
+  }
+  
+  @Bean
+  public SessionLocaleResolver localeResolver() {
+	  SessionLocaleResolver localeResolver = new SessionLocaleResolver();
+	  localeResolver.setDefaultLocale(Locale.US);
+	  return localeResolver;
+  }
 
 }

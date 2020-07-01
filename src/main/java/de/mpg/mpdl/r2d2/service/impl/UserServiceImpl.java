@@ -1,5 +1,6 @@
 package de.mpg.mpdl.r2d2.service.impl;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Optional;
 import java.util.UUID;
@@ -47,21 +48,7 @@ public class UserServiceImpl implements UserService {
     if (emailExist(request.getEmail())) {
       throw new EntityExistsException(String.format("%s is already a registered user.", request.getEmail()));
     }
-    UserAccount account = new UserAccount();
-    account.setEmail(request.getEmail());
-    Person person = new Person();
-    person.setFamilyName(request.getLast());
-    person.setGivenName(request.getFirst());
-    account.setPerson(person);
-    account.setCreationDate(Utils.generateCurrentDateTimeForDatabase());
-    account.setModificationDate(Utils.generateCurrentDateTimeForDatabase());
-    account.getRoles().add(Role.USER);
-
-    account = accountRepository.save(account);
-
-    account.setCreator(new UserAccountRO(account));
-    account.setModifier(new UserAccountRO(account));
-    account = accountRepository.save(account);
+    UserAccount account = request2User(request);
 
     LocalUserAccount user = new LocalUserAccount();
     user.setUser(account);
@@ -142,6 +129,30 @@ public class UserServiceImpl implements UserService {
     }
     userRepository.delete(user);
 
+  }
+
+  private UserAccount request2User(RegistrationRequest request) {
+    UserAccount account = new UserAccount();
+    account.setEmail(request.getEmail());
+    Person person = new Person();
+    person.setFamilyName(request.getLast());
+    person.setGivenName(request.getFirst());
+    if (request.getAffiliations() != null) {
+      person.setAffiliations(request.getAffiliations());
+    }
+    if (request.getIdentifier() != null) {
+      person.setNameIdentifier(request.getIdentifier());
+    }
+    account.setPerson(person);
+    account.setCreationDate(Utils.generateCurrentDateTimeForDatabase());
+    account.setModificationDate(Utils.generateCurrentDateTimeForDatabase());
+    account.getRoles().add(Role.USER);
+
+    account = accountRepository.save(account);
+
+    account.setCreator(new UserAccountRO(account));
+    account.setModifier(new UserAccountRO(account));
+    return accountRepository.save(account);
   }
 
 }
