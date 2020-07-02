@@ -58,8 +58,8 @@ public class UserServiceImpl implements UserService {
     return userRepository.save(user);
   }
 
-  private boolean emailExist(String email) {
-    Optional<LocalUserAccount> user = userRepository.findById(email);
+  private boolean emailExist(String username) {
+    Optional<LocalUserAccount> user = userRepository.findByUsername(username);
     if (user.isPresent()) {
       return true;
     }
@@ -73,8 +73,8 @@ public class UserServiceImpl implements UserService {
   }
 
   @Override
-  public LocalUserAccount getByEmail(String email) {
-    return userRepository.findById(email).get();
+  public LocalUserAccount getByEmail(String username) {
+    return userRepository.findByUsername(username).get();
   }
 
   @Override

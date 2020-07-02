@@ -25,7 +25,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
   @Override
   public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-    LocalUserAccount applicationUser = userRepository.findById(username).orElseThrow(() -> new UsernameNotFoundException(username));
+    LocalUserAccount applicationUser = userRepository.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException(username));
 
     R2D2Principal p = new R2D2Principal(applicationUser.getUsername(), applicationUser.getPassword(), applicationUser.getUser().isActive(),
         new ArrayList<GrantedAuthority>());
