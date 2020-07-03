@@ -26,6 +26,4 @@ public interface UserService {
 
   String checkConfirmationToken(String token);
 
-  void deleteUser(LocalUserAccount user);
-
 }

@@ -111,24 +111,14 @@ public class UserServiceImpl implements UserService {
     final LocalUserAccount user = token2check.getUser();
     final Calendar cal = Calendar.getInstance();
     if ((token2check.getExpirationDate().getTime() - cal.getTime().getTime()) <= 0) {
-      tokenRepository.delete(token2check);
+      // tokenRepository.delete(token2check);
       return "EXPIRED";
     }
 
     user.getUser().setActive(true);
-    // tokenRepository.delete(token2check);
     userRepository.save(user);
+    tokenRepository.delete(token2check);
     return "VALID";
-  }
-
-  @Override
-  public void deleteUser(LocalUserAccount user) {
-    final RegistrationConfirmationToken token = tokenRepository.findByUser(user);
-    if (token != null) {
-      tokenRepository.delete(token);
-    }
-    userRepository.delete(user);
-
   }
 
   private UserAccount request2User(RegistrationRequest request) {

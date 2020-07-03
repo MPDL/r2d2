@@ -71,24 +71,24 @@ public class R2D2Application {
 
   @Bean
   public MessageSource messageSource() {
-	  ReloadableResourceBundleMessageSource messageSource = new ReloadableResourceBundleMessageSource();
-	  messageSource.setBasenames("classpath:messages/registration", "classpath:messages/other");
-	  messageSource.setDefaultEncoding("UTF-8");
-	  return messageSource;
+    ReloadableResourceBundleMessageSource messageSource = new ReloadableResourceBundleMessageSource();
+    messageSource.setBasenames("classpath:messages/registration", "classpath:messages/other");
+    messageSource.setDefaultEncoding("UTF-8");
+    return messageSource;
   }
-  
+
   @Bean
   public LocalValidatorFactoryBean validator(MessageSource messageSource) {
-	  LocalValidatorFactoryBean validationBean = new LocalValidatorFactoryBean();
-	  validationBean.setValidationMessageSource(messageSource);
-	  return validationBean;
+    LocalValidatorFactoryBean validationBean = new LocalValidatorFactoryBean();
+    validationBean.setValidationMessageSource(messageSource);
+    return validationBean;
   }
-  
+
   @Bean
   public SessionLocaleResolver localeResolver() {
-	  SessionLocaleResolver localeResolver = new SessionLocaleResolver();
-	  localeResolver.setDefaultLocale(Locale.US);
-	  return localeResolver;
+    SessionLocaleResolver localeResolver = new SessionLocaleResolver();
+    localeResolver.setDefaultLocale(Locale.US);
+    return localeResolver;
   }
 
 }
