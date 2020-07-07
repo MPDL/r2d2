@@ -4,7 +4,7 @@ import javax.persistence.EntityExistsException;
 
 import de.mpg.mpdl.r2d2.exceptions.R2d2ApplicationException;
 import de.mpg.mpdl.r2d2.model.aa.LocalUserAccount;
-import de.mpg.mpdl.r2d2.registration.RegistrationConfirmationToken;
+import de.mpg.mpdl.r2d2.registration.ConfirmationToken;
 import de.mpg.mpdl.r2d2.registration.RegistrationRequest;
 
 
@@ -20,10 +20,15 @@ public interface UserService {
 
   void createConfirmationToken(LocalUserAccount user, String token);
 
-  RegistrationConfirmationToken getConfirmationToken(String token);
+  ConfirmationToken getConfirmationToken(String token);
 
-  RegistrationConfirmationToken renewConfirmationToken(String token);
+  ConfirmationToken renewConfirmationToken(String token);
 
-  String checkConfirmationToken(String token);
+  String validateConfirmationToken(String token);
 
+  LocalUserAccount activateUser(String token);
+
+  void resetPassword(LocalUserAccount user, String password);
+
+  boolean validateOldPassword(LocalUserAccount user, String password);
 }

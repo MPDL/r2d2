@@ -15,7 +15,7 @@ import de.mpg.mpdl.r2d2.registration.validation.SecondConstraint;
 import de.mpg.mpdl.r2d2.registration.validation.ValidEmail;
 
 
-@PasswordMatches(groups = SecondConstraint.class)
+@PasswordMatches(groups = SecondConstraint.class, pattern = "pass", match = "match")
 @GroupSequence({RegistrationRequest.class, FirstConstraint.class, SecondConstraint.class})
 public class RegistrationRequest {
 
@@ -26,7 +26,7 @@ public class RegistrationRequest {
   @NotBlank(message = "{email.not.blank}")
   @ValidEmail(groups = SecondConstraint.class)
   private String email;
-  @NotBlank(message = "{pass.not.blank}")
+  //@NotBlank(message = "{pass.not.blank}")
   @Size(min = 8, message = "{pass.min}")
   private String pass;
   private String match;

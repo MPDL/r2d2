@@ -27,13 +27,13 @@ public class MailNotificationEvent extends ApplicationEvent {
   public String getRequestUrl() {
     return requestUrl;
   }
-  
+
   public String getSubject() {
-	  return subject;
+    return subject;
   }
-  
+
   public String getMessage() {
-	  return message;
+    return message;
   }
 
   public Locale getLocale() {

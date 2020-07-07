@@ -17,7 +17,7 @@ import javax.persistence.OneToOne;
 import de.mpg.mpdl.r2d2.model.aa.LocalUserAccount;
 
 @Entity
-public class RegistrationConfirmationToken {
+public class ConfirmationToken {
 
   private static final int EXPIRATION_TIME = 60 * 24;
 
@@ -33,18 +33,18 @@ public class RegistrationConfirmationToken {
 
   private Date expirationDate;
 
-  public RegistrationConfirmationToken() {
+  public ConfirmationToken() {
     super();
   }
 
-  public RegistrationConfirmationToken(final String token) {
+  public ConfirmationToken(final String token) {
     super();
 
     this.token = token;
     this.expirationDate = calculateExpirationDate(EXPIRATION_TIME);
   }
 
-  public RegistrationConfirmationToken(final String token, final LocalUserAccount user) {
+  public ConfirmationToken(final String token, final LocalUserAccount user) {
     super();
 
     this.token = token;
@@ -113,7 +113,7 @@ public class RegistrationConfirmationToken {
     if (getClass() != obj.getClass()) {
       return false;
     }
-    final RegistrationConfirmationToken other = (RegistrationConfirmationToken) obj;
+    final ConfirmationToken other = (ConfirmationToken) obj;
     if (expirationDate == null) {
       if (other.expirationDate != null) {
         return false;

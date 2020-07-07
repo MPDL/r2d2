@@ -17,6 +17,10 @@ import javax.validation.Payload;
 @Documented
 public @interface PasswordMatches {
 
+  String pattern();
+
+  String match();
+
   String message() default "Passwords MUST match";
 
   Class<?>[] groups() default {};
