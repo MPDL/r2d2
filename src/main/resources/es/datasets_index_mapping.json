@@ -341,6 +341,16 @@
 							"type": "long"
 						}
 					}
+				},
+				"latestPublicVersion": {
+					"properties": {
+						"id": {
+							"type": "keyword"
+						},
+						"versionNumber": {
+							"type": "long"
+						}
+					}
 				}
 			}
 		},

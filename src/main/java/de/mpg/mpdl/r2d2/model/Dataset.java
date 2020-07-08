@@ -38,6 +38,10 @@ public class Dataset extends BaseDb {
   @Type(type = "jsonb")
   @Column(columnDefinition = "jsonb")
   private List<DatasetVersionRO> versions = new ArrayList<DatasetVersionRO>();
+  
+  @Type(type = "jsonb")
+  @Column(columnDefinition = "jsonb")
+  private DatasetVersionRO latestPublicVersion;
 
   public List<UserAccountRO> getDatamanager() {
     return datamanager;
@@ -61,6 +65,14 @@ public class Dataset extends BaseDb {
 
   public void setVersions(List<DatasetVersionRO> versions) {
     this.versions = versions;
+  }
+
+  public DatasetVersionRO getLatestPublicVersion() {
+    return latestPublicVersion;
+  }
+
+  public void setLatestPublicVersion(DatasetVersionRO latestPublicVersion) {
+    this.latestPublicVersion = latestPublicVersion;
   }
 
 

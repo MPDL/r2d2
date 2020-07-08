@@ -20,27 +20,27 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 public class ExceptionFilter extends OncePerRequestFilter {
-	
-	ObjectMapper mapper = new ObjectMapper();
-	
-	@Override
-	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
-			throws ServletException, IOException {
-		try {
-			filterChain.doFilter(request, response);
-		} catch(Exception ex) {
-			Map<String, Object> errors = new LinkedHashMap<>();
-		    errors.put("time", LocalDateTime.now());
-		    errors.put("cause", ex.getClass().getSimpleName());
-		    errors.put("message", ex.getMessage());
-		    errors.put("uri", request.getRequestURL());
-	        mapper.registerModule(new JavaTimeModule());
-	        mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-	        response.setContentType("application/json");
-	        response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
-			response.getWriter().append(mapper.writeValueAsString(errors));
-		}
 
-	}
+  ObjectMapper mapper = new ObjectMapper();
+
+  @Override
+  protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+      throws ServletException, IOException {
+    try {
+      filterChain.doFilter(request, response);
+    } catch (Exception ex) {
+      Map<String, Object> errors = new LinkedHashMap<>();
+      errors.put("time", LocalDateTime.now());
+      errors.put("cause", ex.getClass().getSimpleName());
+      errors.put("message", ex.getMessage());
+      errors.put("uri", request.getRequestURL());
+      mapper.registerModule(new JavaTimeModule());
+      mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+      response.setContentType("application/json");
+      response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
+      response.getWriter().append(mapper.writeValueAsString(errors));
+    }
+
+  }
 
 }

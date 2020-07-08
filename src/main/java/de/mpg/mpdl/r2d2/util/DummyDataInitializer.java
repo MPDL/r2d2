@@ -148,6 +148,7 @@ public class DummyDataInitializer {
     dataset2.setModificationDate(currentDateTime);
     dataset2.setState(State.PUBLIC);
     dataset2.getVersions().add(new DatasetVersionRO(dv2));
+    dataset2.setLatestPublicVersion(new DatasetVersionRO(dv2));
 
     dv2.setDataset(dataset2);
 

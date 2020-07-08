@@ -76,7 +76,7 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
       throw new R2d2TechnicalException(e);
     }
 
-    datasetVersionIndexDao.createImmediately(datasetVersionToCreate.getId().toString(), datasetVersionToCreate);
+    reindex(datasetVersionToCreate);
 
     return datasetVersionToCreate;
   }
@@ -152,13 +152,14 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
     latestVersion.setState(State.PUBLIC);
     latestVersion.getDataset().setState(State.PUBLIC);
     setBasicModificationProperties(latestVersion, user.getUserAccount());
+    latestVersion.getDataset().setLatestPublicVersion(new DatasetVersionRO(latestVersion));
 
     try {
       datasetVersionToBeUpdated = datasetVersionRepository.saveAndFlush(latestVersion);
     } catch (Exception e) {
       throw new R2d2TechnicalException(e);
     }
-    datasetVersionIndexDao.createImmediately(datasetVersionToBeUpdated.getId().toString(), datasetVersionToBeUpdated);
+    reindex(datasetVersionToBeUpdated);
 
     return datasetVersionToBeUpdated;
 
@@ -213,8 +214,8 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
     f.setState(UploadState.COMPLETE);
 
     //TODO post-processing
-
-    //datasetVersionIndexDao.createImmediately(dv.getId().toString(), dv);
+    //TODO indexing
+    //reindex(dv);
     return f;
 
   }
@@ -317,7 +318,7 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
       throw new R2d2TechnicalException(e);
     }
 
-    datasetVersionIndexDao.createImmediately(datasetVersionToBeUpdated.getId().toString(), datasetVersionToBeUpdated);
+    reindex(datasetVersionToBeUpdated);
 
 
     return datasetVersionToBeUpdated;
@@ -373,6 +374,52 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
     super.setBasicModificationProperties(baseObject, creator, dateTime);
     super.setBasicModificationProperties(baseObject.getDataset(), creator, dateTime);
 
+  }
+  
+  
+  public void reindex(DatasetVersion dv) throws R2d2TechnicalException
+  {
+    this.reindex(dv.getDataset(), true);
+  }
+  
+  private void reindex(Dataset dataset, boolean immediate) throws R2d2TechnicalException
+  {
+    
+    //Delete old version, if exists
+    DatasetVersionRO oldVersion = dataset.getVersions().size() > 1 ? dataset.getVersions().get(dataset.getVersions().size()-2) : null;
+    if(oldVersion!=null)
+    {
+      datasetVersionIndexDao.deleteImmediatly(oldVersion.getId().toString());
+    }
+    
+    //Reindex latest version
+    DatasetVersionRO latestVersionRO = dataset.getVersions().get(dataset.getVersions().size()-1);
+    DatasetVersion latestVersion = datasetVersionRepository.findById(latestVersionRO.getId()).get();
+    if(immediate)
+    {
+      datasetVersionIndexDao.createImmediately(latestVersion.getId().toString(), latestVersion);
+    }
+    else
+    {
+      datasetVersionIndexDao.create(latestVersion.getId().toString(), latestVersion);
+    }
+    
+    //Reindex latest public version if exists and not equal to latest version
+    DatasetVersionRO latestPublicVersionRO = dataset.getLatestPublicVersion();
+    if(latestPublicVersionRO!=null && latestPublicVersionRO.getVersionNumber() != latestVersion.getVersionNumber())
+    {
+      DatasetVersion latestPublicVersion = datasetVersionRepository.findById(latestPublicVersionRO.getId()).get();
+      if(immediate)
+      {
+        datasetVersionIndexDao.createImmediately(latestPublicVersion.getId().toString(), latestPublicVersion);
+      }
+      else
+      {
+        datasetVersionIndexDao.create(latestPublicVersion.getId().toString(), latestPublicVersion);
+      }
+    }
+    
+   
   }
 
 }
