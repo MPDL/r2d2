@@ -18,6 +18,7 @@ import de.mpg.mpdl.r2d2.db.UserAccountRepository;
 import de.mpg.mpdl.r2d2.exceptions.R2d2TechnicalException;
 import de.mpg.mpdl.r2d2.model.Dataset;
 import de.mpg.mpdl.r2d2.model.DatasetVersion;
+import de.mpg.mpdl.r2d2.model.DatasetVersionRO;
 import de.mpg.mpdl.r2d2.model.Person;
 import de.mpg.mpdl.r2d2.model.Dataset.State;
 import de.mpg.mpdl.r2d2.model.aa.LocalUserAccount;
@@ -119,7 +120,7 @@ public class DummyDataInitializer {
     dataset.setCreationDate(currentDateTime);
     dataset.setModificationDate(currentDateTime);
     dataset.getDatamanager().add(new UserAccountRO(user));
-
+    dataset.getVersions().add(new DatasetVersionRO(dv));
     dv.setDataset(dataset);
 
     dv = datasetVersionRepository.save(dv);
@@ -146,6 +147,7 @@ public class DummyDataInitializer {
     dataset2.setCreationDate(currentDateTime);
     dataset2.setModificationDate(currentDateTime);
     dataset2.setState(State.PUBLIC);
+    dataset2.getVersions().add(new DatasetVersionRO(dv2));
 
     dv2.setDataset(dataset2);
 
@@ -175,7 +177,7 @@ public class DummyDataInitializer {
     dataset3.setCreationDate(currentDateTime);
     dataset3.setModificationDate(currentDateTime);
     dataset3.setState(State.PUBLIC);
-
+    dataset3.getVersions().add(new DatasetVersionRO(dv3));
     dv3.setDataset(dataset3);
 
     dv3 = datasetVersionRepository.save(dv3);

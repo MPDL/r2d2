@@ -35,6 +35,10 @@ public class Dataset extends BaseDb {
   private List<UserAccountRO> datamanager = new ArrayList<UserAccountRO>();
 
 
+  @Type(type = "jsonb")
+  @Column(columnDefinition = "jsonb")
+  private List<DatasetVersionRO> versions = new ArrayList<DatasetVersionRO>();
+
   public List<UserAccountRO> getDatamanager() {
     return datamanager;
   }
@@ -49,6 +53,14 @@ public class Dataset extends BaseDb {
 
   public void setState(Dataset.State state) {
     this.state = state;
+  }
+
+  public List<DatasetVersionRO> getVersions() {
+    return versions;
+  }
+
+  public void setVersions(List<DatasetVersionRO> versions) {
+    this.versions = versions;
   }
 
 

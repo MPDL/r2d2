@@ -26,6 +26,7 @@ import de.mpg.mpdl.r2d2.exceptions.ValidationException;
 import de.mpg.mpdl.r2d2.model.Dataset;
 import de.mpg.mpdl.r2d2.model.Dataset.State;
 import de.mpg.mpdl.r2d2.model.DatasetVersion;
+import de.mpg.mpdl.r2d2.model.DatasetVersionRO;
 import de.mpg.mpdl.r2d2.model.File;
 import de.mpg.mpdl.r2d2.model.File.UploadState;
 import de.mpg.mpdl.r2d2.model.FileChunk;
@@ -68,7 +69,8 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
     // TODO validation
 
     try {
-      datasetVersionToCreate = datasetVersionRepository.save(datasetVersionToCreate);
+      datasetVersionToCreate = datasetVersionRepository.saveAndFlush(datasetVersionToCreate);
+      datasetVersionToCreate.getDataset().getVersions().add(new DatasetVersionRO(datasetVersionToCreate));
 
     } catch (Exception e) {
       throw new R2d2TechnicalException(e);
@@ -104,6 +106,7 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
     //TODO Complete deletion if only one version
     //TODO check state
 
+    //TODO delete from version list in dataset
     //TODO Authorization
     datasetVersionRepository.deleteById(id);
     datasetVersionIndexDao.delete(id.toString());
@@ -307,6 +310,9 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
 
     try {
       datasetVersionToBeUpdated = datasetVersionRepository.saveAndFlush(datasetVersionToBeUpdated);
+      if (createNewVersion) {
+        datasetVersionToBeUpdated.getDataset().getVersions().add(new DatasetVersionRO(datasetVersionToBeUpdated));
+      }
     } catch (Exception e) {
       throw new R2d2TechnicalException(e);
     }
