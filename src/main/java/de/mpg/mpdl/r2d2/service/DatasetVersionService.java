@@ -45,6 +45,7 @@ public interface DatasetVersionService extends GenericService<DatasetVersion> {
   public InputStream getFileContent(VersionId datasetId, UUID fileId, R2D2Principal user) throws R2d2TechnicalException,
       OptimisticLockingException, ValidationException, NotFoundException, InvalidStateException, AuthorizationException;
 
+  /*
   public File uploadSingleFile(UUID datasetId, File file, InputStream fileStream, R2D2Principal user) throws R2d2TechnicalException,
       OptimisticLockingException, ValidationException, NotFoundException, InvalidStateException, AuthorizationException;
 
@@ -54,7 +55,7 @@ public interface DatasetVersionService extends GenericService<DatasetVersion> {
   public FileChunk uploadFileChunk(UUID datasetId, UUID fileId, FileChunk chunk, InputStream fileStream, R2D2Principal user)
       throws R2d2TechnicalException, OptimisticLockingException, ValidationException, NotFoundException, InvalidStateException,
       AuthorizationException;
-
+*/
 
 
 }

@@ -27,10 +27,7 @@ import de.mpg.mpdl.r2d2.exceptions.ValidationException;
 import de.mpg.mpdl.r2d2.model.Dataset;
 import de.mpg.mpdl.r2d2.model.Dataset.State;
 import de.mpg.mpdl.r2d2.model.DatasetVersion;
-import de.mpg.mpdl.r2d2.model.DatasetVersionRO;
 import de.mpg.mpdl.r2d2.model.File;
-import de.mpg.mpdl.r2d2.model.File.UploadState;
-import de.mpg.mpdl.r2d2.model.FileChunk;
 import de.mpg.mpdl.r2d2.model.VersionId;
 import de.mpg.mpdl.r2d2.model.aa.R2D2Principal;
 import de.mpg.mpdl.r2d2.model.aa.UserAccount;
@@ -213,6 +210,7 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
 
 
 
+  /*
   @Override
   @Transactional(rollbackFor = Throwable.class)
   public File initNewFile(UUID datasetId, File file, R2D2Principal user) throws R2d2TechnicalException, OptimisticLockingException,
@@ -235,7 +233,7 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
 
   }
 
-
+  
   @Override
   @Transactional(rollbackFor = Throwable.class)
   public File uploadSingleFile(UUID datasetId, File file, InputStream fileStream, R2D2Principal user) throws R2d2TechnicalException,
@@ -267,6 +265,7 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
   }
 
 
+  
   @Override
   @Transactional(rollbackFor = Throwable.class)
   public FileChunk uploadFileChunk(UUID datasetId, UUID fileId, FileChunk chunk, InputStream fileStream, R2D2Principal user)
@@ -304,7 +303,7 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
     return chunk;
 
   }
-
+*/
 
   public InputStream getFileContent(VersionId versionId, UUID fileId, R2D2Principal user) throws R2d2TechnicalException,
       OptimisticLockingException, ValidationException, NotFoundException, InvalidStateException, AuthorizationException {

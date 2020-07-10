@@ -123,6 +123,7 @@ public class DatasetController {
     return new ResponseEntity<InputStreamResource>(inputStreamResource, HttpStatus.OK);
   }
 
+  /*
   @PostMapping("/{id}/files")
   public ResponseEntity<File> newFile(@PathVariable("id") String id, @RequestHeader("X-File-Name") String fileName,
       @RequestHeader(name = "X-File-Total-Chunks", required = false) Integer totalChunks,
@@ -202,7 +203,7 @@ public class DatasetController {
     return re;
   }
 
-
+*/
 
   @RequestMapping(value = "/search", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE,
       produces = MediaType.APPLICATION_JSON_VALUE)
