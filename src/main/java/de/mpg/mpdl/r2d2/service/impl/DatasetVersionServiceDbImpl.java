@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import de.mpg.mpdl.r2d2.db.DatasetRepository;
 import de.mpg.mpdl.r2d2.db.DatasetVersionRepository;
 import de.mpg.mpdl.r2d2.db.FileRepository;
 import de.mpg.mpdl.r2d2.exceptions.AuthorizationException;
@@ -30,6 +31,7 @@ import de.mpg.mpdl.r2d2.model.DatasetVersionRO;
 import de.mpg.mpdl.r2d2.model.File;
 import de.mpg.mpdl.r2d2.model.File.UploadState;
 import de.mpg.mpdl.r2d2.model.FileChunk;
+import de.mpg.mpdl.r2d2.model.VersionId;
 import de.mpg.mpdl.r2d2.model.aa.R2D2Principal;
 import de.mpg.mpdl.r2d2.model.aa.UserAccount;
 import de.mpg.mpdl.r2d2.search.dao.DatasetVersionDaoEs;
@@ -45,6 +47,9 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
 
   @Autowired
   private DatasetVersionRepository datasetVersionRepository;
+
+  @Autowired
+  private DatasetRepository datasetRepository;
 
   @Autowired
   private FileRepository fileRepository;
@@ -70,7 +75,7 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
 
     try {
       datasetVersionToCreate = datasetVersionRepository.saveAndFlush(datasetVersionToCreate);
-      datasetVersionToCreate.getDataset().getVersions().add(new DatasetVersionRO(datasetVersionToCreate));
+      datasetVersionToCreate.getDataset().setLatestVersion(datasetVersionToCreate.getVersionNumber());
 
     } catch (Exception e) {
       throw new R2d2TechnicalException(e);
@@ -89,26 +94,28 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
     return update(id, datasetVersion, user, false);
   }
 
+  /*
   @Override
   @Transactional(rollbackFor = Throwable.class)
   public DatasetVersion createNewVersion(UUID id, DatasetVersion datasetVersion, R2D2Principal user) throws R2d2TechnicalException,
       OptimisticLockingException, ValidationException, NotFoundException, InvalidStateException, AuthorizationException {
     return update(id, datasetVersion, user, true);
   }
+  */
 
   @Override
   @Transactional(rollbackFor = Throwable.class)
   public void delete(UUID id, OffsetDateTime lastModificationDate, R2D2Principal user)
       throws R2d2TechnicalException, OptimisticLockingException, NotFoundException, InvalidStateException, AuthorizationException {
 
-    DatasetVersion datsetVersion = get(id, user);
+    DatasetVersion datsetVersion = getLatest(id, user);
     checkEqualModificationDate(lastModificationDate, datsetVersion.getDataset().getModificationDate());
     //TODO Complete deletion if only one version
     //TODO check state
 
     //TODO delete from version list in dataset
     //TODO Authorization
-    datasetVersionRepository.deleteById(id);
+    datasetRepository.deleteById(id);
     datasetVersionIndexDao.delete(id.toString());
     //TODO delete dataset object, not only version?
 
@@ -116,11 +123,48 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
 
   @Override
   // @Transactional(readOnly = true)
-  public DatasetVersion get(UUID id, R2D2Principal principal) throws R2d2TechnicalException, NotFoundException, AuthorizationException {
+  public DatasetVersion getLatest(UUID id, R2D2Principal principal)
+      throws R2d2TechnicalException, NotFoundException, AuthorizationException {
+
+    DatasetVersion requestedVersion = null;
+    DatasetVersion latestVersion = datasetVersionRepository.findLatestVersion(id);
+
+    if (latestVersion == null) {
+      throw new NotFoundException("Dataset with id " + id + " not found");
+    }
+
+    if (principal == null) {
+      requestedVersion = datasetVersionRepository.findLatestPublicVersion(id);
+    } else {
+
+      try {
+        checkAa("get", principal, latestVersion);
+        requestedVersion = latestVersion;
+      } catch (AuthorizationException e) {
+        requestedVersion = datasetVersionRepository.findLatestPublicVersion(id);
+      }
+    }
+
+    if (requestedVersion == null) {
+      throw new AuthorizationException("No public version of dataset " + id + " is available");
+    }
+
+
+
+    return requestedVersion;
+
+  }
+
+
+  @Override
+  // @Transactional(readOnly = true)
+  public DatasetVersion get(VersionId id, R2D2Principal principal)
+      throws R2d2TechnicalException, NotFoundException, AuthorizationException {
 
 
     DatasetVersion datasetVersion =
         datasetVersionRepository.findById(id).orElseThrow(() -> new NotFoundException("Dataset version with id " + id + " not found"));
+
     checkAa("get", principal, datasetVersion);
 
     return datasetVersion;
@@ -132,19 +176,21 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
   public DatasetVersion publish(UUID id, OffsetDateTime lastModificationDate, R2D2Principal user) throws R2d2TechnicalException,
       OptimisticLockingException, ValidationException, NotFoundException, InvalidStateException, AuthorizationException {
 
-    DatasetVersion datasetVersionToBeUpdated = get(id, user);
-    DatasetVersion latestVersion = datasetVersionRepository.findLatestVersion(datasetVersionToBeUpdated.getDataset().getId());
+    //DatasetVersion datasetVersionToBeUpdated = get(id, user);
+    DatasetVersion latestVersion = datasetVersionRepository.findLatestVersion(id);
 
     checkAa("publish", user, latestVersion);
-    checkEqualModificationDate(lastModificationDate, datasetVersionToBeUpdated.getDataset().getModificationDate());
+    checkEqualModificationDate(lastModificationDate, latestVersion.getDataset().getModificationDate());
 
+    /*
     if (!id.equals(latestVersion.getId())) {
       throw new InvalidStateException("Only the latest dataset version can be published. Given version: "
           + datasetVersionToBeUpdated.getVersionNumber() + "; Latest version: " + latestVersion.getVersionNumber());
     }
+    */
 
-    if (!State.PRIVATE.equals(datasetVersionToBeUpdated.getState())) {
-      throw new InvalidStateException("Dataset in state " + datasetVersionToBeUpdated.getState() + "cannot be published.");
+    if (!State.PRIVATE.equals(latestVersion.getState())) {
+      throw new InvalidStateException("Dataset in state " + latestVersion.getState() + "cannot be published.");
     }
 
 
@@ -152,16 +198,16 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
     latestVersion.setState(State.PUBLIC);
     latestVersion.getDataset().setState(State.PUBLIC);
     setBasicModificationProperties(latestVersion, user.getUserAccount());
-    latestVersion.getDataset().setLatestPublicVersion(new DatasetVersionRO(latestVersion));
+    latestVersion.getDataset().setLatestPublicVersion(latestVersion.getVersionNumber());
 
     try {
-      datasetVersionToBeUpdated = datasetVersionRepository.saveAndFlush(latestVersion);
+      latestVersion = datasetVersionRepository.saveAndFlush(latestVersion);
     } catch (Exception e) {
       throw new R2d2TechnicalException(e);
     }
-    reindex(datasetVersionToBeUpdated);
+    reindex(latestVersion);
 
-    return datasetVersionToBeUpdated;
+    return latestVersion;
 
   }
 
@@ -171,7 +217,7 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
   @Transactional(rollbackFor = Throwable.class)
   public File initNewFile(UUID datasetId, File file, R2D2Principal user) throws R2d2TechnicalException, OptimisticLockingException,
       ValidationException, NotFoundException, InvalidStateException, AuthorizationException {
-    DatasetVersion dv = get(datasetId, user);
+    DatasetVersion dv = getLatest(datasetId, user);
 
     checkAa("upload", user, dv);
 
@@ -194,7 +240,7 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
   @Transactional(rollbackFor = Throwable.class)
   public File uploadSingleFile(UUID datasetId, File file, InputStream fileStream, R2D2Principal user) throws R2d2TechnicalException,
       OptimisticLockingException, ValidationException, NotFoundException, InvalidStateException, AuthorizationException {
-    DatasetVersion dv = get(datasetId, user);
+    DatasetVersion dv = getLatest(datasetId, user);
 
     checkAa("upload", user, dv);
 
@@ -226,7 +272,7 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
   public FileChunk uploadFileChunk(UUID datasetId, UUID fileId, FileChunk chunk, InputStream fileStream, R2D2Principal user)
       throws R2d2TechnicalException, OptimisticLockingException, ValidationException, NotFoundException, InvalidStateException,
       AuthorizationException {
-    DatasetVersion dv = get(datasetId, user);
+    DatasetVersion dv = getLatest(datasetId, user);
 
     checkAa("upload", user, dv);
 
@@ -260,9 +306,9 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
   }
 
 
-  public InputStream getFileContent(UUID datasetId, UUID fileId, R2D2Principal user) throws R2d2TechnicalException,
+  public InputStream getFileContent(VersionId versionId, UUID fileId, R2D2Principal user) throws R2d2TechnicalException,
       OptimisticLockingException, ValidationException, NotFoundException, InvalidStateException, AuthorizationException {
-    DatasetVersion dv = get(datasetId, user);
+    DatasetVersion dv = get(versionId, user);
     File file = fileRepository.findById(fileId).orElseThrow(() -> new NotFoundException("File with id " + fileId + " not found"));
     checkAa("download", user, dv);
 
@@ -275,7 +321,7 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
       throws R2d2TechnicalException, OptimisticLockingException, ValidationException, NotFoundException, InvalidStateException,
       AuthorizationException {
 
-    DatasetVersion datasetVersionToBeUpdated = get(id, user);
+    DatasetVersion datasetVersionToBeUpdated = getLatest(id, user);
     UUID datasetId = datasetVersionToBeUpdated.getDataset().getId();
     DatasetVersion latestVersion = datasetVersionRepository.findLatestVersion(datasetId);
 
@@ -312,7 +358,7 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
     try {
       datasetVersionToBeUpdated = datasetVersionRepository.saveAndFlush(datasetVersionToBeUpdated);
       if (createNewVersion) {
-        datasetVersionToBeUpdated.getDataset().getVersions().add(new DatasetVersionRO(datasetVersionToBeUpdated));
+        datasetVersionToBeUpdated.getDataset().setLatestVersion(datasetVersionToBeUpdated.getVersionNumber());;
       }
     } catch (Exception e) {
       throw new R2d2TechnicalException(e);
@@ -375,51 +421,39 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
     super.setBasicModificationProperties(baseObject.getDataset(), creator, dateTime);
 
   }
-  
-  
-  public void reindex(DatasetVersion dv) throws R2d2TechnicalException
-  {
+
+
+  public void reindex(DatasetVersion dv) throws R2d2TechnicalException {
     this.reindex(dv.getDataset(), true);
   }
-  
-  private void reindex(Dataset dataset, boolean immediate) throws R2d2TechnicalException
-  {
-    
+
+  private void reindex(Dataset dataset, boolean immediate) throws R2d2TechnicalException {
+
     //Delete old version, if exists
-    DatasetVersionRO oldVersion = dataset.getVersions().size() > 1 ? dataset.getVersions().get(dataset.getVersions().size()-2) : null;
-    if(oldVersion!=null)
-    {
-      datasetVersionIndexDao.deleteImmediatly(oldVersion.getId().toString());
+    VersionId oldVersion = new VersionId(dataset.getId(), dataset.getLatestVersion() - 1);
+    if (oldVersion != null) {
+      datasetVersionIndexDao.deleteImmediatly(oldVersion.toString());
     }
-    
+
     //Reindex latest version
-    DatasetVersionRO latestVersionRO = dataset.getVersions().get(dataset.getVersions().size()-1);
-    DatasetVersion latestVersion = datasetVersionRepository.findById(latestVersionRO.getId()).get();
-    if(immediate)
-    {
+    DatasetVersion latestVersion = datasetVersionRepository.findById(dataset.getLatestVersionId()).get();
+    if (immediate) {
       datasetVersionIndexDao.createImmediately(latestVersion.getId().toString(), latestVersion);
-    }
-    else
-    {
+    } else {
       datasetVersionIndexDao.create(latestVersion.getId().toString(), latestVersion);
     }
-    
+
     //Reindex latest public version if exists and not equal to latest version
-    DatasetVersionRO latestPublicVersionRO = dataset.getLatestPublicVersion();
-    if(latestPublicVersionRO!=null && latestPublicVersionRO.getVersionNumber() != latestVersion.getVersionNumber())
-    {
-      DatasetVersion latestPublicVersion = datasetVersionRepository.findById(latestPublicVersionRO.getId()).get();
-      if(immediate)
-      {
+    if (dataset.getLatestPublicVersion() != null && dataset.getLatestPublicVersion() != latestVersion.getVersionNumber()) {
+      DatasetVersion latestPublicVersion = datasetVersionRepository.findById(dataset.getLatestPublicVersionId()).get();
+      if (immediate) {
         datasetVersionIndexDao.createImmediately(latestPublicVersion.getId().toString(), latestPublicVersion);
-      }
-      else
-      {
+      } else {
         datasetVersionIndexDao.create(latestPublicVersion.getId().toString(), latestPublicVersion);
       }
     }
-    
-   
+
+
   }
 
 }

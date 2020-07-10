@@ -114,13 +114,13 @@ public class DummyDataInitializer {
     dv.getMetadata().getAuthors().add(author);
 
     Dataset dataset = new Dataset();
-    dataset.setId(UUID.fromString("9cdb1d04-8527-4c32-8e00-4e4730861cbb"));
+    dataset.setId(dv.getId());
     dataset.setCreator(new UserAccountRO(user));
     dataset.setModifier(new UserAccountRO(user));
     dataset.setCreationDate(currentDateTime);
     dataset.setModificationDate(currentDateTime);
     dataset.getDatamanager().add(new UserAccountRO(user));
-    dataset.getVersions().add(new DatasetVersionRO(dv));
+    dataset.setLatestVersion(1);
     dv.setDataset(dataset);
 
     dv = datasetVersionRepository.save(dv);
@@ -141,14 +141,14 @@ public class DummyDataInitializer {
     dv2.getMetadata().getAuthors().add(author2);
 
     Dataset dataset2 = new Dataset();
-    dataset2.setId(UUID.fromString("9cdb1d04-8527-4c32-8e00-4e4730861cbc"));
+    dataset2.setId(dv2.getId());
     dataset2.setCreator(new UserAccountRO(user));
     dataset2.setModifier(new UserAccountRO(user));
     dataset2.setCreationDate(currentDateTime);
     dataset2.setModificationDate(currentDateTime);
     dataset2.setState(State.PUBLIC);
-    dataset2.getVersions().add(new DatasetVersionRO(dv2));
-    dataset2.setLatestPublicVersion(new DatasetVersionRO(dv2));
+    dataset2.setLatestPublicVersion(1);
+    dataset2.setLatestVersion(1);
 
     dv2.setDataset(dataset2);
 
@@ -158,7 +158,7 @@ public class DummyDataInitializer {
 
 
     DatasetVersion dv3 = new DatasetVersion();
-    dv3.setState(State.PRIVATE);
+    dv3.setState(State.PUBLIC);
     dv3.setId(UUID.fromString("a6124f2a-9a06-489d-a7e2-40b583ebbd25"));
     dv3.setCreator(new UserAccountRO(user2));
     dv3.setModifier(new UserAccountRO(user2));
@@ -172,13 +172,14 @@ public class DummyDataInitializer {
     dv3.getMetadata().getAuthors().add(author3);
 
     Dataset dataset3 = new Dataset();
-    dataset3.setId(UUID.fromString("9cdb1d04-8527-4c32-8e00-4e4730861cbd"));
+    dataset3.setId(dv3.getId());
     dataset3.setCreator(new UserAccountRO(user2));
     dataset3.setModifier(new UserAccountRO(user2));
     dataset3.setCreationDate(currentDateTime);
     dataset3.setModificationDate(currentDateTime);
     dataset3.setState(State.PUBLIC);
-    dataset3.getVersions().add(new DatasetVersionRO(dv3));
+    dataset3.setLatestVersion(1);
+    dataset3.setLatestPublicVersion(1);
     dv3.setDataset(dataset3);
 
     dv3 = datasetVersionRepository.save(dv3);

@@ -43,6 +43,7 @@ import de.mpg.mpdl.r2d2.exceptions.R2d2TechnicalException;
 import de.mpg.mpdl.r2d2.model.DatasetVersion;
 import de.mpg.mpdl.r2d2.model.File;
 import de.mpg.mpdl.r2d2.model.FileChunk;
+import de.mpg.mpdl.r2d2.model.VersionId;
 import de.mpg.mpdl.r2d2.model.aa.R2D2Principal;
 import de.mpg.mpdl.r2d2.service.DatasetVersionService;
 import de.mpg.mpdl.r2d2.util.Utils;
@@ -71,16 +72,19 @@ public class DatasetController {
 
 
   @PutMapping(path = "/{id}")
-  public ResponseEntity<DatasetVersion> updateDataset(@PathVariable("id") String id,
+  public ResponseEntity<DatasetVersion> updateDataset(@PathVariable("id") UUID id,
       @RequestParam(name = "createNewVersion", defaultValue = "false") Boolean createNewVersion,
       @RequestBody DatasetVersion givenDatasetVersion, Principal prinz) throws R2d2TechnicalException, R2d2ApplicationException {
 
     DatasetVersion createdDv = null;
+    /*
     if (createNewVersion) {
       createdDv = datasetVersionService.createNewVersion(UUID.fromString(id), givenDatasetVersion, Utils.toCustomPrincipal(prinz));
     } else {
       createdDv = datasetVersionService.update(UUID.fromString(id), givenDatasetVersion, Utils.toCustomPrincipal(prinz));
     }
+    */
+    createdDv = datasetVersionService.update(id, givenDatasetVersion, Utils.toCustomPrincipal(prinz));
     return new ResponseEntity<DatasetVersion>(createdDv, HttpStatus.CREATED);
   }
 
@@ -94,12 +98,30 @@ public class DatasetController {
   }
 
   @GetMapping(path = "/{id}")
-  public DatasetVersion getDataset(@PathVariable("id") String id, Principal p) throws R2d2TechnicalException, R2d2ApplicationException {
+  public DatasetVersion getLatestDataset(@PathVariable("id") String id, Principal p)
+      throws R2d2TechnicalException, R2d2ApplicationException {
 
-    return datasetVersionService.get(UUID.fromString(id), Utils.toCustomPrincipal(p));
+    return datasetVersionService.getLatest(UUID.fromString(id), Utils.toCustomPrincipal(p));
 
   }
 
+  @GetMapping(path = "/{id}/{versionNumber}")
+  public DatasetVersion getDataset(@PathVariable("id") String id, @PathVariable("versionNumber") int versionNumber, Principal p)
+      throws R2d2TechnicalException, R2d2ApplicationException {
+
+    return datasetVersionService.get(new VersionId(UUID.fromString(id), versionNumber), Utils.toCustomPrincipal(p));
+
+  }
+
+
+  @GetMapping("/{id}/{versionNumber}/files/{fileId}")
+  public ResponseEntity<?> download(@PathVariable("id") String datasetId, @PathVariable("versionNumber") int versionNumber,
+      @PathVariable("fileId") String fileId, Principal prinz)
+      throws R2d2ApplicationException, AuthorizationException, R2d2TechnicalException {
+    InputStreamResource inputStreamResource = new InputStreamResource(datasetVersionService
+        .getFileContent(new VersionId(UUID.fromString(datasetId), versionNumber), UUID.fromString(fileId), Utils.toCustomPrincipal(prinz)));
+    return new ResponseEntity<InputStreamResource>(inputStreamResource, HttpStatus.OK);
+  }
 
   @PostMapping("/{id}/files")
   public ResponseEntity<File> newFile(@PathVariable("id") String id, @RequestHeader("X-File-Name") String fileName,
@@ -181,13 +203,6 @@ public class DatasetController {
   }
 
 
-  @GetMapping("/{id}/files/{fileId}")
-  public ResponseEntity<?> download(@PathVariable("id") String datasetId, @PathVariable("fileId") String fileId, Principal prinz)
-      throws R2d2ApplicationException, AuthorizationException, R2d2TechnicalException {
-    InputStreamResource inputStreamResource = new InputStreamResource(
-        datasetVersionService.getFileContent(UUID.fromString(datasetId), UUID.fromString(fileId), Utils.toCustomPrincipal(prinz)));
-    return new ResponseEntity<InputStreamResource>(inputStreamResource, HttpStatus.OK);
-  }
 
   @RequestMapping(value = "/search", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE,
       produces = MediaType.APPLICATION_JSON_VALUE)

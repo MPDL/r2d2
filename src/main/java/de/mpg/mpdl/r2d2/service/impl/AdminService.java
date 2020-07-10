@@ -23,6 +23,7 @@ import de.mpg.mpdl.r2d2.db.UserAccountRepository;
 import de.mpg.mpdl.r2d2.exceptions.NotFoundException;
 import de.mpg.mpdl.r2d2.model.DatasetVersion;
 import de.mpg.mpdl.r2d2.model.File;
+import de.mpg.mpdl.r2d2.model.VersionId;
 import de.mpg.mpdl.r2d2.model.aa.UserAccount;
 import de.mpg.mpdl.r2d2.service.storage.SwiftObjectStoreRepository;
 
@@ -73,14 +74,13 @@ public class AdminService {
     return datasetList;
   }
 
-  public DatasetVersion listDatasetById(String id) throws NotFoundException {
-    return datasets.findById(UUID.fromString(id))
-        .orElseThrow(() -> new NotFoundException(String.format("Dataset with id %s NOT FOUND", id)));
+  public DatasetVersion listDatasetById(VersionId id) throws NotFoundException {
+    return datasets.findById(id).orElseThrow(() -> new NotFoundException(String.format("Dataset with id %s NOT FOUND", id)));
   }
 
-  public void deleteDataset(String id) throws NotFoundException {
+  public void deleteDataset(VersionId id) throws NotFoundException {
     DatasetVersion dataset =
-        datasets.findById(UUID.fromString(id)).orElseThrow(() -> new NotFoundException(String.format("Dataset with id %s NOT FOUND", id)));
+        datasets.findById(id).orElseThrow(() -> new NotFoundException(String.format("Dataset with id %s NOT FOUND", id)));
     List<File> files = dataset.getFiles();
     files.forEach(file -> {
       try {
@@ -89,7 +89,7 @@ public class AdminService {
         LOGGER.warn(String.format("File with id %s for dataset %s NOT FOUND.", file.getId().toString(), id));
       }
     });
-    datasets.deleteById(UUID.fromString(id));
+    datasets.deleteById(id);
   }
 
   public List<String> listAllFiles() {

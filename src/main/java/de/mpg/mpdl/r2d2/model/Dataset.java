@@ -7,17 +7,15 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.ManyToMany;
 
 import org.hibernate.annotations.Type;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
-import de.mpg.mpdl.r2d2.model.aa.UserAccount;
 import de.mpg.mpdl.r2d2.model.aa.UserAccountRO;
 
 @Entity
+@JsonPropertyOrder(value = {"id", "state"})
 public class Dataset extends BaseDb {
 
 
@@ -30,18 +28,19 @@ public class Dataset extends BaseDb {
   @Enumerated(EnumType.STRING)
   private Dataset.State state = State.PRIVATE;
 
+  //@Type(type = "jsonb")
+  //@Column(columnDefinition = "jsonb")
+  private Integer latestVersion = 1;
+
+  //@Type(type = "jsonb")
+  //@Column(columnDefinition = "jsonb")
+  private Integer latestPublicVersion = null;
+
+
   @Type(type = "jsonb")
   @Column(columnDefinition = "jsonb")
   private List<UserAccountRO> datamanager = new ArrayList<UserAccountRO>();
 
-
-  @Type(type = "jsonb")
-  @Column(columnDefinition = "jsonb")
-  private List<DatasetVersionRO> versions = new ArrayList<DatasetVersionRO>();
-  
-  @Type(type = "jsonb")
-  @Column(columnDefinition = "jsonb")
-  private DatasetVersionRO latestPublicVersion;
 
   public List<UserAccountRO> getDatamanager() {
     return datamanager;
@@ -59,22 +58,37 @@ public class Dataset extends BaseDb {
     this.state = state;
   }
 
-  public List<DatasetVersionRO> getVersions() {
-    return versions;
+  public Integer getLatestVersion() {
+    return latestVersion;
   }
 
-  public void setVersions(List<DatasetVersionRO> versions) {
-    this.versions = versions;
+  public void setLatestVersion(Integer latestVersion) {
+    this.latestVersion = latestVersion;
   }
 
-  public DatasetVersionRO getLatestPublicVersion() {
+  public Integer getLatestPublicVersion() {
     return latestPublicVersion;
   }
 
-  public void setLatestPublicVersion(DatasetVersionRO latestPublicVersion) {
+  public void setLatestPublicVersion(Integer latestPublicVersion) {
     this.latestPublicVersion = latestPublicVersion;
   }
 
+
+  public VersionId getLatestVersionId() {
+    if (latestVersion != null) {
+      return new VersionId(this.getId(), latestVersion);
+    }
+    return null;
+  }
+
+  public VersionId getLatestPublicVersionId() {
+    if (latestPublicVersion != null) {
+      return new VersionId(this.getId(), latestPublicVersion);
+    }
+
+    return null;
+  }
 
 
 }

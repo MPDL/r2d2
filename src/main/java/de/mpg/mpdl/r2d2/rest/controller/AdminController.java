@@ -3,6 +3,7 @@ package de.mpg.mpdl.r2d2.rest.controller;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -22,6 +23,7 @@ import de.mpg.mpdl.r2d2.exceptions.AuthorizationException;
 import de.mpg.mpdl.r2d2.exceptions.NotFoundException;
 import de.mpg.mpdl.r2d2.exceptions.R2d2ApplicationException;
 import de.mpg.mpdl.r2d2.model.DatasetVersion;
+import de.mpg.mpdl.r2d2.model.VersionId;
 import de.mpg.mpdl.r2d2.model.aa.UserAccount;
 import de.mpg.mpdl.r2d2.service.impl.AdminService;
 
@@ -88,16 +90,17 @@ public class AdminController {
     return new ResponseEntity<>(list, HttpStatus.OK);
   }
 
-  @GetMapping(value = "/datasets/{id}")
-  public ResponseEntity<?> listDataasetById(@PathVariable("id") String uuid, HttpServletRequest request)
-      throws AuthorizationException, NotFoundException {
-    DatasetVersion dataset = service.listDatasetById(uuid);
+  @GetMapping(value = "/datasets/{id}/{versionNumber}")
+  public ResponseEntity<?> listDataasetById(@PathVariable("id") String uuid, @PathVariable("versionNumber") Integer versionNumber,
+      HttpServletRequest request) throws AuthorizationException, NotFoundException {
+    DatasetVersion dataset = service.listDatasetById(new VersionId(UUID.fromString(uuid), versionNumber));
     return new ResponseEntity<>(dataset, HttpStatus.OK);
   }
 
-  @DeleteMapping(value = "/datasets/{id}")
-  public ResponseEntity<?> deleteDataset(@PathVariable("id") String uuid) throws AuthorizationException, NotFoundException {
-    service.deleteDataset(uuid);
+  @DeleteMapping(value = "/datasets/{id}/{versionNumber}")
+  public ResponseEntity<?> deleteDataset(@PathVariable("id") String uuid, @PathVariable("versionNumber") Integer versionNumber)
+      throws AuthorizationException, NotFoundException {
+    service.deleteDataset(new VersionId(UUID.fromString(uuid), versionNumber));
     return new ResponseEntity<>(HttpStatus.GONE);
   }
 }
