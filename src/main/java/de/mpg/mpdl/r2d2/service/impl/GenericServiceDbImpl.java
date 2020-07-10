@@ -21,6 +21,7 @@ import de.mpg.mpdl.r2d2.exceptions.AuthorizationException;
 import de.mpg.mpdl.r2d2.exceptions.OptimisticLockingException;
 import de.mpg.mpdl.r2d2.exceptions.R2d2ApplicationException;
 import de.mpg.mpdl.r2d2.exceptions.R2d2TechnicalException;
+import de.mpg.mpdl.r2d2.model.BaseDateDb;
 import de.mpg.mpdl.r2d2.model.BaseDb;
 import de.mpg.mpdl.r2d2.model.aa.R2D2Principal;
 import de.mpg.mpdl.r2d2.model.aa.UserAccount;
@@ -78,23 +79,23 @@ public abstract class GenericServiceDbImpl<E> {
   }
 
 
-  protected void setBasicCreationProperties(BaseDb baseObject, UserAccount creator) {
+  protected void setBasicCreationProperties(BaseDateDb baseObject, UserAccount creator) {
     //Truncate to microseconds, as the database doesn't support more
     setBasicCreationProperties(baseObject, creator, Utils.generateCurrentDateTimeForDatabase());
   }
 
-  protected void setBasicCreationProperties(BaseDb baseObject, UserAccount creator, OffsetDateTime dateTime) {
+  protected void setBasicCreationProperties(BaseDateDb baseObject, UserAccount creator, OffsetDateTime dateTime) {
     baseObject.setCreator(new UserAccountRO(creator));
     baseObject.setCreationDate(dateTime);
     setBasicModificationProperties(baseObject, creator, dateTime);
   }
 
-  protected void setBasicModificationProperties(BaseDb baseObject, UserAccount creator) {
+  protected void setBasicModificationProperties(BaseDateDb baseObject, UserAccount creator) {
     //Truncate to microseconds, as the database doesn't support more
     setBasicModificationProperties(baseObject, creator, Utils.generateCurrentDateTimeForDatabase());
   }
 
-  protected void setBasicModificationProperties(BaseDb baseObject, UserAccount creator, OffsetDateTime dateTime) {
+  protected void setBasicModificationProperties(BaseDateDb baseObject, UserAccount creator, OffsetDateTime dateTime) {
     baseObject.setModifier(new UserAccountRO(creator));
     baseObject.setModificationDate(dateTime);
   }

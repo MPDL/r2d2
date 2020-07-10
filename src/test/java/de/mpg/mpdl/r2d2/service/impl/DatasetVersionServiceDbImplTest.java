@@ -74,7 +74,7 @@ public class DatasetVersionServiceDbImplTest {
 
     DatasetVersion savedDatasetVersion = new DatasetVersion();
     UUID datasetVersionId = UUID.randomUUID();
-    savedDatasetVersion.setId(datasetVersionId);
+    savedDatasetVersion.getDataset().setId(datasetVersionId);
     Mockito.when(this.datasetVersionRepository.save(Mockito.any())).thenReturn(savedDatasetVersion);
 
     //When

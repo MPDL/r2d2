@@ -332,25 +332,11 @@
 				"state": {
 					"type": "keyword"
 				},
-				"versions": {
-					"properties": {
-						"id": {
-							"type": "keyword"
-						},
-						"versionNumber": {
-							"type": "long"
-						}
-					}
+				"latestVersion": {
+					"type" : "integer"
 				},
 				"latestPublicVersion": {
-					"properties": {
-						"id": {
-							"type": "keyword"
-						},
-						"versionNumber": {
-							"type": "long"
-						}
-					}
+					"type" : "integer"
 				}
 			}
 		},

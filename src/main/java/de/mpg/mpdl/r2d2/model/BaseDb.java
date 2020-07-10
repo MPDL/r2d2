@@ -29,13 +29,8 @@ import de.mpg.mpdl.r2d2.model.aa.UserAccount;
 import de.mpg.mpdl.r2d2.model.aa.UserAccountRO;
 
 @MappedSuperclass
-@TypeDefs({@TypeDef(name = "json", typeClass = JsonStringType.class), @TypeDef(name = "jsonb", typeClass = JsonBinaryType.class),
-    @TypeDef(name = "string-array", typeClass = StringArrayType.class), @TypeDef(name = "int-array", typeClass = IntArrayType.class)})
+public class BaseDb extends BaseDateDb {
 
-public class BaseDb {
-
-  public final static String[] userIgnoreJsonProperties =
-      new String[] {"creationDate", "creator", "modificationDate", "modifier", "email", "roles"};
 
   @Id
   //@GeneratedValue(strategy = GenerationType.AUTO)
@@ -45,62 +40,12 @@ public class BaseDb {
   private UUID id;
 
 
-  @Column(columnDefinition = "TIMESTAMP WITH TIME ZONE", nullable = false, updatable = false)
-  private OffsetDateTime creationDate;
-
-  @Column(columnDefinition = "TIMESTAMP WITH TIME ZONE", nullable = false)
-  private OffsetDateTime modificationDate;
-
-
-  @Embedded
-  @AttributeOverrides({@AttributeOverride(name = "id", column = @Column(name = "creator_id")),
-      @AttributeOverride(name = "name", column = @Column(name = "creator_name"))})
-  private UserAccountRO creator;
-
-
-  @Embedded
-  @AttributeOverrides({@AttributeOverride(name = "id", column = @Column(name = "modifier_id")),
-      @AttributeOverride(name = "name", column = @Column(name = "modifier_name"))})
-  private UserAccountRO modifier;
-
   public UUID getId() {
     return id;
   }
 
   public void setId(UUID id) {
     this.id = id;
-  }
-
-  public OffsetDateTime getCreationDate() {
-    return creationDate;
-  }
-
-  public void setCreationDate(OffsetDateTime creationDate) {
-    this.creationDate = creationDate;
-  }
-
-  public OffsetDateTime getModificationDate() {
-    return modificationDate;
-  }
-
-  public void setModificationDate(OffsetDateTime modificationDate) {
-    this.modificationDate = modificationDate;
-  }
-
-  public UserAccountRO getCreator() {
-    return creator;
-  }
-
-  public void setCreator(UserAccountRO creator) {
-    this.creator = creator;
-  }
-
-  public UserAccountRO getModifier() {
-    return modifier;
-  }
-
-  public void setModifier(UserAccountRO modifier) {
-    this.modifier = modifier;
   }
 
 }

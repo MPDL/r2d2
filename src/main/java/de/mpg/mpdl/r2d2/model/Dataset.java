@@ -7,9 +7,11 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.Transient;
 
 import org.hibernate.annotations.Type;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 import de.mpg.mpdl.r2d2.model.aa.UserAccountRO;
@@ -75,6 +77,8 @@ public class Dataset extends BaseDb {
   }
 
 
+  @JsonIgnore
+  @Transient
   public VersionId getLatestVersionId() {
     if (latestVersion != null) {
       return new VersionId(this.getId(), latestVersion);
@@ -82,6 +86,8 @@ public class Dataset extends BaseDb {
     return null;
   }
 
+  @JsonIgnore
+  @Transient
   public VersionId getLatestPublicVersionId() {
     if (latestPublicVersion != null) {
       return new VersionId(this.getId(), latestPublicVersion);

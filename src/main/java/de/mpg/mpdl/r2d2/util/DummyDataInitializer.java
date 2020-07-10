@@ -101,7 +101,7 @@ public class DummyDataInitializer {
     internalUserRepository.save(internalUser2);
 
     DatasetVersion dv = new DatasetVersion();
-    dv.setId(UUID.fromString("a6124f2a-9a06-489d-a7e2-40b583ebbd23"));
+    //dv.setId(UUID.fromString("a6124f2a-9a06-489d-a7e2-40b583ebbd23"));
     dv.setCreator(new UserAccountRO(user));
     dv.setModifier(new UserAccountRO(user));
     dv.setCreationDate(currentDateTime);
@@ -114,7 +114,7 @@ public class DummyDataInitializer {
     dv.getMetadata().getAuthors().add(author);
 
     Dataset dataset = new Dataset();
-    dataset.setId(dv.getId());
+    dataset.setId(UUID.fromString("a6124f2a-9a06-489d-a7e2-40b583ebbd23"));
     dataset.setCreator(new UserAccountRO(user));
     dataset.setModifier(new UserAccountRO(user));
     dataset.setCreationDate(currentDateTime);
@@ -128,7 +128,7 @@ public class DummyDataInitializer {
 
     DatasetVersion dv2 = new DatasetVersion();
     dv2.setState(State.PUBLIC);
-    dv2.setId(UUID.fromString("a6124f2a-9a06-489d-a7e2-40b583ebbd24"));
+    //dv2.setId(UUID.fromString("a6124f2a-9a06-489d-a7e2-40b583ebbd24"));
     dv2.setCreator(new UserAccountRO(user));
     dv2.setModifier(new UserAccountRO(user));
     dv2.setCreationDate(currentDateTime);
@@ -141,7 +141,7 @@ public class DummyDataInitializer {
     dv2.getMetadata().getAuthors().add(author2);
 
     Dataset dataset2 = new Dataset();
-    dataset2.setId(dv2.getId());
+    dataset2.setId(UUID.fromString("a6124f2a-9a06-489d-a7e2-40b583ebbd24"));
     dataset2.setCreator(new UserAccountRO(user));
     dataset2.setModifier(new UserAccountRO(user));
     dataset2.setCreationDate(currentDateTime);
@@ -159,7 +159,7 @@ public class DummyDataInitializer {
 
     DatasetVersion dv3 = new DatasetVersion();
     dv3.setState(State.PUBLIC);
-    dv3.setId(UUID.fromString("a6124f2a-9a06-489d-a7e2-40b583ebbd25"));
+    //dv3.setId(UUID.fromString("a6124f2a-9a06-489d-a7e2-40b583ebbd25"));
     dv3.setCreator(new UserAccountRO(user2));
     dv3.setModifier(new UserAccountRO(user2));
     dv3.setCreationDate(currentDateTime);
@@ -172,7 +172,7 @@ public class DummyDataInitializer {
     dv3.getMetadata().getAuthors().add(author3);
 
     Dataset dataset3 = new Dataset();
-    dataset3.setId(dv3.getId());
+    dataset3.setId(UUID.fromString("a6124f2a-9a06-489d-a7e2-40b583ebbd25"));
     dataset3.setCreator(new UserAccountRO(user2));
     dataset3.setModifier(new UserAccountRO(user2));
     dataset3.setCreationDate(currentDateTime);

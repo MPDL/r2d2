@@ -3,9 +3,12 @@ package de.mpg.mpdl.r2d2.model;
 import java.io.Serializable;
 import java.util.UUID;
 
+import javax.persistence.Embeddable;
+
+@Embeddable
 public class VersionId implements Serializable {
 
-  private UUID id;
+  private UUID dataset;
 
   private int versionNumber;
 
@@ -15,16 +18,16 @@ public class VersionId implements Serializable {
 
   public VersionId(UUID id, int versionNumber) {
     super();
-    this.id = id;
+    this.dataset = id;
     this.versionNumber = versionNumber;
   }
 
   public UUID getId() {
-    return id;
+    return dataset;
   }
 
   public void setId(UUID id) {
-    this.id = id;
+    this.dataset = id;
   }
 
   public int getVersionNumber() {
@@ -37,7 +40,7 @@ public class VersionId implements Serializable {
 
 
   public String toString() {
-    return this.id.toString() + "/" + versionNumber;
+    return this.dataset.toString() + "/" + versionNumber;
   }
 
 }
