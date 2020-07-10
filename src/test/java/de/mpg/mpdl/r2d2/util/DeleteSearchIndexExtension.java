@@ -5,13 +5,13 @@ import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequest;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestHighLevelClient;
-import org.junit.jupiter.api.extension.AfterAllCallback;
+import org.junit.jupiter.api.extension.AfterEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
 
-public class DeleteSearchIndexExtension implements AfterAllCallback {
+public class DeleteSearchIndexExtension implements AfterEachCallback {
 
   @Override
-  public void afterAll(ExtensionContext context) throws Exception {
+  public void afterEach(ExtensionContext context) throws Exception {
     RestHighLevelClient elasticSearchClient =
         new RestHighLevelClient(RestClient.builder(HttpHost.create(SearchEngineLauncher.ELASTIC_SEARCH_CONTAINER.getHttpHostAddress())));
 
