@@ -8,7 +8,20 @@ import javax.persistence.Enumerated;
 import org.hibernate.annotations.Type;
 
 @Entity
-public class File extends BaseDb {
+public class StagingFile extends BaseDb {
+
+  public enum UploadState {
+    INITIATED,
+    ONGOING,
+    COMPLETE
+  }
+
+  @Enumerated(EnumType.STRING)
+  private UploadState state = UploadState.INITIATED;
+
+  @Type(type = "jsonb")
+  @Column(columnDefinition = "jsonb")
+  private FileUploadStatus stateInfo = new FileUploadStatus();
 
   private String filename;
 
@@ -58,6 +71,22 @@ public class File extends BaseDb {
 
   public void setSize(long size) {
     this.size = size;
+  }
+
+  public UploadState getState() {
+    return state;
+  }
+
+  public void setState(UploadState state) {
+    this.state = state;
+  }
+
+  public FileUploadStatus getStateInfo() {
+    return stateInfo;
+  }
+
+  public void setStateInfo(FileUploadStatus stateInfo) {
+    this.stateInfo = stateInfo;
   }
 
 }
