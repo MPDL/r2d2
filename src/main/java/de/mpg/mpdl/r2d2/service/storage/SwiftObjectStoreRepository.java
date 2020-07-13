@@ -38,6 +38,7 @@ import de.mpg.mpdl.r2d2.SwiftStorageConfigurationProperties;
 import de.mpg.mpdl.r2d2.exceptions.NotFoundException;
 import de.mpg.mpdl.r2d2.model.File;
 import de.mpg.mpdl.r2d2.model.FileChunk;
+import de.mpg.mpdl.r2d2.model.StagingFile;
 
 @Repository
 public class SwiftObjectStoreRepository {
@@ -52,7 +53,7 @@ public class SwiftObjectStoreRepository {
   private BlobStore store;
 
 
-
+  private static final String CONTENT = "content";
   private static final String SEGMENTS = "segments";
 
 
@@ -66,11 +67,11 @@ public class SwiftObjectStoreRepository {
   }
 
 
-  public String uploadChunk(File file, FileChunk chunk, InputStream is) {
+  public String uploadChunk(StagingFile sf, FileChunk chunk, InputStream is) {
 
 
-    LOGGER.info("Uploading Chunk to container " + file.getId());
-    boolean containerCreated = createContainer(file.getId().toString());
+    LOGGER.info("Uploading Chunk to container " + sf.getId());
+    boolean containerCreated = createContainer(sf.getId().toString());
     Payload payload = new InputStreamPayload(is);
     //payload.getContentMetadata().setContentLength(f.getSize());
     if (chunk.getClientEtag() != null) {
@@ -89,13 +90,13 @@ public class SwiftObjectStoreRepository {
     // @formatter:off
     Blob blob = store.blobBuilder(name).payload(payload).userMetadata(userMetadata).build();
     // @formatter:on
-    String eTag = store.putBlob(file.getId().toString(), blob);
+    String eTag = store.putBlob(sf.getId().toString(), blob);
     LOGGER.info("Cloud server returned etag " + eTag);
     return eTag;
   }
 
 
-  public String uploadFile(File file, InputStream is) {
+  public String uploadFile(StagingFile file, InputStream is) {
 
 
     LOGGER.info("Uploading single file to container " + file.getId());
@@ -111,11 +112,10 @@ public class SwiftObjectStoreRepository {
      * TODO provide metadata
      */
 
-    String name = "content";
     Map<String, String> userMetadata = new HashMap<String, String>();
     //userMetadata.put("X-Detect-Content-Type", "true");
     // @formatter:off
-    Blob blob = store.blobBuilder(name).payload(payload).userMetadata(userMetadata).build();
+    Blob blob = store.blobBuilder(CONTENT).payload(payload).userMetadata(userMetadata).build();
     // @formatter:on
     String eTag = store.putBlob(file.getId().toString(), blob);
     LOGGER.info("Cloud server returned etag " + eTag);
@@ -191,6 +191,10 @@ public class SwiftObjectStoreRepository {
     return store.getBlob(container, name);
   }
 
+  public String getPublicURI(String container) {
+    return store.blobMetadata(container, CONTENT).getPublicUri().toString();
+  }
+
   public boolean deleteFile(String container, String name) {
 
     boolean isFileRemoved = false;
@@ -242,13 +246,13 @@ public class SwiftObjectStoreRepository {
   }
 
 
-  public String createManifest(File file) {
+  public String createManifest(StagingFile sf) {
     String contentType = "application/octet-stream";
-    if (file.getFormat() != null) {
-      contentType = file.getFormat();
+    if (sf.getFormat() != null) {
+      contentType = sf.getFormat();
     }
 
-    return createManifest(file.getId().toString(), SEGMENTS, file.getId().toString(), contentType);
+    return createManifest(sf.getId().toString(), SEGMENTS, sf.getId().toString(), contentType);
 
   }
 }

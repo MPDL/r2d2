@@ -61,7 +61,7 @@ public class DatasetVersion extends BaseDateDb {
   @MapsId("id")
   @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
   @OnDelete(action = OnDeleteAction.CASCADE)
-  @JoinColumn(name="id", nullable = false)
+  @JoinColumn(name = "id", nullable = false)
   @JsonProperty("parent")
   private Dataset dataset = new Dataset();
 
