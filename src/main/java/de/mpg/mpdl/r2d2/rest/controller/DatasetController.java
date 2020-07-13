@@ -129,24 +129,24 @@ public class DatasetController {
       @RequestHeader(name = "X-File-Total-Chunks", required = false) Integer totalChunks,
       @RequestHeader(name = "X-File-Total-Size") Long size, HttpServletRequest req, Principal prinz)
       throws R2d2ApplicationException, AuthorizationException, R2d2TechnicalException {
-
-
+  
+  
     InputStream is;
-
+  
     try {
       is = req.getInputStream();
     } catch (IOException e) {
       throw new R2d2TechnicalException(e);
     }
-
-
+  
+  
     File f = new File();
     f.setFilename(fileName);
     if (size != null) {
       f.setSize(size);
     }
-
-
+  
+  
     if (totalChunks != null) {
       //Init chunked upload
       try {
@@ -156,37 +156,37 @@ public class DatasetController {
       } catch (IOException e) {
         throw new R2d2TechnicalException(e);
       }
-
+  
       f.getStateInfo().setExpectedNumberOfChunks(totalChunks);
       f = datasetVersionService.initNewFile(UUID.fromString(id), f, Utils.toCustomPrincipal(prinz));
     } else {
       //Upload single file
       f = datasetVersionService.uploadSingleFile(UUID.fromString(id), f, is, Utils.toCustomPrincipal(prinz));
     }
-
+  
     BodyBuilder responseBuilder = ResponseEntity.status(HttpStatus.CREATED);
-
+  
     if (f.getChecksum() != null) {
       responseBuilder.header("etag", f.getChecksum());
     }
-
+  
     return responseBuilder.body(f);
   }
-
+  
   @PutMapping("/{id}/files/{fileId}")
   public ResponseEntity<FileChunk> uploadFileChunk(@PathVariable("id") String id, @PathVariable("fileId") String fileId,
       @RequestHeader("X-File-Chunk-Number") int part, @RequestHeader(name = "etag", required = false) String etag,
       @RequestHeader(name = "X-File-Chunk-Size", required = false) Long contentLength, HttpServletRequest req, Principal prinz)
       throws R2d2ApplicationException, AuthorizationException, R2d2TechnicalException {
-
+  
     InputStream is;
-
+  
     try {
       is = req.getInputStream();
     } catch (IOException e) {
       throw new R2d2TechnicalException(e);
     }
-
+  
     FileChunk chunk = new FileChunk();
     chunk.setClientEtag(etag);
     chunk.setNumber(part);
@@ -195,15 +195,15 @@ public class DatasetController {
     }
     FileChunk resultChunk =
         datasetVersionService.uploadFileChunk(UUID.fromString(id), UUID.fromString(fileId), chunk, is, Utils.toCustomPrincipal(prinz));
-
+  
     ResponseEntity<FileChunk> re = ResponseEntity.status(HttpStatus.CREATED).header("etag", resultChunk.getServerEtag()).body(resultChunk);
-
-
-
+  
+  
+  
     return re;
   }
-
-*/
+  
+  */
 
   @RequestMapping(value = "/search", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE,
       produces = MediaType.APPLICATION_JSON_VALUE)

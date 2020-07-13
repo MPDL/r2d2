@@ -94,7 +94,7 @@
 		
 	"de.mpg.mpdl.r2d2.service.impl.FileUploadService" : {
 		"technical" : {
-			"order" : ["user, stagingFile"]
+			"order" : ["user", "stagingFile"]
 		}, 
 		"upload" : [
 			{
