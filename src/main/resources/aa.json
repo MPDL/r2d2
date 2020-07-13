@@ -90,6 +90,24 @@
 				"datasetVersion.state" : ["PRIVATE"]
 			}
 		]
-		}		
+	},
+		
+	"de.mpg.mpdl.r2d2.service.impl.FileUploadService" : {
+		"technical" : {
+			"order" : ["user, stagingFile"]
+		}, 
+		"upload" : [
+			{
+				"user" : {
+					"role" : "ADMIN"
+				}
+			},
+			{
+				"user" : {
+					"role" : "USER"
+				}
+			}
+		]
+	}		
 		
 }
