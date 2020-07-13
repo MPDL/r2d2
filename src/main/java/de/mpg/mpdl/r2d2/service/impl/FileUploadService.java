@@ -135,11 +135,11 @@ public class FileUploadService extends GenericServiceDbImpl<StagingFile> impleme
   protected GenericDaoEs<StagingFile> getIndexDao() {
     return stagingFileDaoEs;
   }
-  
+
   public List<StagingFile> list() {
-	  List<StagingFile> list = new ArrayList<>();
-	  stagingFileRepository.findAll().iterator().forEachRemaining(list::add);
-	  return list;
+    List<StagingFile> list = new ArrayList<>();
+    stagingFileRepository.findAll().iterator().forEachRemaining(list::add);
+    return list;
   }
 
 }

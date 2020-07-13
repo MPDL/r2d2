@@ -40,8 +40,8 @@ public class FileUploadController {
   private StagingFileService stagingFileService;
 
   @GetMapping("")
-  public ResponseEntity<String> list(HttpServletResponse httpResponse,
-      @AuthenticationPrincipal R2D2Principal p) throws AuthorizationException, R2d2TechnicalException, IOException {
+  public ResponseEntity<String> list(HttpServletResponse httpResponse, @AuthenticationPrincipal R2D2Principal p)
+      throws AuthorizationException, R2d2TechnicalException, IOException {
 
     List<StagingFile> resp = ((FileUploadService) stagingFileService).list();
     return new ResponseEntity<String>(resp.toString(), HttpStatus.OK);

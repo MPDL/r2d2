@@ -342,6 +342,8 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
       setBasicCreationProperties(datasetVersionToBeUpdated, user.getUserAccount());
 
       datasetVersion.setFiles(new ArrayList<File>(latestVersion.getFiles()));
+      
+      datasetVersionToBeUpdated.getDataset().setLatestVersion(datasetVersionToBeUpdated.getVersionNumber());
 
 
 
@@ -354,9 +356,6 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
 
     try {
       datasetVersionToBeUpdated = datasetVersionRepository.saveAndFlush(datasetVersionToBeUpdated);
-      if (createNewVersion) {
-        datasetVersionToBeUpdated.getDataset().setLatestVersion(datasetVersionToBeUpdated.getVersionNumber());;
-      }
     } catch (Exception e) {
       throw new R2d2TechnicalException(e);
     }
