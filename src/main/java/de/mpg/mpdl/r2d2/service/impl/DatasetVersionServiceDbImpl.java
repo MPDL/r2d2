@@ -320,28 +320,25 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
       throws R2d2TechnicalException, OptimisticLockingException, ValidationException, NotFoundException, InvalidStateException,
       AuthorizationException {
 
-    DatasetVersion datasetVersionToBeUpdated = getLatest(id, user);
-    UUID datasetId = datasetVersionToBeUpdated.getDataset().getId();
-    DatasetVersion latestVersion = datasetVersionRepository.findLatestVersion(datasetId);
+    DatasetVersion latestVersion = datasetVersionRepository.findLatestVersion(id);
+    DatasetVersion datasetVersionToBeUpdated;
 
-    if (!datasetVersionToBeUpdated.getId().equals(latestVersion.getId())) {
-      throw new InvalidStateException("Only the latest dataset version can be updated. Given version: "
-          + datasetVersionToBeUpdated.getVersionNumber() + "; Latest version: " + latestVersion.getVersionNumber());
-    }
-
-    checkAa("update", user, datasetVersionToBeUpdated);
+    checkAa("update", user, latestVersion);
     // TODO validation
-    checkEqualModificationDate(datasetVersion.getModificationDate(), datasetVersionToBeUpdated.getDataset().getModificationDate());
+    checkEqualModificationDate(datasetVersion.getModificationDate(), latestVersion.getDataset().getModificationDate());
 
-    if (createNewVersion) {
+    //create new versioin
+    if (State.PUBLIC.equals(latestVersion.getState())) {
+      /*
       if (!State.PUBLIC.equals(datasetVersionToBeUpdated.getState())) {
         throw new InvalidStateException("A new version can only be created if the state of the latest version is public.");
       }
+      */
 
       //em.detach(datasetVersionToBeUpdated);
       //em.detach(latestVersion);
-      datasetVersionToBeUpdated = buildDatasetVersionToCreate(datasetVersion, user.getUserAccount(),
-          datasetVersionToBeUpdated.getVersionNumber() + 1, datasetVersionToBeUpdated.getDataset());
+      datasetVersionToBeUpdated = buildDatasetVersionToCreate(datasetVersion, user.getUserAccount(), latestVersion.getVersionNumber() + 1,
+          latestVersion.getDataset());
       setBasicCreationProperties(datasetVersionToBeUpdated, user.getUserAccount());
 
       datasetVersion.setFiles(new ArrayList<File>(latestVersion.getFiles()));
@@ -349,6 +346,7 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
 
 
     } else {
+      datasetVersionToBeUpdated = latestVersion;
       datasetVersionToBeUpdated.setMetadata(datasetVersion.getMetadata());
       setBasicModificationProperties(datasetVersionToBeUpdated, user.getUserAccount());
 
