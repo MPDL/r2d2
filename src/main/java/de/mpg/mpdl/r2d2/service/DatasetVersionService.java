@@ -22,7 +22,7 @@ import de.mpg.mpdl.r2d2.model.aa.UserAccount;
 public interface DatasetVersionService extends GenericService<DatasetVersion> {
 
   public DatasetVersion create(DatasetVersion object, R2D2Principal user)
-      throws R2d2TechnicalException, ValidationException, AuthorizationException;
+      throws R2d2TechnicalException, ValidationException, AuthorizationException, InvalidStateException;
 
   public DatasetVersion update(UUID id, DatasetVersion object, R2D2Principal user) throws R2d2TechnicalException,
       OptimisticLockingException, ValidationException, NotFoundException, InvalidStateException, AuthorizationException;
