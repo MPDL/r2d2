@@ -19,6 +19,7 @@ import de.mpg.mpdl.r2d2.aa.AuthorizationService;
 import de.mpg.mpdl.r2d2.db.DatasetVersionRepository;
 import de.mpg.mpdl.r2d2.db.FileRepository;
 import de.mpg.mpdl.r2d2.exceptions.AuthorizationException;
+import de.mpg.mpdl.r2d2.exceptions.InvalidStateException;
 import de.mpg.mpdl.r2d2.exceptions.R2d2TechnicalException;
 import de.mpg.mpdl.r2d2.exceptions.ValidationException;
 import de.mpg.mpdl.r2d2.model.DatasetVersion;
@@ -57,7 +58,8 @@ public class DatasetVersionServiceDbImplTest {
   private DatasetVersionServiceDbImpl datasetVersionServiceDbImpl = new DatasetVersionServiceDbImpl();
 
   @Test
-  public void testCreateMethodDelegationAndControlFlow() throws ValidationException, AuthorizationException, R2d2TechnicalException {
+  public void testCreateMethodDelegationAndControlFlow()
+      throws ValidationException, AuthorizationException, R2d2TechnicalException, InvalidStateException {
     //Given
     DatasetVersion datasetVersion = new DatasetVersion();
     DatasetVersionMetadata datasetVersionMetadata = new DatasetVersionMetadata();
