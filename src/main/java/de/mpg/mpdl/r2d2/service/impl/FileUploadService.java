@@ -9,6 +9,8 @@ import java.util.UUID;
 
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PostFilter;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -60,14 +62,16 @@ public class FileUploadService extends GenericServiceDbImpl<StagingFile> impleme
   }
 
   @Override
-  public void delete(UUID id, OffsetDateTime lastModificationDate, R2D2Principal user)
+  @PreAuthorize("hasRole('ADMIN') or hasRole('USER')")
+  public boolean delete(UUID id, R2D2Principal user)
       throws R2d2TechnicalException, OptimisticLockingException, NotFoundException, InvalidStateException, AuthorizationException {
     try {
-      stagingFileRepository.existsById(id);
+      stagingFileRepository.deleteById(id);
+      return objectStoreRepository.deleteContainer(id.toString());
     } catch (Exception e) {
       throw new R2d2TechnicalException(e);
     }
-    stagingFileDaoEs.deleteImmediatly(id.toString());
+    // stagingFileDaoEs.deleteImmediatly(id.toString());
   }
 
   @Override
@@ -90,7 +94,7 @@ public class FileUploadService extends GenericServiceDbImpl<StagingFile> impleme
     sf.setChecksum(eTag);
     sf.setState(UploadState.COMPLETE);
     sf.setStorageLocation(objectStoreRepository.getPublicURI(file.getId().toString()));
-    stagingFileDaoEs.createImmediately(sf.getId().toString(), sf);
+    // stagingFileDaoEs.createImmediately(sf.getId().toString(), sf);
 
     return sf;
   }
@@ -104,7 +108,7 @@ public class FileUploadService extends GenericServiceDbImpl<StagingFile> impleme
 
     StagingFile sf = create(file, user);
     objectStoreRepository.createContainer(file.getId().toString());
-    stagingFileDaoEs.createImmediately(sf.getId().toString(), sf);
+    // stagingFileDaoEs.createImmediately(sf.getId().toString(), sf);
 
     return sf;
   }
@@ -127,7 +131,7 @@ public class FileUploadService extends GenericServiceDbImpl<StagingFile> impleme
       sf.setState(UploadState.COMPLETE);
       objectStoreRepository.createManifest(sf);
     }
-    stagingFileDaoEs.createImmediately(sf.getId().toString(), sf);
+    // stagingFileDaoEs.createImmediately(sf.getId().toString(), sf);
     return chunk;
   }
 
@@ -135,11 +139,13 @@ public class FileUploadService extends GenericServiceDbImpl<StagingFile> impleme
   protected GenericDaoEs<StagingFile> getIndexDao() {
     return stagingFileDaoEs;
   }
-  
+
+  //@PostFilter("hasRole('ROLE_ADMIN') or filterObject.creator.id == principal.userAccount.id")
+  @PostFilter("filterObject.creator.id == principal.userAccount.id")
   public List<StagingFile> list() {
-	  List<StagingFile> list = new ArrayList<>();
-	  stagingFileRepository.findAll().iterator().forEachRemaining(list::add);
-	  return list;
+    List<StagingFile> list = new ArrayList<>();
+    stagingFileRepository.findAll().iterator().forEachRemaining(list::add);
+    return list;
   }
 
 }

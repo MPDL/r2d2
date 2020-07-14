@@ -22,7 +22,7 @@ public interface StagingFileService extends GenericService<StagingFile> {
   public StagingFile update(StagingFile object, R2D2Principal user) throws R2d2TechnicalException, OptimisticLockingException,
       ValidationException, NotFoundException, InvalidStateException, AuthorizationException;
 
-  public void delete(UUID id, OffsetDateTime lastModificationDate, R2D2Principal user)
+  public boolean delete(UUID id, R2D2Principal user)
       throws R2d2TechnicalException, OptimisticLockingException, NotFoundException, InvalidStateException, AuthorizationException;
 
   public StagingFile get(UUID id, R2D2Principal user) throws R2d2TechnicalException, NotFoundException, AuthorizationException;
