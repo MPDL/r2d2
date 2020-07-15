@@ -20,7 +20,7 @@ public interface DatasetVersionRepository extends JpaRepository<DatasetVersion, 
   public DatasetVersion findLatestPublicVersion(@Param("datasetId") UUID datasetId);
 
   //@Query(value = "SELECT dataset_version_id FROM dataset_version_files WHERE files_id = :fileId", nativeQuery = true)
-  @Query("SELECT datasetVersion.dataset.id FROM DatasetVersion datasetVersion JOIN datasetVersion.files file WHERE file.id = :fileId")
+  @Query("SELECT DISTINCT datasetVersion.dataset.id FROM DatasetVersion datasetVersion JOIN datasetVersion.files file WHERE file.id = :fileId")
   public List<UUID> findItemsForFile(@Param("fileId") UUID fileId);
 
 }

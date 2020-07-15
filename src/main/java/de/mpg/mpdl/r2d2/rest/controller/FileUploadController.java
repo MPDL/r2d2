@@ -124,13 +124,14 @@ public class FileUploadController {
 
     return re;
   }
-  
+
   @DeleteMapping("/{fileId}")
-  public ResponseEntity<?> delete(@PathVariable("fileId") String fileId, @AuthenticationPrincipal R2D2Principal p) throws R2d2TechnicalException, OptimisticLockingException, NotFoundException, InvalidStateException, AuthorizationException {
-	  if (stagingFileService.delete(UUID.fromString(fileId), p)) {
-		  Map<String, Boolean> map = Collections.singletonMap("Acknowledged", true);
-		  return new ResponseEntity<>(map, HttpStatus.ACCEPTED);
-	  }
-	return null;
+  public ResponseEntity<?> delete(@PathVariable("fileId") String fileId, @AuthenticationPrincipal R2D2Principal p)
+      throws R2d2TechnicalException, OptimisticLockingException, NotFoundException, InvalidStateException, AuthorizationException {
+    if (stagingFileService.delete(UUID.fromString(fileId), p)) {
+      Map<String, Boolean> map = Collections.singletonMap("Acknowledged", true);
+      return new ResponseEntity<>(map, HttpStatus.ACCEPTED);
+    }
+    return null;
   }
 }
