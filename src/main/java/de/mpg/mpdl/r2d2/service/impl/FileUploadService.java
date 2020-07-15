@@ -77,7 +77,7 @@ public class FileUploadService extends GenericServiceDbImpl<StagingFile> impleme
   @Override
   public StagingFile get(UUID id, R2D2Principal user) throws R2d2TechnicalException, NotFoundException, AuthorizationException {
     StagingFile sf = stagingFileRepository.findById(id)
-        .orElseThrow(() -> new NotFoundException(String.format("File with id %s MOT FOUND!", id.toString())));
+        .orElseThrow(() -> new NotFoundException(String.format("File with id %s NOT FOUND!", id.toString())));
     return sf;
   }
 
