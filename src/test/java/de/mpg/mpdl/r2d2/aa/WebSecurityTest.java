@@ -30,7 +30,9 @@ import de.mpg.mpdl.r2d2.db.UserAccountRepository;
 import de.mpg.mpdl.r2d2.model.aa.R2D2Principal;
 import de.mpg.mpdl.r2d2.model.aa.UserAccount;
 import de.mpg.mpdl.r2d2.service.DatasetVersionService;
+import de.mpg.mpdl.r2d2.service.StagingFileService;
 import de.mpg.mpdl.r2d2.service.UserService;
+import de.mpg.mpdl.r2d2.service.impl.AdminService;
 
 /**
  * Test for the WebSecurity (CORS Configuration, AuthenticationFilters)
@@ -56,6 +58,12 @@ public class WebSecurityTest {
 
   @MockBean
   private UserService userService;
+
+  @MockBean
+  private AdminService adminService;
+
+  @MockBean
+  private StagingFileService stagingFileService;
 
   @Autowired
   private BCryptPasswordEncoder passwordEncoder;
