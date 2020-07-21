@@ -14,7 +14,13 @@ import de.mpg.mpdl.r2d2.model.DatasetVersion;
 import de.mpg.mpdl.r2d2.util.BaseIntegrationTest;
 import de.mpg.mpdl.r2d2.util.Utils;
 
-public class DatasetVersionRepositoryTest extends BaseIntegrationTest {
+/**
+ * Integration test for DatasetVersionRepository
+ * 
+ * @author helk
+ *
+ */
+public class DatasetVersionRepositoryIT extends BaseIntegrationTest {
 
   @Autowired
   private DatasetVersionRepository datasetVersionRepository;
