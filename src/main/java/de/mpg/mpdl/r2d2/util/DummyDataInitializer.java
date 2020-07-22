@@ -124,7 +124,7 @@ public class DummyDataInitializer {
     dv.setDataset(dataset);
 
     dv = datasetVersionRepository.save(dv);
-    datasetVersionDao.createImmediately(dv.getId().toString(), dv);
+    datasetVersionDao.createImmediately(dv.getVersionId().toString(), dv);
 
     DatasetVersion dv2 = new DatasetVersion();
     dv2.setState(State.PUBLIC);
@@ -153,7 +153,7 @@ public class DummyDataInitializer {
     dv2.setDataset(dataset2);
 
     dv2 = datasetVersionRepository.save(dv2);
-    datasetVersionDao.createImmediately(dv2.getId().toString(), dv2);
+    datasetVersionDao.createImmediately(dv2.getVersionId().toString(), dv2);
 
 
 
@@ -183,7 +183,7 @@ public class DummyDataInitializer {
     dv3.setDataset(dataset3);
 
     dv3 = datasetVersionRepository.save(dv3);
-    datasetVersionDao.createImmediately(dv3.getId().toString(), dv3);
+    datasetVersionDao.createImmediately(dv3.getVersionId().toString(), dv3);
 
   }
 
