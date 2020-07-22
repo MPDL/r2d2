@@ -14,6 +14,9 @@ public class DeleteDatabaseExtension implements AfterEachCallback {
 
   @Override
   public void afterEach(ExtensionContext context) throws Exception {
+
+    //TODO: Delete/recreate tables instead of truncate them?
+
     DataSource dataSource = SpringExtension.getApplicationContext(context).getBean(DataSource.class);
     Connection connection = dataSource.getConnection();
 
@@ -28,7 +31,7 @@ public class DeleteDatabaseExtension implements AfterEachCallback {
     statement.executeBatch();
 
     //TODO: Check persistence-level Approach:
-    //Another approach would be to use the EntityManager to delete the test data on entity/persistence-level (instead of the sql-level)
+    //Another approach would be to use the EntityManager (or Hibernate or JdbcTemplate!?) to delete the test data on entity/persistence-level (instead of the sql-level)
   }
 
 }

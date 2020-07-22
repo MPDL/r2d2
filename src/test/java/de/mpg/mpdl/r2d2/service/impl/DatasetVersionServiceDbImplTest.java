@@ -3,6 +3,7 @@ package de.mpg.mpdl.r2d2.service.impl;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.ArrayList;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.junit.jupiter.api.Test;
@@ -77,7 +78,8 @@ public class DatasetVersionServiceDbImplTest {
     DatasetVersion savedDatasetVersion = new DatasetVersion();
     UUID datasetVersionId = UUID.randomUUID();
     savedDatasetVersion.getDataset().setId(datasetVersionId);
-    Mockito.when(this.datasetVersionRepository.save(Mockito.any())).thenReturn(savedDatasetVersion);
+    Mockito.when(this.datasetVersionRepository.saveAndFlush(Mockito.any())).thenReturn(savedDatasetVersion);
+    Mockito.when(this.datasetVersionRepository.findById(Mockito.any())).thenReturn(Optional.of(savedDatasetVersion));
 
     //When
     this.datasetVersionServiceDbImpl.create(datasetVersion, r2d2Principal);
@@ -94,7 +96,7 @@ public class DatasetVersionServiceDbImplTest {
     assertThat(objectArguments.getAllValues()).first().isEqualTo(r2d2Principal);
     assertThat(objectArguments.getAllValues()).last().isInstanceOf(DatasetVersion.class);
 
-    inOrder.verify(datasetVersionRepository).save(datasetVersionArgument.capture());
+    inOrder.verify(datasetVersionRepository).saveAndFlush(datasetVersionArgument.capture());
     assertThat(datasetVersionArgument.getValue()).extracting("metadata").isEqualTo(datasetVersionMetadata);
 
     inOrder.verify(datasetVersionIndexDao).createImmediately(Mockito.eq(datasetVersionId.toString()), Mockito.eq(savedDatasetVersion));

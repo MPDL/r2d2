@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.OffsetDateTime;
 import java.util.Arrays;
+import java.util.UUID;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,7 +14,13 @@ import de.mpg.mpdl.r2d2.model.DatasetVersion;
 import de.mpg.mpdl.r2d2.util.BaseIntegrationTest;
 import de.mpg.mpdl.r2d2.util.Utils;
 
-public class DatasetVersionRepositoryTest extends BaseIntegrationTest {
+/**
+ * Integration test for DatasetVersionRepository
+ * 
+ * @author helk
+ *
+ */
+public class DatasetVersionRepositoryIT extends BaseIntegrationTest {
 
   @Autowired
   private DatasetVersionRepository datasetVersionRepository;
@@ -24,6 +31,7 @@ public class DatasetVersionRepositoryTest extends BaseIntegrationTest {
     OffsetDateTime currentDateTime = Utils.generateCurrentDateTimeForDatabase();
 
     Dataset dataset = new Dataset();
+    dataset.setId(UUID.randomUUID());
     dataset.setCreationDate(currentDateTime);
     dataset.setModificationDate(currentDateTime);
 
