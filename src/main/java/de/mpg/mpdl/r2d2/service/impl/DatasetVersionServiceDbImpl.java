@@ -510,18 +510,18 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
     //Reindex latest version
     DatasetVersion latestVersion = datasetVersionRepository.findById(dataset.getLatestVersionId()).get();
     if (immediate) {
-      datasetVersionIndexDao.createImmediately(latestVersion.getId().toString(), latestVersion);
+      datasetVersionIndexDao.createImmediately(latestVersion.getVersionId().toString(), latestVersion);
     } else {
-      datasetVersionIndexDao.create(latestVersion.getId().toString(), latestVersion);
+      datasetVersionIndexDao.create(latestVersion.getVersionId().toString(), latestVersion);
     }
 
     //Reindex latest public version if exists and not equal to latest version
     if (dataset.getLatestPublicVersion() != null && dataset.getLatestPublicVersion() != latestVersion.getVersionNumber()) {
       DatasetVersion latestPublicVersion = datasetVersionRepository.findById(dataset.getLatestPublicVersionId()).get();
       if (immediate) {
-        datasetVersionIndexDao.createImmediately(latestPublicVersion.getId().toString(), latestPublicVersion);
+        datasetVersionIndexDao.createImmediately(latestPublicVersion.getVersionId().toString(), latestPublicVersion);
       } else {
-        datasetVersionIndexDao.create(latestPublicVersion.getId().toString(), latestPublicVersion);
+        datasetVersionIndexDao.create(latestPublicVersion.getVersionId().toString(), latestPublicVersion);
       }
     }
 
