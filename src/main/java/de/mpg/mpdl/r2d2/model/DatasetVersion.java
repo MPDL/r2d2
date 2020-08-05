@@ -26,14 +26,11 @@ import org.hibernate.annotations.OnDeleteAction;
 import org.hibernate.annotations.Type;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 import de.mpg.mpdl.r2d2.model.Dataset.State;
 
 @Entity
 @IdClass(VersionId.class)
-@JsonPropertyOrder(value = {"id", "versionNumber", "state"})
 public class DatasetVersion extends BaseDateDb {
 
 
@@ -62,7 +59,6 @@ public class DatasetVersion extends BaseDateDb {
   @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
   @OnDelete(action = OnDeleteAction.CASCADE)
   @JoinColumn(name = "id", nullable = false)
-  @JsonProperty("parent")
   private Dataset dataset = new Dataset();
 
   public int getVersionNumber() {

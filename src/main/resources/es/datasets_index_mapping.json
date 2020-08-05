@@ -255,7 +255,7 @@
 				}
 			}
 		},
-		"parent": {
+		"dataset": {
 			"properties": {
 				"creationDate": {
 					"type": "date"

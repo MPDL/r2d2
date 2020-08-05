@@ -30,17 +30,22 @@ public class MyTest {
 
   ObjectMapper objectMapper = new ObjectMapper();
 
+
+  public void testAA() {
+
+  }
+
   @Test
   public void test() throws Exception {
     objectMapper.findAndRegisterModules();
-    String filePath = "C:\\mytmp\\video.mkv";
-    //String filePath = "C:\\Users\\haarlae1\\Downloads\\scripts.zip";
+    //String filePath = "C:\\mytmp\\video.mkv";
+    String filePath = "C:\\Users\\haarlae1\\Downloads\\scripts.zip";
     Path p = Paths.get(filePath);
     String token = login();
 
-    chunkedFileUpload(p, 20, token);
+    //chunkedFileUpload(p, 20, token);
 
-    //singleFileUpload(p, token);
+    singleFileUpload(p, token);
 
     //getData();
 
@@ -97,9 +102,8 @@ public class MyTest {
     //FileInputStream cfis1 = new FileInputStream(p.toFile());
     long size = Files.size(filePath);
 
-    String res = Request.Post(host + "/api/datasets/dataset/a6124f2a-9a06-489d-a7e2-40b583ebbd23/files").addHeader("Authorization", token)
-        .addHeader("X-File-Name", filePath.getFileName().toString()).addHeader("X-File-Total-Size", Long.toString(size)).bodyStream(is)
-        .execute().returnContent().asString();
+    String res = Request.Post(host + "/files").addHeader("Authorization", token).addHeader("X-File-Name", filePath.getFileName().toString())
+        .addHeader("X-File-Total-Size", Long.toString(size)).bodyStream(is).execute().returnContent().asString();
 
 
     Logger.info(res);

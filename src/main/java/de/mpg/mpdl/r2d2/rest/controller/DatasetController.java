@@ -45,6 +45,8 @@ import de.mpg.mpdl.r2d2.model.File;
 import de.mpg.mpdl.r2d2.model.FileChunk;
 import de.mpg.mpdl.r2d2.model.VersionId;
 import de.mpg.mpdl.r2d2.model.aa.R2D2Principal;
+import de.mpg.mpdl.r2d2.rest.controller.dto.DatasetVersionDto;
+import de.mpg.mpdl.r2d2.rest.controller.dto.DtoMapper;
 import de.mpg.mpdl.r2d2.service.DatasetVersionService;
 import de.mpg.mpdl.r2d2.util.Utils;
 
@@ -61,20 +63,24 @@ public class DatasetController {
   private DatasetVersionService datasetVersionService;
 
 
+  @Autowired
+  private DtoMapper dtoMapper;
+
   @PostMapping(path = "")
-  public ResponseEntity<DatasetVersion> createDataset(@RequestBody DatasetVersion givenDatasetVersion, Principal prinz)
+  public ResponseEntity<DatasetVersionDto> createDataset(@RequestBody DatasetVersionDto givenDatasetVersion, Principal prinz)
       throws R2d2TechnicalException, R2d2ApplicationException {
 
-    DatasetVersion createdDv = datasetVersionService.create(givenDatasetVersion, Utils.toCustomPrincipal(prinz));
-    return new ResponseEntity<DatasetVersion>(createdDv, HttpStatus.CREATED);
+    DatasetVersion createdDv =
+        datasetVersionService.create(dtoMapper.convertToDatasetVersion(givenDatasetVersion), Utils.toCustomPrincipal(prinz));
+    return new ResponseEntity<DatasetVersionDto>(dtoMapper.convertToDatasetVersionDto(createdDv), HttpStatus.CREATED);
   }
 
 
 
   @PutMapping(path = "/{id}")
-  public ResponseEntity<DatasetVersion> updateDataset(@PathVariable("id") UUID id,
+  public ResponseEntity<DatasetVersionDto> updateDataset(@PathVariable("id") UUID id,
       @RequestParam(name = "createNewVersion", defaultValue = "false") Boolean createNewVersion,
-      @RequestBody DatasetVersion givenDatasetVersion, Principal prinz) throws R2d2TechnicalException, R2d2ApplicationException {
+      @RequestBody DatasetVersionDto givenDatasetVersion, Principal prinz) throws R2d2TechnicalException, R2d2ApplicationException {
 
     DatasetVersion createdDv = null;
     /*
@@ -84,32 +90,33 @@ public class DatasetController {
       createdDv = datasetVersionService.update(UUID.fromString(id), givenDatasetVersion, Utils.toCustomPrincipal(prinz));
     }
     */
-    createdDv = datasetVersionService.update(id, givenDatasetVersion, Utils.toCustomPrincipal(prinz));
-    return new ResponseEntity<DatasetVersion>(createdDv, HttpStatus.CREATED);
+    createdDv = datasetVersionService.update(id, dtoMapper.convertToDatasetVersion(givenDatasetVersion), Utils.toCustomPrincipal(prinz));
+    return new ResponseEntity<DatasetVersionDto>(dtoMapper.convertToDatasetVersionDto(createdDv), HttpStatus.CREATED);
   }
 
   @PutMapping(path = "/{id}/publish")
-  public ResponseEntity<DatasetVersion> publish(@PathVariable("id") String id,
+  public ResponseEntity<DatasetVersionDto> publish(@PathVariable("id") String id,
       @RequestParam(name = "lmd") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime lmd, Principal prinz)
       throws R2d2TechnicalException, R2d2ApplicationException {
 
     DatasetVersion publishedDv = datasetVersionService.publish(UUID.fromString(id), lmd, Utils.toCustomPrincipal(prinz));
-    return new ResponseEntity<DatasetVersion>(publishedDv, HttpStatus.CREATED);
+    return new ResponseEntity<DatasetVersionDto>(dtoMapper.convertToDatasetVersionDto(publishedDv), HttpStatus.CREATED);
   }
 
   @GetMapping(path = "/{id}")
-  public DatasetVersion getLatestDataset(@PathVariable("id") String id, Principal p)
+  public DatasetVersionDto getLatestDataset(@PathVariable("id") String id, Principal p)
       throws R2d2TechnicalException, R2d2ApplicationException {
 
-    return datasetVersionService.getLatest(UUID.fromString(id), Utils.toCustomPrincipal(p));
+    return dtoMapper.convertToDatasetVersionDto(datasetVersionService.getLatest(UUID.fromString(id), Utils.toCustomPrincipal(p)));
 
   }
 
   @GetMapping(path = "/{id}/{versionNumber}")
-  public DatasetVersion getDataset(@PathVariable("id") String id, @PathVariable("versionNumber") int versionNumber, Principal p)
+  public DatasetVersionDto getDataset(@PathVariable("id") String id, @PathVariable("versionNumber") int versionNumber, Principal p)
       throws R2d2TechnicalException, R2d2ApplicationException {
 
-    return datasetVersionService.get(new VersionId(UUID.fromString(id), versionNumber), Utils.toCustomPrincipal(p));
+    return dtoMapper.convertToDatasetVersionDto(
+        datasetVersionService.get(new VersionId(UUID.fromString(id), versionNumber), Utils.toCustomPrincipal(p)));
 
   }
 
@@ -234,5 +241,7 @@ public class DatasetController {
 
     return new ResponseEntity<String>(resp.toString(), HttpStatus.OK);
   }
+
+
 
 }
