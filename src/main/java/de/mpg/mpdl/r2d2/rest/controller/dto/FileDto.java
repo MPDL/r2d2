@@ -3,32 +3,35 @@ package de.mpg.mpdl.r2d2.rest.controller.dto;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-
-import org.hibernate.annotations.Type;
-
 public class FileDto {
+
 
   private UUID id;
 
+
   private OffsetDateTime creationDate;
+
 
   private OffsetDateTime modificationDate;
 
+
   private UUID creator;
+
 
   private UUID modifier;
 
+
   private String filename;
+
 
   private String storageLocation;
 
+
   private String checksum;
 
+
   private String format;
+
 
   private long size;
 

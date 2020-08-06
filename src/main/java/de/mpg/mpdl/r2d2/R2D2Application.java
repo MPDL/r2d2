@@ -2,9 +2,6 @@ package de.mpg.mpdl.r2d2;
 
 import java.util.Locale;
 
-import org.modelmapper.ModelMapper;
-import org.modelmapper.convention.MatchingStrategies;
-import org.modelmapper.spi.MatchingStrategy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -22,13 +19,6 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-
-import de.mpg.mpdl.r2d2.model.Dataset;
-import de.mpg.mpdl.r2d2.model.DatasetVersion;
-import de.mpg.mpdl.r2d2.model.File;
-import de.mpg.mpdl.r2d2.rest.controller.dto.DatasetDto;
-import de.mpg.mpdl.r2d2.rest.controller.dto.DatasetVersionDto;
-import de.mpg.mpdl.r2d2.rest.controller.dto.FileDto;
 
 @SpringBootApplication
 @PropertySource("classpath:application.r2d2.properties")
@@ -66,19 +56,26 @@ public class R2D2Application {
 
   }
 
+
+
+  /*
   @Bean
   public ModelMapper modelMapper() {
-
+  
     ModelMapper mp = new ModelMapper();
     //mp.getConfiguration().setMatchingStrategy(MatchingStrategies.LOOSE);
     mp.createTypeMap(DatasetVersion.class, DatasetVersionDto.class)
         .addMappings(mapper -> mapper.map(src -> src.getCreator().getId(), DatasetVersionDto::setCreator))
         .addMappings(mapper -> mapper.map(src -> src.getModifier().getId(), DatasetVersionDto::setModifier));
     mp.createTypeMap(Dataset.class, DatasetDto.class)
-        .addMappings(mapper -> mapper.map(src -> src.getCreator().getId(), DatasetDto::setCreator));
-    mp.createTypeMap(File.class, FileDto.class).addMappings(mapper -> mapper.map(src -> src.getCreator().getId(), FileDto::setCreator));
+        .addMappings(mapper -> mapper.map(src -> src.getCreator().getId(), DatasetDto::setCreator))
+        .addMappings(mapper -> mapper.map(src -> src.getModifier().getId(), DatasetDto::setModifier));
+    mp.createTypeMap(File.class, FileDto.class)
+        .addMappings(mapper -> mapper.map(src -> src.getCreator().getId(), FileDto::setCreator))
+        .addMappings(mapper -> mapper.map(src -> src.getModifier().getId(), FileDto::setModifier));
     return mp;
   }
+   */
 
   @Bean
   public BCryptPasswordEncoder passwordEncoder() {

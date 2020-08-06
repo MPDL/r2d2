@@ -6,6 +6,7 @@ import java.security.Principal;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
+import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
