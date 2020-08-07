@@ -57,26 +57,6 @@ public class R2D2Application {
   }
 
 
-
-  /*
-  @Bean
-  public ModelMapper modelMapper() {
-  
-    ModelMapper mp = new ModelMapper();
-    //mp.getConfiguration().setMatchingStrategy(MatchingStrategies.LOOSE);
-    mp.createTypeMap(DatasetVersion.class, DatasetVersionDto.class)
-        .addMappings(mapper -> mapper.map(src -> src.getCreator().getId(), DatasetVersionDto::setCreator))
-        .addMappings(mapper -> mapper.map(src -> src.getModifier().getId(), DatasetVersionDto::setModifier));
-    mp.createTypeMap(Dataset.class, DatasetDto.class)
-        .addMappings(mapper -> mapper.map(src -> src.getCreator().getId(), DatasetDto::setCreator))
-        .addMappings(mapper -> mapper.map(src -> src.getModifier().getId(), DatasetDto::setModifier));
-    mp.createTypeMap(File.class, FileDto.class)
-        .addMappings(mapper -> mapper.map(src -> src.getCreator().getId(), FileDto::setCreator))
-        .addMappings(mapper -> mapper.map(src -> src.getModifier().getId(), FileDto::setModifier));
-    return mp;
-  }
-   */
-
   @Bean
   public BCryptPasswordEncoder passwordEncoder() {
     return new BCryptPasswordEncoder();
