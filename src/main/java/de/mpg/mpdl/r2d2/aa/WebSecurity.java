@@ -51,6 +51,7 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
     configuration.addAllowedMethod(HttpMethod.DELETE);
     configuration.addExposedHeader("Authorization");
     configuration.addExposedHeader("Content-Disposition");
+    configuration.addExposedHeader("ETag");
     final UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
     source.registerCorsConfiguration("/**", configuration);
     return source;

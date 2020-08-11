@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import de.mpg.mpdl.r2d2.exceptions.AuthorizationException;
@@ -53,10 +54,28 @@ public class FileUploadController {
     return new ResponseEntity<>(resp, HttpStatus.OK);
   }
 
+  
+  
   @PostMapping("")
-  public ResponseEntity<StagingFile> newFile(@RequestHeader("X-File-Name") String fileName,
-      @RequestHeader(name = "X-File-Total-Chunks", required = false) Integer totalChunks,
-      @RequestHeader(name = "X-File-Total-Size") Long size, HttpServletRequest req, Principal prinz)
+  public ResponseEntity<StagingFile> newSingleFileUpload(@RequestHeader("File-Name") String fileName, @RequestHeader("Content-Type") String contentType, @RequestHeader(name = "Content-MD5", required = false) String etag) throws R2d2ApplicationException, AuthorizationException, R2d2TechnicalException
+  {
+    
+    f = stagingFileService.uploadSingleFile(f, is, Utils.toCustomPrincipal(prinz));
+    
+    BodyBuilder responseBuilder = ResponseEntity.status(HttpStatus.CREATED);
+
+    if (f.getChecksum() != null) {
+      responseBuilder.header("etag", f.getChecksum());
+    }
+
+    return responseBuilder.body(f);
+    
+  }
+  
+  
+  @PostMapping("/multipart")
+  public ResponseEntity<StagingFile> newChunkedFileUpload(@RequestHeader("File-Name") String fileName, @RequestHeader("Content-Type") String contentType,
+      HttpServletRequest req, Principal prinz)
       throws R2d2ApplicationException, AuthorizationException, R2d2TechnicalException {
 
     InputStream is;
@@ -73,7 +92,7 @@ public class FileUploadController {
       f.setSize(size);
     }
 
-    if (totalChunks != null) {
+   
       try {
         if (is.read() != -1) {
           throw new R2d2ApplicationException("Body must be empty. Upload chunks after this initialization");
@@ -84,9 +103,7 @@ public class FileUploadController {
 
       f.getStateInfo().setExpectedNumberOfChunks(totalChunks);
       f = stagingFileService.initNewFile(f, Utils.toCustomPrincipal(prinz));
-    } else {
-      f = stagingFileService.uploadSingleFile(f, is, Utils.toCustomPrincipal(prinz));
-    }
+    
 
     BodyBuilder responseBuilder = ResponseEntity.status(HttpStatus.CREATED);
 
@@ -98,10 +115,10 @@ public class FileUploadController {
   }
 
 
-  @PutMapping("/{fileId}")
-  public ResponseEntity<FileChunk> uploadFileChunk(@PathVariable("fileId") String fileId, @RequestHeader("X-File-Chunk-Number") int part,
-      @RequestHeader(name = "etag", required = false) String etag,
-      @RequestHeader(name = "X-File-Chunk-Size", required = false) Long contentLength, HttpServletRequest req, Principal prinz)
+  @PutMapping("/multipart/{fileId}")
+  public ResponseEntity<FileChunk> uploadFileChunk(@PathVariable("fileId") String fileId, @RequestParam("chunk-number") int part,
+      @RequestHeader(name = "Content-MD5", required = false) String etag,
+      HttpServletRequest req, Principal prinz)
       throws R2d2ApplicationException, AuthorizationException, R2d2TechnicalException {
 
     InputStream is;
@@ -120,11 +137,16 @@ public class FileUploadController {
     }
     FileChunk resultChunk = stagingFileService.uploadFileChunk(UUID.fromString(fileId), chunk, is, Utils.toCustomPrincipal(prinz));
 
-    ResponseEntity<FileChunk> re = ResponseEntity.status(HttpStatus.CREATED).header("etag", resultChunk.getServerEtag()).body(resultChunk);
+    ResponseEntity<FileChunk> re = ResponseEntity.status(HttpStatus.CREATED).header("ETag", resultChunk.getServerEtag()).body(resultChunk);
 
     return re;
   }
 
+  
+  //Methode für Beendigung des Multipart File-Uploads
+  
+  //Methoden für getStatus von FileChunks und StagingFiles
+  
   @DeleteMapping("/{fileId}")
   public ResponseEntity<?> delete(@PathVariable("fileId") String fileId, @AuthenticationPrincipal R2D2Principal p)
       throws R2d2TechnicalException, OptimisticLockingException, NotFoundException, InvalidStateException, AuthorizationException {
