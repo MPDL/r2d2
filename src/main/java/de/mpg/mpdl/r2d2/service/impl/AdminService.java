@@ -8,6 +8,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import org.jclouds.openstack.swift.v1.domain.Container;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -98,13 +99,13 @@ public class AdminService {
     return fileIds;
   }
 
-  public List<String> listAllContainers() {
+  public List<Container> listAllContainers() {
     return objectStore.listAllContainers();
   }
 
   public Map<String, Object> clearObjectStore() {
     Map<String, Object> response = new LinkedHashMap<>();
-    List<String> containers = listAllContainers();
+    List<Container> containers = listAllContainers();
     response.put("containers", containers.size());
     List<String> files = listAllFiles();
     response.put("files", files.size());

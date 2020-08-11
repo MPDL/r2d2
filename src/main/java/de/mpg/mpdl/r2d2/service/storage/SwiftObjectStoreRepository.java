@@ -17,8 +17,10 @@ import org.jclouds.io.Payload;
 import org.jclouds.io.payloads.ByteArrayPayload;
 import org.jclouds.io.payloads.InputStreamPayload;
 import org.jclouds.openstack.swift.v1.SwiftApi;
+import org.jclouds.openstack.swift.v1.domain.Container;
 import org.jclouds.openstack.swift.v1.domain.ObjectList;
 import org.jclouds.openstack.swift.v1.domain.Segment;
+import org.jclouds.openstack.swift.v1.features.ContainerApi;
 import org.jclouds.openstack.swift.v1.features.StaticLargeObjectApi;
 import org.jclouds.openstack.swift.v1.options.ListContainerOptions;
 import org.slf4j.Logger;
@@ -156,9 +158,14 @@ public class SwiftObjectStoreRepository {
     return inputStream;
   }
 
-  public List<String> listAllContainers() {
+  public List<Container> listAllContainers() {
     PageSet<? extends StorageMetadata> set = store.list();
-    return set.stream().map(smd -> smd.getName()).collect(Collectors.toList());
+    SwiftApi api = context.unwrapApi(SwiftApi.class);
+    ContainerApi capi = api.getContainerApi("region1");
+    List<Container> list = capi.list().toList();
+    return list;
+    // return set.stream().map(smd -> smd.getName()).collect(Collectors.toList());
+
   }
 
   public List<Object> listContainer(String container) throws NotFoundException {
