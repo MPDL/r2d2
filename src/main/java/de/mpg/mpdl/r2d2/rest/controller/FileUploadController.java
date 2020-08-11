@@ -32,6 +32,7 @@ import de.mpg.mpdl.r2d2.exceptions.NotFoundException;
 import de.mpg.mpdl.r2d2.exceptions.OptimisticLockingException;
 import de.mpg.mpdl.r2d2.exceptions.R2d2ApplicationException;
 import de.mpg.mpdl.r2d2.exceptions.R2d2TechnicalException;
+import de.mpg.mpdl.r2d2.exceptions.ValidationException;
 import de.mpg.mpdl.r2d2.model.FileChunk;
 import de.mpg.mpdl.r2d2.model.StagingFile;
 import de.mpg.mpdl.r2d2.model.aa.R2D2Principal;
@@ -57,15 +58,29 @@ public class FileUploadController {
   
   
   @PostMapping("")
-  public ResponseEntity<StagingFile> newSingleFileUpload(@RequestHeader("File-Name") String fileName, @RequestHeader("Content-Type") String contentType, @RequestHeader(name = "Content-MD5", required = false) String etag) throws R2d2ApplicationException, AuthorizationException, R2d2TechnicalException
+  public ResponseEntity<StagingFile> newSingleFileUpload(@RequestHeader("File-Name") String fileName, @RequestHeader("Content-Type") String contentType, @RequestHeader(name = "Content-MD5", required = false) String etag, HttpServletRequest request, @AuthenticationPrincipal R2D2Principal p) throws R2d2ApplicationException, AuthorizationException, R2d2TechnicalException
   {
+	  InputStream is;
+
+	    try {
+	      is = request.getInputStream();
+	    } catch (IOException e) {
+	      throw new R2d2TechnicalException(e);
+	    }
+	    
+	    StagingFile f = new StagingFile();
+	    f.setFilename(fileName);
+	    f.setFormat(contentType);
+	    if (etag != null) {
+	    	f.setChecksum(etag);
+	    }
     
-    f = stagingFileService.uploadSingleFile(f, is, Utils.toCustomPrincipal(prinz));
+    f = stagingFileService.uploadSingleFile(f, is, p);
     
     BodyBuilder responseBuilder = ResponseEntity.status(HttpStatus.CREATED);
 
     if (f.getChecksum() != null) {
-      responseBuilder.header("etag", f.getChecksum());
+      responseBuilder.header("ETag", f.getChecksum());
     }
 
     return responseBuilder.body(f);
@@ -75,41 +90,16 @@ public class FileUploadController {
   
   @PostMapping("/multipart")
   public ResponseEntity<StagingFile> newChunkedFileUpload(@RequestHeader("File-Name") String fileName, @RequestHeader("Content-Type") String contentType,
-      HttpServletRequest req, Principal prinz)
+      @AuthenticationPrincipal R2D2Principal p)
       throws R2d2ApplicationException, AuthorizationException, R2d2TechnicalException {
-
-    InputStream is;
-
-    try {
-      is = req.getInputStream();
-    } catch (IOException e) {
-      throw new R2d2TechnicalException(e);
-    }
 
     StagingFile f = new StagingFile();
     f.setFilename(fileName);
-    if (size != null) {
-      f.setSize(size);
-    }
+    f.setFormat(contentType);
 
-   
-      try {
-        if (is.read() != -1) {
-          throw new R2d2ApplicationException("Body must be empty. Upload chunks after this initialization");
-        }
-      } catch (IOException e) {
-        throw new R2d2TechnicalException(e);
-      }
-
-      f.getStateInfo().setExpectedNumberOfChunks(totalChunks);
-      f = stagingFileService.initNewFile(f, Utils.toCustomPrincipal(prinz));
-    
+      f = stagingFileService.initNewFile(f,p);
 
     BodyBuilder responseBuilder = ResponseEntity.status(HttpStatus.CREATED);
-
-    if (f.getChecksum() != null) {
-      responseBuilder.header("etag", f.getChecksum());
-    }
 
     return responseBuilder.body(f);
   }
@@ -118,7 +108,7 @@ public class FileUploadController {
   @PutMapping("/multipart/{fileId}")
   public ResponseEntity<FileChunk> uploadFileChunk(@PathVariable("fileId") String fileId, @RequestParam("chunk-number") int part,
       @RequestHeader(name = "Content-MD5", required = false) String etag,
-      HttpServletRequest req, Principal prinz)
+      HttpServletRequest req, @AuthenticationPrincipal R2D2Principal p)
       throws R2d2ApplicationException, AuthorizationException, R2d2TechnicalException {
 
     InputStream is;
@@ -130,20 +120,31 @@ public class FileUploadController {
     }
 
     FileChunk chunk = new FileChunk();
-    chunk.setClientEtag(etag);
-    chunk.setNumber(part);
-    if (contentLength != null) {
-      chunk.setSize(contentLength);
+    if (etag != null) {
+        chunk.setClientEtag(etag);
     }
-    FileChunk resultChunk = stagingFileService.uploadFileChunk(UUID.fromString(fileId), chunk, is, Utils.toCustomPrincipal(prinz));
+    chunk.setNumber(part);
+    
+    FileChunk resultChunk = stagingFileService.uploadFileChunk(UUID.fromString(fileId), chunk, is, p);
 
     ResponseEntity<FileChunk> re = ResponseEntity.status(HttpStatus.CREATED).header("ETag", resultChunk.getServerEtag()).body(resultChunk);
 
     return re;
   }
-
   
   //Methode für Beendigung des Multipart File-Uploads
+  @PostMapping("/multipart/{fileId}")
+  public ResponseEntity<?> finishChunkedFileUpload(@PathVariable("fileId") String fileId, @AuthenticationPrincipal R2D2Principal p) throws R2d2TechnicalException, OptimisticLockingException, NotFoundException, InvalidStateException, AuthorizationException, ValidationException {
+	  StagingFile sf = stagingFileService.completeChunkedUpload(UUID.fromString(fileId), p);
+	  BodyBuilder responseBuilder = ResponseEntity.status(HttpStatus.CREATED);
+
+	    if (sf.getChecksum() != null) {
+	      responseBuilder.header("ETag", sf.getChecksum());
+	    }
+
+	    return responseBuilder.body(sf);
+  }
+
   
   //Methoden für getStatus von FileChunks und StagingFiles
   

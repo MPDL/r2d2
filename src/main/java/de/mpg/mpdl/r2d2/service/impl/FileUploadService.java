@@ -148,4 +148,18 @@ public class FileUploadService extends GenericServiceDbImpl<StagingFile> impleme
     return list;
   }
 
+@Override
+@Transactional(rollbackFor = Throwable.class)
+public StagingFile completeChunkedUpload(UUID fileId, R2D2Principal user)
+		throws R2d2TechnicalException, OptimisticLockingException, ValidationException, NotFoundException,
+		InvalidStateException, AuthorizationException {
+	checkAa("upload", user);
+	StagingFile sf = stagingFileRepository.findById(fileId)
+	        .orElseThrow(() -> new NotFoundException(String.format("File with id %s MOT FOUND!", fileId.toString())));
+	String etag = objectStoreRepository.createManifest(sf);
+	sf.setChecksum(etag);
+	sf.setState(UploadState.COMPLETE);
+	return sf;
+}
+
 }
