@@ -9,6 +9,7 @@ import java.util.UUID;
 
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PostFilter;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -22,6 +23,7 @@ import de.mpg.mpdl.r2d2.exceptions.OptimisticLockingException;
 import de.mpg.mpdl.r2d2.exceptions.R2d2TechnicalException;
 import de.mpg.mpdl.r2d2.exceptions.ValidationException;
 import de.mpg.mpdl.r2d2.model.FileChunk;
+import de.mpg.mpdl.r2d2.model.FileChunk.Progress;
 import de.mpg.mpdl.r2d2.model.StagingFile;
 import de.mpg.mpdl.r2d2.model.StagingFile.UploadState;
 import de.mpg.mpdl.r2d2.model.aa.R2D2Principal;
@@ -122,16 +124,27 @@ public class FileUploadService extends GenericServiceDbImpl<StagingFile> impleme
 
     StagingFile sf = stagingFileRepository.findById(fileId)
         .orElseThrow(() -> new NotFoundException(String.format("File with id %s MOT FOUND!", fileId.toString())));
+    
+    List<FileChunk> chunks = sf.getStateInfo().getChunks();
+    if (sf.getState().equals(UploadState.COMPLETE)) {
+    	throw new InvalidStateException(String.format("File with id %s is in state %s", fileId.toString(), sf.getState().name()));
+    }
+
+    if (chunks.stream().anyMatch(c -> c.getNumber() == chunk.getNumber())) {
+    	FileChunk fc = chunks.stream().filter(c -> c.getNumber() == chunk.getNumber()).findFirst().get();
+    	if (fc.getProgress().equals(Progress.IN_PROGRESS)) {
+    		throw new InvalidStateException(String.format("Chunk with number %d is in state %s", fc.getNumber(), fc.getProgress().name()));
+    	} else {
+            chunks.removeIf(c -> c.getNumber() == chunk.getNumber());
+    	}
+    }
+    
     String etag = objectStoreRepository.uploadChunk(sf, chunk, fileStream);
     chunk.setServerEtag(etag);
-    sf.getStateInfo().getChunks().add(chunk);
+    chunk.setProgress(Progress.COMPLETE);
+    chunks.add(chunk);
     sf.setState(UploadState.ONGOING);
-    //LastChunk
-    if (sf.getStateInfo().getExpectedNumberOfChunks() == sf.getStateInfo().getChunks().size()) {
-      sf.setState(UploadState.COMPLETE);
-      objectStoreRepository.createManifest(sf);
-    }
-    // stagingFileDaoEs.createImmediately(sf.getId().toString(), sf);
+
     return chunk;
   }
 
@@ -140,26 +153,38 @@ public class FileUploadService extends GenericServiceDbImpl<StagingFile> impleme
     return stagingFileDaoEs;
   }
 
-  //@PostFilter("hasRole('ROLE_ADMIN') or filterObject.creator.id == principal.userAccount.id")
   @PostFilter("filterObject.creator.id == principal.userAccount.id")
   public List<StagingFile> list() {
     List<StagingFile> list = new ArrayList<>();
     stagingFileRepository.findAll().iterator().forEachRemaining(list::add);
     return list;
   }
+  
+  @PostAuthorize("returnObject.creator.id == principal.userAccount.id")
+  public StagingFile list(UUID id) throws NotFoundException {
+	  StagingFile sf = stagingFileRepository.findById(id).orElseThrow(() -> new NotFoundException(String.format("File with id %s MOT FOUND!", id.toString())));
+    return sf;
+  }
 
-@Override
-@Transactional(rollbackFor = Throwable.class)
-public StagingFile completeChunkedUpload(UUID fileId, R2D2Principal user)
-		throws R2d2TechnicalException, OptimisticLockingException, ValidationException, NotFoundException,
-		InvalidStateException, AuthorizationException {
-	checkAa("upload", user);
-	StagingFile sf = stagingFileRepository.findById(fileId)
-	        .orElseThrow(() -> new NotFoundException(String.format("File with id %s MOT FOUND!", fileId.toString())));
-	String etag = objectStoreRepository.createManifest(sf);
-	sf.setChecksum(etag);
-	sf.setState(UploadState.COMPLETE);
-	return sf;
-}
+  @Override
+  @Transactional(rollbackFor = Throwable.class)
+  public StagingFile completeChunkedUpload(UUID fileId, int parts, R2D2Principal user) throws R2d2TechnicalException,
+      OptimisticLockingException, ValidationException, NotFoundException, InvalidStateException, AuthorizationException {
+    checkAa("upload", user);
+    StagingFile sf = stagingFileRepository.findById(fileId)
+        .orElseThrow(() -> new NotFoundException(String.format("File with id %s NOT FOUND!", fileId.toString())));
+    // TODO: check number of parts in object store ...
+    if (sf.getStateInfo().getChunks().size() == parts) {
+      String etag = objectStoreRepository.createManifest(sf);
+      sf.setChecksum(etag);
+      sf.getStateInfo().setExpectedNumberOfChunks(parts);
+      sf.setState(UploadState.COMPLETE);
+      sf.setStorageLocation(objectStoreRepository.getPublicURI(sf.getId().toString()));
+      return sf;
+    } else {
+      throw new InvalidStateException(String.format("Incorrect number of parts (expected %d, but got %d) in file with id %s", parts, sf.getStateInfo().getChunks().size(), fileId.toString()));
+    }
+
+  }
 
 }

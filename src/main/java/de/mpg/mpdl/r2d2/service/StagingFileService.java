@@ -35,7 +35,8 @@ public interface StagingFileService extends GenericService<StagingFile> {
 
   public FileChunk uploadFileChunk(UUID fileId, FileChunk chunk, InputStream fileStream, R2D2Principal user) throws R2d2TechnicalException,
       OptimisticLockingException, ValidationException, NotFoundException, InvalidStateException, AuthorizationException;
-  
-  public StagingFile completeChunkedUpload(UUID fileId, R2D2Principal user) throws R2d2TechnicalException, OptimisticLockingException, ValidationException, NotFoundException, InvalidStateException, AuthorizationException;
+
+  public StagingFile completeChunkedUpload(UUID fileId, int parts, R2D2Principal user) throws R2d2TechnicalException,
+      OptimisticLockingException, ValidationException, NotFoundException, InvalidStateException, AuthorizationException;
 
 }

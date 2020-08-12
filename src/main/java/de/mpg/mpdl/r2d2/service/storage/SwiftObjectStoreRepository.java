@@ -103,13 +103,12 @@ public class SwiftObjectStoreRepository {
 
     LOGGER.info("Uploading single file to container " + file.getId());
     Payload payload = new InputStreamPayload(is);
-    //payload.getContentMetadata().setContentLength(f.getSize());
     if (file.getChecksum() != null) {
       payload.getContentMetadata().setContentMD5(HashCode.fromString(file.getChecksum()));
     }
 
-    //payload.getContentMetadata().setContentType(contentType);
-    //payload.getContentMetadata().setContentDisposition(fileName);
+    payload.getContentMetadata().setContentType(file.getFormat());
+    payload.getContentMetadata().setContentDisposition(file.getFilename());
     /*
      * TODO provide metadata
      */
