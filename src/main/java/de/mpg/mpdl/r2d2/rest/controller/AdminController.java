@@ -68,9 +68,9 @@ public class AdminController {
 
   @GetMapping(value = "/store")
   public ResponseEntity<?> listAllContainers() throws AuthorizationException {
-	  return new ResponseEntity<>(service.listAllContainers(), HttpStatus.OK);
+    return new ResponseEntity<>(service.listAllContainers(), HttpStatus.OK);
   }
-  
+
   @GetMapping(value = "/store/clear")
   public ResponseEntity<?> clearObjectStore() throws AuthorizationException, NotFoundException {
     Map<String, Object> details = service.clearObjectStore();

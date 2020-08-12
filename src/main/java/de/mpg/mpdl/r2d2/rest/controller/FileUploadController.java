@@ -55,28 +55,30 @@ public class FileUploadController {
     return new ResponseEntity<>(resp, HttpStatus.OK);
   }
 
-  
-  
-  @PostMapping("")
-  public ResponseEntity<StagingFile> newSingleFileUpload(@RequestHeader("File-Name") String fileName, @RequestHeader("Content-Type") String contentType, @RequestHeader(name = "Content-MD5", required = false) String etag, HttpServletRequest request, @AuthenticationPrincipal R2D2Principal p) throws R2d2ApplicationException, AuthorizationException, R2d2TechnicalException
-  {
-	  InputStream is;
 
-	    try {
-	      is = request.getInputStream();
-	    } catch (IOException e) {
-	      throw new R2d2TechnicalException(e);
-	    }
-	    
-	    StagingFile f = new StagingFile();
-	    f.setFilename(fileName);
-	    f.setFormat(contentType);
-	    if (etag != null) {
-	    	f.setChecksum(etag);
-	    }
-    
+
+  @PostMapping("")
+  public ResponseEntity<StagingFile> newSingleFileUpload(@RequestHeader("File-Name") String fileName,
+      @RequestHeader("Content-Type") String contentType, @RequestHeader(name = "Content-MD5", required = false) String etag,
+      HttpServletRequest request, @AuthenticationPrincipal R2D2Principal p)
+      throws R2d2ApplicationException, AuthorizationException, R2d2TechnicalException {
+    InputStream is;
+
+    try {
+      is = request.getInputStream();
+    } catch (IOException e) {
+      throw new R2d2TechnicalException(e);
+    }
+
+    StagingFile f = new StagingFile();
+    f.setFilename(fileName);
+    f.setFormat(contentType);
+    if (etag != null) {
+      f.setChecksum(etag);
+    }
+
     f = stagingFileService.uploadSingleFile(f, is, p);
-    
+
     BodyBuilder responseBuilder = ResponseEntity.status(HttpStatus.CREATED);
 
     if (f.getChecksum() != null) {
@@ -84,20 +86,20 @@ public class FileUploadController {
     }
 
     return responseBuilder.body(f);
-    
+
   }
-  
-  
+
+
   @PostMapping("/multipart")
-  public ResponseEntity<StagingFile> newChunkedFileUpload(@RequestHeader("File-Name") String fileName, @RequestHeader("Content-Type") String contentType,
-      @AuthenticationPrincipal R2D2Principal p)
+  public ResponseEntity<StagingFile> newChunkedFileUpload(@RequestHeader("File-Name") String fileName,
+      @RequestHeader("Content-Type") String contentType, @AuthenticationPrincipal R2D2Principal p)
       throws R2d2ApplicationException, AuthorizationException, R2d2TechnicalException {
 
     StagingFile f = new StagingFile();
     f.setFilename(fileName);
     f.setFormat(contentType);
 
-      f = stagingFileService.initNewFile(f,p);
+    f = stagingFileService.initNewFile(f, p);
 
     BodyBuilder responseBuilder = ResponseEntity.status(HttpStatus.CREATED);
 
@@ -107,8 +109,7 @@ public class FileUploadController {
 
   @PutMapping("/multipart/{fileId}")
   public ResponseEntity<FileChunk> uploadFileChunk(@PathVariable("fileId") String fileId, @RequestParam("chunk-number") int part,
-      @RequestHeader(name = "Content-MD5", required = false) String etag,
-      HttpServletRequest req, @AuthenticationPrincipal R2D2Principal p)
+      @RequestHeader(name = "Content-MD5", required = false) String etag, HttpServletRequest req, @AuthenticationPrincipal R2D2Principal p)
       throws R2d2ApplicationException, AuthorizationException, R2d2TechnicalException {
 
     InputStream is;
@@ -121,33 +122,35 @@ public class FileUploadController {
 
     FileChunk chunk = new FileChunk();
     if (etag != null) {
-        chunk.setClientEtag(etag);
+      chunk.setClientEtag(etag);
     }
     chunk.setNumber(part);
-    
+
     FileChunk resultChunk = stagingFileService.uploadFileChunk(UUID.fromString(fileId), chunk, is, p);
 
     ResponseEntity<FileChunk> re = ResponseEntity.status(HttpStatus.CREATED).header("ETag", resultChunk.getServerEtag()).body(resultChunk);
 
     return re;
   }
-  
+
   //Methode für Beendigung des Multipart File-Uploads
   @PostMapping("/multipart/{fileId}")
-  public ResponseEntity<?> finishChunkedFileUpload(@PathVariable("fileId") String fileId, @AuthenticationPrincipal R2D2Principal p) throws R2d2TechnicalException, OptimisticLockingException, NotFoundException, InvalidStateException, AuthorizationException, ValidationException {
-	  StagingFile sf = stagingFileService.completeChunkedUpload(UUID.fromString(fileId), p);
-	  BodyBuilder responseBuilder = ResponseEntity.status(HttpStatus.CREATED);
+  public ResponseEntity<?> finishChunkedFileUpload(@PathVariable("fileId") String fileId, @AuthenticationPrincipal R2D2Principal p)
+      throws R2d2TechnicalException, OptimisticLockingException, NotFoundException, InvalidStateException, AuthorizationException,
+      ValidationException {
+    StagingFile sf = stagingFileService.completeChunkedUpload(UUID.fromString(fileId), p);
+    BodyBuilder responseBuilder = ResponseEntity.status(HttpStatus.CREATED);
 
-	    if (sf.getChecksum() != null) {
-	      responseBuilder.header("ETag", sf.getChecksum());
-	    }
+    if (sf.getChecksum() != null) {
+      responseBuilder.header("ETag", sf.getChecksum());
+    }
 
-	    return responseBuilder.body(sf);
+    return responseBuilder.body(sf);
   }
 
-  
+
   //Methoden für getStatus von FileChunks und StagingFiles
-  
+
   @DeleteMapping("/{fileId}")
   public ResponseEntity<?> delete(@PathVariable("fileId") String fileId, @AuthenticationPrincipal R2D2Principal p)
       throws R2d2TechnicalException, OptimisticLockingException, NotFoundException, InvalidStateException, AuthorizationException {
