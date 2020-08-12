@@ -46,6 +46,8 @@ import de.mpg.mpdl.r2d2.model.File;
 import de.mpg.mpdl.r2d2.model.FileChunk;
 import de.mpg.mpdl.r2d2.model.VersionId;
 import de.mpg.mpdl.r2d2.model.aa.R2D2Principal;
+import de.mpg.mpdl.r2d2.model.search.SearchQuery;
+import de.mpg.mpdl.r2d2.model.search.SearchResult;
 import de.mpg.mpdl.r2d2.rest.controller.dto.DatasetVersionDto;
 import de.mpg.mpdl.r2d2.rest.controller.dto.DtoMapper;
 import de.mpg.mpdl.r2d2.service.DatasetVersionService;
@@ -241,6 +243,32 @@ public class DatasetController {
 
 
     return new ResponseEntity<String>(resp.toString(), HttpStatus.OK);
+  }
+
+
+  @RequestMapping(value = "", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+  public ResponseEntity<SearchResult<DatasetVersionDto>> search(@RequestParam(name = "q", required = false) String query,
+      @RequestParam(name = "scroll", required = false) String scrollTimeValue, @RequestParam(name = "from", required = false) Integer from,
+      @RequestParam(name = "size", required = false) Integer size, HttpServletResponse httpResponse, @AuthenticationPrincipal R2D2Principal p)
+      throws AuthorizationException, R2d2TechnicalException, IOException {
+
+    SearchQuery sq = new SearchQuery();
+    sq.setQuery(query);
+    if(from!=null)
+    {
+      sq.setFrom(from);
+    }
+    if(size!=null)
+    {
+      sq.setSize(size);
+    }
+   
+
+
+    SearchResult<DatasetVersion> resp = datasetVersionService.search(sq, p);
+
+
+    return new ResponseEntity<SearchResult<DatasetVersionDto>>(dtoMapper.convertToSearchResultDto(resp), HttpStatus.OK);
   }
 
 

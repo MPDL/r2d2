@@ -21,6 +21,7 @@ import de.mpg.mpdl.r2d2.exceptions.NotFoundException;
 import de.mpg.mpdl.r2d2.exceptions.OptimisticLockingException;
 import de.mpg.mpdl.r2d2.exceptions.R2d2TechnicalException;
 import de.mpg.mpdl.r2d2.exceptions.ValidationException;
+import de.mpg.mpdl.r2d2.model.DatasetVersion;
 import de.mpg.mpdl.r2d2.model.FileChunk;
 import de.mpg.mpdl.r2d2.model.StagingFile;
 import de.mpg.mpdl.r2d2.model.StagingFile.UploadState;
@@ -41,6 +42,10 @@ public class FileUploadService extends GenericServiceDbImpl<StagingFile> impleme
 
   @Autowired
   StagingFileDaoEs stagingFileDaoEs;
+
+  public FileUploadService() {
+    super(StagingFile.class);
+  }
 
   @Override
   public StagingFile create(StagingFile object, R2D2Principal user)
@@ -148,18 +153,17 @@ public class FileUploadService extends GenericServiceDbImpl<StagingFile> impleme
     return list;
   }
 
-@Override
-@Transactional(rollbackFor = Throwable.class)
-public StagingFile completeChunkedUpload(UUID fileId, R2D2Principal user)
-		throws R2d2TechnicalException, OptimisticLockingException, ValidationException, NotFoundException,
-		InvalidStateException, AuthorizationException {
-	checkAa("upload", user);
-	StagingFile sf = stagingFileRepository.findById(fileId)
-	        .orElseThrow(() -> new NotFoundException(String.format("File with id %s MOT FOUND!", fileId.toString())));
-	String etag = objectStoreRepository.createManifest(sf);
-	sf.setChecksum(etag);
-	sf.setState(UploadState.COMPLETE);
-	return sf;
-}
+  @Override
+  @Transactional(rollbackFor = Throwable.class)
+  public StagingFile completeChunkedUpload(UUID fileId, R2D2Principal user) throws R2d2TechnicalException, OptimisticLockingException,
+      ValidationException, NotFoundException, InvalidStateException, AuthorizationException {
+    checkAa("upload", user);
+    StagingFile sf = stagingFileRepository.findById(fileId)
+        .orElseThrow(() -> new NotFoundException(String.format("File with id %s MOT FOUND!", fileId.toString())));
+    String etag = objectStoreRepository.createManifest(sf);
+    sf.setChecksum(etag);
+    sf.setState(UploadState.COMPLETE);
+    return sf;
+  }
 
 }
