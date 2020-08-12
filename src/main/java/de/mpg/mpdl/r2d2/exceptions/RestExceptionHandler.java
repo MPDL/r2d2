@@ -27,8 +27,8 @@ import de.mpg.mpdl.r2d2.service.storage.SwiftObjectStoreRepository;
 
 @RestControllerAdvice
 public class RestExceptionHandler extends ResponseEntityExceptionHandler {
-	
-	  private static Logger LOGGER = LoggerFactory.getLogger(RestExceptionHandler.class);
+
+  private static Logger LOGGER = LoggerFactory.getLogger(RestExceptionHandler.class);
 
   @Override
   protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex, HttpHeaders headers, HttpStatus status,
@@ -46,13 +46,13 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
 
   @ExceptionHandler({Exception.class})
   public ResponseEntity<Object> handleAllExceptions(Exception ex, HttpServletRequest request) {
-	  LOGGER.error("PECH", ex);
+    LOGGER.error("PECH", ex);
     return new ResponseEntity<Object>(details(ex, request), new HttpHeaders(), HttpStatus.INTERNAL_SERVER_ERROR);
   }
 
   @ExceptionHandler({RuntimeException.class})
   public ResponseEntity<Object> handleRuntimeException(Exception ex, HttpServletRequest request) {
-	  LOGGER.error("PECH", ex);
+    LOGGER.error("PECH", ex);
     return new ResponseEntity<Object>(details(ex, request), new HttpHeaders(), HttpStatus.INTERNAL_SERVER_ERROR);
   }
 

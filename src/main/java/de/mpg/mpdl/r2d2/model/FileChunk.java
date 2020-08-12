@@ -9,11 +9,11 @@ public class FileChunk {
   private String serverEtag;
 
   private long size;
-  
+
   public enum Progress {
-		IN_PROGRESS,
-	    COMPLETE
-	  }
+    IN_PROGRESS,
+    COMPLETE
+  }
 
   private Progress progress = Progress.IN_PROGRESS;
 
@@ -50,12 +50,12 @@ public class FileChunk {
     this.size = size;
   }
 
-public Progress getProgress() {
-	return progress;
-}
+  public Progress getProgress() {
+    return progress;
+  }
 
-public void setProgress(Progress progress) {
-	this.progress = progress;
-}
+  public void setProgress(Progress progress) {
+    this.progress = progress;
+  }
 
 }

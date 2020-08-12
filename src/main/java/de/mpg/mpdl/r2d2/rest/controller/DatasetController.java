@@ -249,20 +249,18 @@ public class DatasetController {
   @RequestMapping(value = "", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<SearchResult<DatasetVersionDto>> search(@RequestParam(name = "q", required = false) String query,
       @RequestParam(name = "scroll", required = false) String scrollTimeValue, @RequestParam(name = "from", required = false) Integer from,
-      @RequestParam(name = "size", required = false) Integer size, HttpServletResponse httpResponse, @AuthenticationPrincipal R2D2Principal p)
-      throws AuthorizationException, R2d2TechnicalException, IOException {
+      @RequestParam(name = "size", required = false) Integer size, HttpServletResponse httpResponse,
+      @AuthenticationPrincipal R2D2Principal p) throws AuthorizationException, R2d2TechnicalException, IOException {
 
     SearchQuery sq = new SearchQuery();
     sq.setQuery(query);
-    if(from!=null)
-    {
+    if (from != null) {
       sq.setFrom(from);
     }
-    if(size!=null)
-    {
+    if (size != null) {
       sq.setSize(size);
     }
-   
+
 
 
     SearchResult<DatasetVersion> resp = datasetVersionService.search(sq, p);

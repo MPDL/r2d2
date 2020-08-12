@@ -35,12 +35,12 @@ import de.mpg.mpdl.r2d2.service.storage.SwiftObjectStoreRepository;
 @Service
 public class FileUploadService extends GenericServiceDbImpl<StagingFile> implements StagingFileService {
 
-  public FileUploadService(Class<StagingFile> modelClazz) {
-		super(modelClazz);
-		// TODO Auto-generated constructor stub
-	}
+  public FileUploadService() {
+    super(StagingFile.class);
+    // TODO Auto-generated constructor stub
+  }
 
-@Autowired
+  @Autowired
   StagingFileRepository stagingFileRepository;
 
   @Autowired
@@ -129,21 +129,21 @@ public class FileUploadService extends GenericServiceDbImpl<StagingFile> impleme
 
     StagingFile sf = stagingFileRepository.findById(fileId)
         .orElseThrow(() -> new NotFoundException(String.format("File with id %s MOT FOUND!", fileId.toString())));
-    
+
     List<FileChunk> chunks = sf.getStateInfo().getChunks();
     if (sf.getState().equals(UploadState.COMPLETE)) {
-    	throw new InvalidStateException(String.format("File with id %s is in state %s", fileId.toString(), sf.getState().name()));
+      throw new InvalidStateException(String.format("File with id %s is in state %s", fileId.toString(), sf.getState().name()));
     }
 
     if (chunks.stream().anyMatch(c -> c.getNumber() == chunk.getNumber())) {
-    	FileChunk fc = chunks.stream().filter(c -> c.getNumber() == chunk.getNumber()).findFirst().get();
-    	if (fc.getProgress().equals(Progress.IN_PROGRESS)) {
-    		throw new InvalidStateException(String.format("Chunk with number %d is in state %s", fc.getNumber(), fc.getProgress().name()));
-    	} else {
-            chunks.removeIf(c -> c.getNumber() == chunk.getNumber());
-    	}
+      FileChunk fc = chunks.stream().filter(c -> c.getNumber() == chunk.getNumber()).findFirst().get();
+      if (fc.getProgress().equals(Progress.IN_PROGRESS)) {
+        throw new InvalidStateException(String.format("Chunk with number %d is in state %s", fc.getNumber(), fc.getProgress().name()));
+      } else {
+        chunks.removeIf(c -> c.getNumber() == chunk.getNumber());
+      }
     }
-    
+
     String etag = objectStoreRepository.uploadChunk(sf, chunk, fileStream);
     chunk.setServerEtag(etag);
     chunk.setProgress(Progress.COMPLETE);
@@ -164,10 +164,11 @@ public class FileUploadService extends GenericServiceDbImpl<StagingFile> impleme
     stagingFileRepository.findAll().iterator().forEachRemaining(list::add);
     return list;
   }
-  
+
   @PostAuthorize("returnObject.creator.id == principal.userAccount.id")
   public StagingFile list(UUID id) throws NotFoundException {
-	  StagingFile sf = stagingFileRepository.findById(id).orElseThrow(() -> new NotFoundException(String.format("File with id %s MOT FOUND!", id.toString())));
+    StagingFile sf = stagingFileRepository.findById(id)
+        .orElseThrow(() -> new NotFoundException(String.format("File with id %s MOT FOUND!", id.toString())));
     return sf;
   }
 
@@ -187,7 +188,8 @@ public class FileUploadService extends GenericServiceDbImpl<StagingFile> impleme
       sf.setStorageLocation(objectStoreRepository.getPublicURI(sf.getId().toString()));
       return sf;
     } else {
-      throw new InvalidStateException(String.format("Incorrect number of parts (expected %d, but got %d) in file with id %s", parts, sf.getStateInfo().getChunks().size(), fileId.toString()));
+      throw new InvalidStateException(String.format("Incorrect number of parts (expected %d, but got %d) in file with id %s", parts,
+          sf.getStateInfo().getChunks().size(), fileId.toString()));
     }
 
   }

@@ -81,9 +81,9 @@ public abstract class GenericServiceDbImpl<E> {
 
 
   public SearchResult<E> search(SearchQuery sq, R2D2Principal principal) throws R2d2TechnicalException, AuthorizationException {
-    QueryBuilder qb = QueryBuilders.queryStringQuery(sq.getQuery()!=null ? sq.getQuery() : "*");
-    SearchSourceBuilder ssb = SearchSourceBuilder.searchSource(); 
-    
+    QueryBuilder qb = QueryBuilders.queryStringQuery(sq.getQuery() != null ? sq.getQuery() : "*");
+    SearchSourceBuilder ssb = SearchSourceBuilder.searchSource();
+
     ssb.query(qb);
     ssb.size(sq.getSize());
     ssb.from(sq.getFrom());
