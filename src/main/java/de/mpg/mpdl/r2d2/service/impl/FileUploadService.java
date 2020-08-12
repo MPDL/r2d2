@@ -35,7 +35,12 @@ import de.mpg.mpdl.r2d2.service.storage.SwiftObjectStoreRepository;
 @Service
 public class FileUploadService extends GenericServiceDbImpl<StagingFile> implements StagingFileService {
 
-  @Autowired
+  public FileUploadService(Class<StagingFile> modelClazz) {
+		super(modelClazz);
+		// TODO Auto-generated constructor stub
+	}
+
+@Autowired
   StagingFileRepository stagingFileRepository;
 
   @Autowired

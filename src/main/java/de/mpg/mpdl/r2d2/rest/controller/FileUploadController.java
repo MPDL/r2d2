@@ -114,7 +114,7 @@ public class FileUploadController {
 
 
   @PutMapping("/multipart/{fileId}")
-  public ResponseEntity<FileChunk> uploadFileChunk(@PathVariable("fileId") String fileId, @RequestParam("part") int part,
+  public ResponseEntity<FileChunk> uploadFileChunk(@PathVariable("fileId") String fileId, @RequestParam("chunk-number") int part,
       @RequestHeader(name = "Content-MD5", required = false) String etag, HttpServletRequest req, @AuthenticationPrincipal R2D2Principal p)
       throws R2d2ApplicationException, AuthorizationException, R2d2TechnicalException {
 
@@ -139,6 +139,7 @@ public class FileUploadController {
     return re;
   }
 
+  //Methode für Beendigung des Multipart File-Uploads
   @PostMapping("/multipart/{fileId}")
   public ResponseEntity<?> finishChunkedFileUpload(@PathVariable("fileId") String fileId, @RequestParam("parts") int parts,
       @AuthenticationPrincipal R2D2Principal p) throws R2d2TechnicalException, OptimisticLockingException, NotFoundException,

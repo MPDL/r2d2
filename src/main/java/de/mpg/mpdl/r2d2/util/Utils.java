@@ -40,6 +40,8 @@ public class Utils {
 
   }
 
+
+
   public static OffsetDateTime generateCurrentDateTimeForDatabase() {
     return OffsetDateTime.now().truncatedTo(ChronoUnit.MICROS);
   }

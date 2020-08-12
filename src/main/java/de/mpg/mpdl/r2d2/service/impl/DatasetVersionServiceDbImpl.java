@@ -68,6 +68,10 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
   @Autowired
   private FileUploadService fileUploadService;
 
+  public DatasetVersionServiceDbImpl() {
+    super(DatasetVersion.class);
+  }
+
   @Override
   @Transactional(rollbackFor = Throwable.class)
   public DatasetVersion create(DatasetVersion datasetVersion, R2D2Principal principal)

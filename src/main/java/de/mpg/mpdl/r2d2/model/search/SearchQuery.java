@@ -10,7 +10,7 @@ public class SearchQuery {
 
   private int from = 0;
 
-  private int size = -1;
+  private int size = 10;
 
   private String scrollId;
 

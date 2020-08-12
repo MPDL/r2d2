@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 import de.mpg.mpdl.r2d2.model.Dataset;
 import de.mpg.mpdl.r2d2.model.DatasetVersion;
 import de.mpg.mpdl.r2d2.model.File;
+import de.mpg.mpdl.r2d2.model.search.SearchResult;
 
 @Mapper(componentModel = "spring")
 public abstract class DtoMapper {
@@ -39,6 +40,10 @@ public abstract class DtoMapper {
 
   @InheritInverseConfiguration
   public abstract File convertToFile(FileDto dvDto);
+
+
+  public abstract SearchResult<DatasetVersionDto> convertToSearchResultDto(SearchResult<DatasetVersion> sr);
+
 
 
 }
