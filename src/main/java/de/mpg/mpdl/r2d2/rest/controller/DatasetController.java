@@ -147,11 +147,7 @@ public class DatasetController {
         contentDispositionType = "attachment";
       }
 
-
-      HttpHeaders headers = new HttpHeaders();
-      headers.add("Custom-Header", "foo");
       response.setContentType(fd.getFile().getFormat());
-
 
       //Add filename and RFC 5987 encoded filename as content disposition headers
       response.setHeader("Content-Disposition", contentDispositionType + "; "
