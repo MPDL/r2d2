@@ -40,6 +40,7 @@ import de.mpg.mpdl.r2d2.search.dao.DatasetVersionDaoEs;
 import de.mpg.mpdl.r2d2.search.dao.GenericDaoEs;
 import de.mpg.mpdl.r2d2.service.DatasetVersionService;
 import de.mpg.mpdl.r2d2.service.storage.SwiftObjectStoreRepository;
+import de.mpg.mpdl.r2d2.service.util.FileDownloadWrapper;
 import de.mpg.mpdl.r2d2.util.Utils;
 
 @Service
@@ -319,13 +320,15 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
   }
   */
 
-  public InputStream getFileContent(VersionId versionId, UUID fileId, R2D2Principal user) throws R2d2TechnicalException,
+  public FileDownloadWrapper getFileContent(VersionId versionId, UUID fileId, R2D2Principal user) throws R2d2TechnicalException,
       OptimisticLockingException, ValidationException, NotFoundException, InvalidStateException, AuthorizationException {
     DatasetVersion dv = get(versionId, user);
     File file = fileRepository.findById(fileId).orElseThrow(() -> new NotFoundException("File with id " + fileId + " not found"));
     checkAa("download", user, dv);
 
-    return objectStoreRepository.downloadFile(fileId.toString(), "content");
+    FileDownloadWrapper fd = new FileDownloadWrapper(file, objectStoreRepository);
+
+    return fd;
 
 
   }

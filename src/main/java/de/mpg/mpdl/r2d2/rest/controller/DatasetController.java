@@ -2,6 +2,9 @@ package de.mpg.mpdl.r2d2.rest.controller;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.security.Principal;
 import java.time.OffsetDateTime;
 import java.util.UUID;
@@ -39,8 +42,12 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import de.mpg.mpdl.r2d2.exceptions.AuthorizationException;
+import de.mpg.mpdl.r2d2.exceptions.InvalidStateException;
+import de.mpg.mpdl.r2d2.exceptions.NotFoundException;
+import de.mpg.mpdl.r2d2.exceptions.OptimisticLockingException;
 import de.mpg.mpdl.r2d2.exceptions.R2d2ApplicationException;
 import de.mpg.mpdl.r2d2.exceptions.R2d2TechnicalException;
+import de.mpg.mpdl.r2d2.exceptions.ValidationException;
 import de.mpg.mpdl.r2d2.model.DatasetVersion;
 import de.mpg.mpdl.r2d2.model.File;
 import de.mpg.mpdl.r2d2.model.FileChunk;
@@ -51,6 +58,7 @@ import de.mpg.mpdl.r2d2.model.search.SearchResult;
 import de.mpg.mpdl.r2d2.rest.controller.dto.DatasetVersionDto;
 import de.mpg.mpdl.r2d2.rest.controller.dto.DtoMapper;
 import de.mpg.mpdl.r2d2.service.DatasetVersionService;
+import de.mpg.mpdl.r2d2.service.util.FileDownloadWrapper;
 import de.mpg.mpdl.r2d2.util.Utils;
 
 @RestController
@@ -126,11 +134,36 @@ public class DatasetController {
 
   @GetMapping("/{id}/{versionNumber}/files/{fileId}")
   public ResponseEntity<?> download(@PathVariable("id") String datasetId, @PathVariable("versionNumber") int versionNumber,
-      @PathVariable("fileId") String fileId, Principal prinz)
-      throws R2d2ApplicationException, AuthorizationException, R2d2TechnicalException {
-    InputStreamResource inputStreamResource = new InputStreamResource(datasetVersionService
-        .getFileContent(new VersionId(UUID.fromString(datasetId), versionNumber), UUID.fromString(fileId), Utils.toCustomPrincipal(prinz)));
-    return new ResponseEntity<InputStreamResource>(inputStreamResource, HttpStatus.OK);
+      @PathVariable("fileId") String fileId,
+      @RequestParam(value = "download", required = false, defaultValue = "false") boolean forceDownload, HttpServletResponse response,
+      Principal prinz) throws R2d2ApplicationException, AuthorizationException, R2d2TechnicalException {
+
+    try {
+      FileDownloadWrapper fd = datasetVersionService.getFileContent(new VersionId(UUID.fromString(datasetId), versionNumber),
+          UUID.fromString(fileId), Utils.toCustomPrincipal(prinz));
+
+      String contentDispositionType = "inline";
+      if (forceDownload) {
+        contentDispositionType = "attachment";
+      }
+
+
+      HttpHeaders headers = new HttpHeaders();
+      headers.add("Custom-Header", "foo");
+      response.setContentType(fd.getFile().getFormat());
+
+
+      //Add filename and RFC 5987 encoded filename as content disposition headers
+      response.setHeader("Content-Disposition", contentDispositionType + "; "
+      //Leave only utf-8 encoded filename, as normal filename could lead to encoding problems in Apache
+      //+ "filename=\"" + fileVOWrapper.getFileVO().getName() + "\"; "
+          + "filename*=UTF-8''"
+          + URLEncoder.encode(fd.getFile().getFilename(), StandardCharsets.UTF_8.toString()).replaceAll("\\+", "%20"));
+
+      return new ResponseEntity<InputStreamResource>(new InputStreamResource(fd.readFile()), HttpStatus.OK);
+    } catch (Exception e) {
+      throw new R2d2TechnicalException(e);
+    }
   }
 
   /*

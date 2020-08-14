@@ -18,6 +18,7 @@ import de.mpg.mpdl.r2d2.model.FileChunk;
 import de.mpg.mpdl.r2d2.model.VersionId;
 import de.mpg.mpdl.r2d2.model.aa.R2D2Principal;
 import de.mpg.mpdl.r2d2.model.aa.UserAccount;
+import de.mpg.mpdl.r2d2.service.util.FileDownloadWrapper;
 
 public interface DatasetVersionService extends GenericService<DatasetVersion> {
 
@@ -42,7 +43,7 @@ public interface DatasetVersionService extends GenericService<DatasetVersion> {
   public DatasetVersion publish(UUID id, OffsetDateTime lastModificationDate, R2D2Principal user) throws R2d2TechnicalException,
       OptimisticLockingException, ValidationException, NotFoundException, InvalidStateException, AuthorizationException;
 
-  public InputStream getFileContent(VersionId datasetId, UUID fileId, R2D2Principal user) throws R2d2TechnicalException,
+  public FileDownloadWrapper getFileContent(VersionId datasetId, UUID fileId, R2D2Principal user) throws R2d2TechnicalException,
       OptimisticLockingException, ValidationException, NotFoundException, InvalidStateException, AuthorizationException;
 
   /*
