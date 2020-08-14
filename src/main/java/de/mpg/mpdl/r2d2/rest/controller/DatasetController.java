@@ -138,10 +138,10 @@ public class DatasetController {
       @RequestParam(value = "download", required = false, defaultValue = "false") boolean forceDownload, HttpServletResponse response,
       Principal prinz) throws R2d2ApplicationException, AuthorizationException, R2d2TechnicalException {
 
-    try {
-      FileDownloadWrapper fd = datasetVersionService.getFileContent(new VersionId(UUID.fromString(datasetId), versionNumber),
-          UUID.fromString(fileId), Utils.toCustomPrincipal(prinz));
 
+    FileDownloadWrapper fd = datasetVersionService.getFileContent(new VersionId(UUID.fromString(datasetId), versionNumber),
+        UUID.fromString(fileId), Utils.toCustomPrincipal(prinz));
+    try {
       String contentDispositionType = "inline";
       if (forceDownload) {
         contentDispositionType = "attachment";
