@@ -22,10 +22,12 @@ import de.mpg.mpdl.r2d2.db.DatasetVersionRepository;
 import de.mpg.mpdl.r2d2.db.FileRepository;
 import de.mpg.mpdl.r2d2.db.UserAccountRepository;
 import de.mpg.mpdl.r2d2.exceptions.NotFoundException;
+import de.mpg.mpdl.r2d2.exceptions.R2d2TechnicalException;
 import de.mpg.mpdl.r2d2.model.DatasetVersion;
 import de.mpg.mpdl.r2d2.model.File;
 import de.mpg.mpdl.r2d2.model.VersionId;
 import de.mpg.mpdl.r2d2.model.aa.UserAccount;
+import de.mpg.mpdl.r2d2.search.dao.DatasetVersionDaoEs;
 import de.mpg.mpdl.r2d2.service.storage.SwiftObjectStoreRepository;
 
 @Service
@@ -39,6 +41,9 @@ public class AdminService {
 
   @Autowired
   DatasetVersionRepository datasets;
+
+  @Autowired
+  DatasetVersionDaoEs datasetVersionDaoEs;
 
   @Autowired
   FileRepository files;
@@ -79,7 +84,7 @@ public class AdminService {
     return datasets.findById(id).orElseThrow(() -> new NotFoundException(String.format("Dataset with id %s NOT FOUND", id)));
   }
 
-  public void deleteDataset(VersionId id) throws NotFoundException {
+  public String deleteDataset(VersionId id) throws NotFoundException, R2d2TechnicalException {
     DatasetVersion dataset =
         datasets.findById(id).orElseThrow(() -> new NotFoundException(String.format("Dataset with id %s NOT FOUND", id)));
     List<File> files = dataset.getFiles();
@@ -91,6 +96,7 @@ public class AdminService {
       }
     });
     datasets.deleteById(id);
+    return datasetVersionDaoEs.deleteImmediatly(id.toString());
   }
 
   public List<String> listAllFiles() {

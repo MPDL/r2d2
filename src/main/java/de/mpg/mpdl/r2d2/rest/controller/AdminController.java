@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 import de.mpg.mpdl.r2d2.exceptions.AuthorizationException;
 import de.mpg.mpdl.r2d2.exceptions.NotFoundException;
 import de.mpg.mpdl.r2d2.exceptions.R2d2ApplicationException;
+import de.mpg.mpdl.r2d2.exceptions.R2d2TechnicalException;
 import de.mpg.mpdl.r2d2.model.DatasetVersion;
 import de.mpg.mpdl.r2d2.model.VersionId;
 import de.mpg.mpdl.r2d2.model.aa.UserAccount;
@@ -104,8 +105,9 @@ public class AdminController {
 
   @DeleteMapping(value = "/datasets/{id}/{versionNumber}")
   public ResponseEntity<?> deleteDataset(@PathVariable("id") String uuid, @PathVariable("versionNumber") Integer versionNumber)
-      throws AuthorizationException, NotFoundException {
-    service.deleteDataset(new VersionId(UUID.fromString(uuid), versionNumber));
-    return new ResponseEntity<>(HttpStatus.GONE);
+      throws AuthorizationException, NotFoundException, R2d2TechnicalException {
+    String resp = service.deleteDataset(new VersionId(UUID.fromString(uuid), versionNumber));
+    Map<String, Object> map = Collections.singletonMap("deleted", resp);
+    return new ResponseEntity<>(map, HttpStatus.ACCEPTED);
   }
 }
