@@ -76,8 +76,10 @@ public class DatasetVersionServiceDbImplTest {
     r2d2Principal.setUserAccount(userAccount);
 
     DatasetVersion savedDatasetVersion = new DatasetVersion();
-    UUID datasetVersionId = UUID.randomUUID();
-    savedDatasetVersion.getDataset().setId(datasetVersionId);
+    UUID datasetId = UUID.randomUUID();
+    savedDatasetVersion.getDataset().setId(datasetId);
+    savedDatasetVersion.setVersionNumber(1);
+    String savedDatasetVersionId = savedDatasetVersion.getVersionId().toString();
     Mockito.when(this.datasetVersionRepository.saveAndFlush(Mockito.any())).thenReturn(savedDatasetVersion);
     Mockito.when(this.datasetVersionRepository.findById(Mockito.any())).thenReturn(Optional.of(savedDatasetVersion));
 
@@ -99,7 +101,7 @@ public class DatasetVersionServiceDbImplTest {
     inOrder.verify(datasetVersionRepository).saveAndFlush(datasetVersionArgument.capture());
     assertThat(datasetVersionArgument.getValue()).extracting("metadata").isEqualTo(datasetVersionMetadata);
 
-    inOrder.verify(datasetVersionIndexDao).createImmediately(Mockito.eq(datasetVersionId.toString()), Mockito.eq(savedDatasetVersion));
+    inOrder.verify(datasetVersionIndexDao).createImmediately(Mockito.eq(savedDatasetVersionId), Mockito.eq(savedDatasetVersion));
   }
 
 }

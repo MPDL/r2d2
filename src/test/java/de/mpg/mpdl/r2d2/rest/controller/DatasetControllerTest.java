@@ -3,6 +3,7 @@ package de.mpg.mpdl.r2d2.rest.controller;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import de.mpg.mpdl.r2d2.rest.controller.dto.DtoMapper;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +34,9 @@ public class DatasetControllerTest {
 
   @MockBean
   private DatasetVersionService datasetVersionService;
+
+  @MockBean
+  private DtoMapper dtoMapper;
 
   @Autowired
   private MockMvc mockMvc;

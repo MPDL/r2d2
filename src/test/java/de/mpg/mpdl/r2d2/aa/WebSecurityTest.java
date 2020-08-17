@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.Optional;
 import java.util.UUID;
 
+import de.mpg.mpdl.r2d2.rest.controller.dto.DtoMapper;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,6 +65,9 @@ public class WebSecurityTest {
 
   @MockBean
   private StagingFileService stagingFileService;
+
+  @MockBean
+  private DtoMapper dtoMapper;
 
   @Autowired
   private BCryptPasswordEncoder passwordEncoder;
