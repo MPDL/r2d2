@@ -1,13 +1,20 @@
 package de.mpg.mpdl.r2d2.service.impl;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
+
+import org.elasticsearch.index.query.QueryBuilders;
 import org.jclouds.openstack.swift.v1.domain.Container;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,13 +23,16 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import de.mpg.mpdl.r2d2.db.DatasetRepository;
 import de.mpg.mpdl.r2d2.db.DatasetVersionRepository;
 import de.mpg.mpdl.r2d2.db.FileRepository;
+import de.mpg.mpdl.r2d2.db.StagingFileRepository;
 import de.mpg.mpdl.r2d2.db.UserAccountRepository;
 import de.mpg.mpdl.r2d2.exceptions.NotFoundException;
 import de.mpg.mpdl.r2d2.exceptions.R2d2TechnicalException;
+import de.mpg.mpdl.r2d2.model.Dataset;
 import de.mpg.mpdl.r2d2.model.DatasetVersion;
 import de.mpg.mpdl.r2d2.model.File;
 import de.mpg.mpdl.r2d2.model.VersionId;
@@ -40,7 +50,10 @@ public class AdminService {
   UserAccountRepository users;
 
   @Autowired
-  DatasetVersionRepository datasets;
+  DatasetRepository datasets;
+
+  @Autowired
+  DatasetVersionRepository versions;
 
   @Autowired
   DatasetVersionDaoEs datasetVersionDaoEs;
@@ -49,7 +62,11 @@ public class AdminService {
   FileRepository files;
 
   @Autowired
+  StagingFileRepository staging;
+
+  @Autowired
   SwiftObjectStoreRepository objectStore;
+
 
   public String test() {
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -76,18 +93,41 @@ public class AdminService {
 
   public List<DatasetVersion> listAllDatasets() {
     List<DatasetVersion> datasetList = new ArrayList<>();
-    datasets.findAll().iterator().forEachRemaining(datasetList::add);
+    versions.findAll().iterator().forEachRemaining(datasetList::add);
     return datasetList;
   }
 
   public DatasetVersion listDatasetById(VersionId id) throws NotFoundException {
-    return datasets.findById(id).orElseThrow(() -> new NotFoundException(String.format("Dataset with id %s NOT FOUND", id)));
+    return versions.findById(id).orElseThrow(() -> new NotFoundException(String.format("Dataset with id %s NOT FOUND", id)));
   }
 
-  public String deleteDataset(VersionId id) throws NotFoundException, R2d2TechnicalException {
-    DatasetVersion dataset =
-        datasets.findById(id).orElseThrow(() -> new NotFoundException(String.format("Dataset with id %s NOT FOUND", id)));
-    List<File> files = dataset.getFiles();
+  // @Transactional(rollbackFor = Throwable.class)
+  public long deleteDataset(UUID id) throws NotFoundException, R2d2TechnicalException {
+    Dataset dataset = datasets.findById(id).orElseThrow(() -> new NotFoundException(String.format("Dataset with id %s NOT FOUND", id)));
+
+    List<DatasetVersion> versionList = datasets.listAllVersions(id);
+    Set<File> fileSet = new HashSet<>();
+    versionList.forEach(v -> {
+      v.getFiles().forEach(f -> fileSet.add(f));
+      versions.deleteById(v.getVersionId());
+    });
+    fileSet.forEach(f -> {
+      files.deleteById(f.getId());
+      staging.deleteById(f.getId());
+      try {
+        this.deleteContainer(f.getId().toString());
+      } catch (NotFoundException e) {
+        LOGGER.warn(String.format("File with id %s for dataset %s NOT FOUND.", f.getId().toString(), id.toString()));
+      }
+    });
+    datasets.deleteById(id);
+    return datasetVersionDaoEs.deleteByQuery(QueryBuilders.termQuery("id", id.toString()));
+  }
+
+  public String deleteDatasetVersion(VersionId id) throws NotFoundException, R2d2TechnicalException {
+    DatasetVersion version =
+        versions.findById(id).orElseThrow(() -> new NotFoundException(String.format("Dataset with id %s NOT FOUND", id)));
+    Set<File> files = version.getFiles();
     files.forEach(file -> {
       try {
         deleteContainer(file.getId().toString());
@@ -95,7 +135,7 @@ public class AdminService {
         LOGGER.warn(String.format("File with id %s for dataset %s NOT FOUND.", file.getId().toString(), id));
       }
     });
-    datasets.deleteById(id);
+    versions.deleteById(id);
     return datasetVersionDaoEs.deleteImmediatly(id.toString());
   }
 

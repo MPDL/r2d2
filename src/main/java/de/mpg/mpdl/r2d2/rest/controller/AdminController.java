@@ -106,7 +106,7 @@ public class AdminController {
   @DeleteMapping(value = "/datasets/{id}/{versionNumber}")
   public ResponseEntity<?> deleteDataset(@PathVariable("id") String uuid, @PathVariable("versionNumber") Integer versionNumber)
       throws AuthorizationException, NotFoundException, R2d2TechnicalException {
-    String resp = service.deleteDataset(new VersionId(UUID.fromString(uuid), versionNumber));
+    long resp = service.deleteDataset(UUID.fromString(uuid));
     Map<String, Object> map = Collections.singletonMap("deleted", resp);
     return new ResponseEntity<>(map, HttpStatus.ACCEPTED);
   }

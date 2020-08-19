@@ -2,7 +2,9 @@ package de.mpg.mpdl.r2d2.model;
 
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import javax.persistence.CascadeType;
@@ -51,8 +53,9 @@ public class DatasetVersion extends BaseDateDb {
   @Column(columnDefinition = "jsonb")
   private DatasetVersionMetadata metadata = new DatasetVersionMetadata();
 
-  @ManyToMany(fetch = FetchType.EAGER, cascade = {CascadeType.ALL})
-  private List<File> files = new ArrayList<>();
+  @ManyToMany(fetch = FetchType.EAGER, cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
+  @OnDelete(action = OnDeleteAction.CASCADE)
+  private Set<File> files = new HashSet();
 
   @Id
   @MapsId("id")
@@ -101,11 +104,11 @@ public class DatasetVersion extends BaseDateDb {
     this.metadata = metadata;
   }
 
-  public List<File> getFiles() {
+  public Set<File> getFiles() {
     return files;
   }
 
-  public void setFiles(List<File> files) {
+  public void setFiles(Set<File> files) {
     this.files = files;
   }
 

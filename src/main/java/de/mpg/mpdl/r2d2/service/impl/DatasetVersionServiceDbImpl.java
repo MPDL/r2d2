@@ -4,9 +4,11 @@ import java.io.InputStream;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
 
 import javax.persistence.EntityManager;
@@ -385,10 +387,10 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
 
 
 
-  private List<File> handleFiles(DatasetVersion newDataset, DatasetVersion latestDataset, R2D2Principal principal)
+  private Set<File> handleFiles(DatasetVersion newDataset, DatasetVersion latestDataset, R2D2Principal principal)
       throws R2d2TechnicalException, ValidationException, InvalidStateException, AuthorizationException {
 
-    List<File> updatedFileList = new ArrayList<>();
+    Set<File> updatedFileList = new HashSet();
 
     Map<UUID, File> currentFiles = new HashMap<UUID, File>();
     if (latestDataset != null) {

@@ -2,7 +2,9 @@ package de.mpg.mpdl.r2d2.rest.controller.dto;
 
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import de.mpg.mpdl.r2d2.model.Dataset;
@@ -39,7 +41,7 @@ public class DatasetVersionDto {
   private DatasetVersionMetadata metadata = new DatasetVersionMetadata();
 
 
-  private List<FileDto> files = new ArrayList<>();
+  private Set<FileDto> files = new HashSet();
 
 
 
@@ -108,11 +110,11 @@ public class DatasetVersionDto {
     this.metadata = metadata;
   }
 
-  public List<FileDto> getFiles() {
+  public Set<FileDto> getFiles() {
     return files;
   }
 
-  public void setFiles(List<FileDto> files) {
+  public void setFiles(Set<FileDto> files) {
     this.files = files;
   }
 
