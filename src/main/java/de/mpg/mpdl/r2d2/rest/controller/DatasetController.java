@@ -27,6 +27,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.ResponseEntity.BodyBuilder;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -157,87 +158,26 @@ public class DatasetController {
     }
   }
 
-  /*
-  @PostMapping("/{id}/files")
-  public ResponseEntity<File> newFile(@PathVariable("id") String id, @RequestHeader("X-File-Name") String fileName,
-      @RequestHeader(name = "X-File-Total-Chunks", required = false) Integer totalChunks,
-      @RequestHeader(name = "X-File-Total-Size") Long size, HttpServletRequest req, Principal prinz)
-      throws R2d2ApplicationException, AuthorizationException, R2d2TechnicalException {
-  
-  
-    InputStream is;
-  
-    try {
-      is = req.getInputStream();
-    } catch (IOException e) {
-      throw new R2d2TechnicalException(e);
-    }
-  
-  
-    File f = new File();
-    f.setFilename(fileName);
-    if (size != null) {
-      f.setSize(size);
-    }
-  
-  
-    if (totalChunks != null) {
-      //Init chunked upload
-      try {
-        if (is.read() != -1) {
-          throw new R2d2ApplicationException("Body must be empty. Upload chunks after this initialization");
-        }
-      } catch (IOException e) {
-        throw new R2d2TechnicalException(e);
-      }
-  
-      f.getStateInfo().setExpectedNumberOfChunks(totalChunks);
-      f = datasetVersionService.initNewFile(UUID.fromString(id), f, Utils.toCustomPrincipal(prinz));
-    } else {
-      //Upload single file
-      f = datasetVersionService.uploadSingleFile(UUID.fromString(id), f, is, Utils.toCustomPrincipal(prinz));
-    }
-  
-    BodyBuilder responseBuilder = ResponseEntity.status(HttpStatus.CREATED);
-  
-    if (f.getChecksum() != null) {
-      responseBuilder.header("etag", f.getChecksum());
-    }
-  
-    return responseBuilder.body(f);
-  }
-  
+
   @PutMapping("/{id}/files/{fileId}")
-  public ResponseEntity<FileChunk> uploadFileChunk(@PathVariable("id") String id, @PathVariable("fileId") String fileId,
-      @RequestHeader("X-File-Chunk-Number") int part, @RequestHeader(name = "etag", required = false) String etag,
-      @RequestHeader(name = "X-File-Chunk-Size", required = false) Long contentLength, HttpServletRequest req, Principal prinz)
-      throws R2d2ApplicationException, AuthorizationException, R2d2TechnicalException {
-  
-    InputStream is;
-  
-    try {
-      is = req.getInputStream();
-    } catch (IOException e) {
-      throw new R2d2TechnicalException(e);
-    }
-  
-    FileChunk chunk = new FileChunk();
-    chunk.setClientEtag(etag);
-    chunk.setNumber(part);
-    if (contentLength != null) {
-      chunk.setSize(contentLength);
-    }
-    FileChunk resultChunk =
-        datasetVersionService.uploadFileChunk(UUID.fromString(id), UUID.fromString(fileId), chunk, is, Utils.toCustomPrincipal(prinz));
-  
-    ResponseEntity<FileChunk> re = ResponseEntity.status(HttpStatus.CREATED).header("etag", resultChunk.getServerEtag()).body(resultChunk);
-  
-  
-  
-    return re;
+  public ResponseEntity<DatasetVersionDto> addFile(@PathVariable("id") String id, @PathVariable("fileId") String fileId,
+      @RequestParam(name = "lmd") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime lmd,
+      @AuthenticationPrincipal R2D2Principal p) throws R2d2ApplicationException, AuthorizationException, R2d2TechnicalException {
+    DatasetVersion response = null;
+    response = datasetVersionService.addOrRemoveFile(UUID.fromString(id), UUID.fromString(fileId), lmd, p, "add");
+
+    return new ResponseEntity<DatasetVersionDto>(dtoMapper.convertToDatasetVersionDto(response), HttpStatus.ACCEPTED);
   }
-  
-  */
+
+  @DeleteMapping("/{id}/files/{fileId}")
+  public ResponseEntity<DatasetVersionDto> removeFile(@PathVariable("id") String id, @PathVariable("fileId") String fileId,
+      @RequestParam(name = "lmd") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime lmd,
+      @AuthenticationPrincipal R2D2Principal p) throws R2d2ApplicationException, AuthorizationException, R2d2TechnicalException {
+    DatasetVersion response = null;
+    response = datasetVersionService.addOrRemoveFile(UUID.fromString(id), UUID.fromString(fileId), lmd, p, "remove");
+
+    return new ResponseEntity<DatasetVersionDto>(dtoMapper.convertToDatasetVersionDto(response), HttpStatus.ACCEPTED);
+  }
 
   @RequestMapping(value = "/search", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE,
       produces = MediaType.APPLICATION_JSON_VALUE)

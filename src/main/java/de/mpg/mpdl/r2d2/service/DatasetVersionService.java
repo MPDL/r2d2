@@ -29,13 +29,10 @@ public interface DatasetVersionService extends GenericService<DatasetVersion> {
   public DatasetVersion update(UUID id, DatasetVersion object, R2D2Principal user, boolean metadata) throws R2d2TechnicalException,
       OptimisticLockingException, ValidationException, NotFoundException, InvalidStateException, AuthorizationException;
 
-  public DatasetVersion addFile(UUID id, UUID fileId, OffsetDateTime lastModificationDate, R2D2Principal user)
+  public DatasetVersion addOrRemoveFile(UUID id, UUID fileId, OffsetDateTime lastModificationDate, R2D2Principal user, String action)
       throws R2d2TechnicalException, OptimisticLockingException, ValidationException, NotFoundException, InvalidStateException,
       AuthorizationException;
 
-  public DatasetVersion removeFile(UUID id, UUID fileId, OffsetDateTime lastModificationDate, R2D2Principal user)
-      throws R2d2TechnicalException, OptimisticLockingException, ValidationException, NotFoundException, InvalidStateException,
-      AuthorizationException;
   /*
   public DatasetVersion createNewVersion(UUID id, DatasetVersion object, R2D2Principal user) throws R2d2TechnicalException,
       OptimisticLockingException, ValidationException, NotFoundException, InvalidStateException, AuthorizationException;

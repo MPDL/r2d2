@@ -326,8 +326,9 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
 
   }
 
-  private DatasetVersion update1(UUID id, DatasetVersion datasetVersion, R2D2Principal user, boolean metadata) throws R2d2TechnicalException,
-      OptimisticLockingException, ValidationException, NotFoundException, InvalidStateException, AuthorizationException {
+  private DatasetVersion update1(UUID id, DatasetVersion datasetVersion, R2D2Principal user, boolean metadata)
+      throws R2d2TechnicalException, OptimisticLockingException, ValidationException, NotFoundException, InvalidStateException,
+      AuthorizationException {
 
     DatasetVersion latestVersion = datasetVersionRepository.findLatestVersion(id);
     DatasetVersion datasetVersionToBeUpdated;
@@ -523,19 +524,66 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
   }
 
   @Override
-  public DatasetVersion addFile(UUID id, UUID fileId, OffsetDateTime lastModificationDate, R2D2Principal user)
+  @Transactional(rollbackFor = Throwable.class)
+  public DatasetVersion addOrRemoveFile(UUID id, UUID fileId, OffsetDateTime lastModificationDate, R2D2Principal user, String action)
       throws R2d2TechnicalException, OptimisticLockingException, ValidationException, NotFoundException, InvalidStateException,
       AuthorizationException {
-    // TODO Auto-generated method stub
-    return null;
+
+    DatasetVersion latestVersion = datasetVersionRepository.findLatestVersion(id);
+    DatasetVersion result;
+    // File file;
+
+    checkAa("update", user, latestVersion);
+    // TODO validation
+    checkEqualModificationDate(lastModificationDate, latestVersion.getDataset().getModificationDate());
+
+    // create new versioin
+    if (State.PUBLIC.equals(latestVersion.getState())) {
+      result = buildDatasetVersionToCreate(latestVersion, user.getUserAccount(), latestVersion.getVersionNumber() + 1,
+          latestVersion.getDataset());
+      result.setFiles(latestVersion.getFiles());
+      result.getDataset().setLatestVersion(result.getVersionNumber());
+      setBasicCreationProperties(result, user.getUserAccount());
+      result = datasetVersionRepository.save(result);
+
+    } else {
+      result = latestVersion;
+    }
+
+    switch (action) {
+      case "add":
+        StagingFile file2add = fileUploadService.get(fileId, user);
+        File file = new File();
+        file = stagingToFile(file2add, file, user);
+        result.getFiles().add(file);
+        break;
+      case "remove":
+        File file2remove = fileRepository.findById(fileId)
+            .orElseThrow(() -> new NotFoundException(String.format("File with id %s NOT FOUND", fileId.toString())));
+        result.getFiles().remove(file2remove);
+        break;
+      default:
+        break;
+    }
+    try {
+      result = datasetVersionRepository.saveAndFlush(result);
+    } catch (Exception e) {
+      throw new R2d2TechnicalException(e);
+    }
+    reindex(result);
+
+    return result;
   }
 
-  @Override
-  public DatasetVersion removeFile(UUID id, UUID fileId, OffsetDateTime lastModificationDate, R2D2Principal user)
-      throws R2d2TechnicalException, OptimisticLockingException, ValidationException, NotFoundException, InvalidStateException,
-      AuthorizationException {
-    // TODO Auto-generated method stub
-    return null;
+  private File stagingToFile(StagingFile sf, File file, R2D2Principal user) {
+    setBasicCreationProperties(file, user.getUserAccount());
+    file.setId(sf.getId());
+    file.setFilename(sf.getFilename());
+    file.setChecksum(sf.getChecksum());
+    file.setFormat(sf.getFormat());
+    file.setSize(sf.getSize());
+    file.setStorageLocation(sf.getId().toString());
+    return file;
   }
 
 }
