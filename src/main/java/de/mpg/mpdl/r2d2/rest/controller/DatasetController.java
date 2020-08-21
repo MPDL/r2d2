@@ -90,18 +90,13 @@ public class DatasetController {
 
   @PutMapping(path = "/{id}")
   public ResponseEntity<DatasetVersionDto> updateDataset(@PathVariable("id") UUID id,
-      @RequestParam(name = "createNewVersion", defaultValue = "false") Boolean createNewVersion,
-      @RequestBody DatasetVersionDto givenDatasetVersion, Principal prinz) throws R2d2TechnicalException, R2d2ApplicationException {
+      @RequestParam(name = "metadata", defaultValue = "false") boolean metadata, @RequestBody DatasetVersionDto givenDatasetVersion,
+      Principal prinz) throws R2d2TechnicalException, R2d2ApplicationException {
 
     DatasetVersion createdDv = null;
-    /*
-    if (createNewVersion) {
-      createdDv = datasetVersionService.createNewVersion(UUID.fromString(id), givenDatasetVersion, Utils.toCustomPrincipal(prinz));
-    } else {
-      createdDv = datasetVersionService.update(UUID.fromString(id), givenDatasetVersion, Utils.toCustomPrincipal(prinz));
-    }
-    */
-    createdDv = datasetVersionService.update(id, dtoMapper.convertToDatasetVersion(givenDatasetVersion), Utils.toCustomPrincipal(prinz));
+
+    createdDv =
+        datasetVersionService.update(id, dtoMapper.convertToDatasetVersion(givenDatasetVersion), Utils.toCustomPrincipal(prinz), metadata);
     return new ResponseEntity<DatasetVersionDto>(dtoMapper.convertToDatasetVersionDto(createdDv), HttpStatus.CREATED);
   }
 
