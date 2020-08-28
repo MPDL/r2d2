@@ -13,4 +13,6 @@ public interface LocalUserAccountRepository extends CrudRepository<LocalUserAcco
 
   public Optional<LocalUserAccount> findByUsername(String username);
 
+  long deleteByUser(UserAccount user);
+
 }

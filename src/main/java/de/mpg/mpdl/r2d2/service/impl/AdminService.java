@@ -28,6 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 import de.mpg.mpdl.r2d2.db.DatasetRepository;
 import de.mpg.mpdl.r2d2.db.DatasetVersionRepository;
 import de.mpg.mpdl.r2d2.db.FileRepository;
+import de.mpg.mpdl.r2d2.db.LocalUserAccountRepository;
 import de.mpg.mpdl.r2d2.db.StagingFileRepository;
 import de.mpg.mpdl.r2d2.db.UserAccountRepository;
 import de.mpg.mpdl.r2d2.exceptions.NotFoundException;
@@ -48,6 +49,9 @@ public class AdminService {
 
   @Autowired
   UserAccountRepository users;
+
+  @Autowired
+  LocalUserAccountRepository localUsers;
 
   @Autowired
   DatasetRepository datasets;
@@ -87,7 +91,10 @@ public class AdminService {
     return users.save(user2update);
   }
 
-  public void deleteUser(String id) {
+  @Transactional
+  public void deleteUser(String id) throws NotFoundException {
+	UserAccount user = users.findById(UUID.fromString(id)).orElseThrow(() -> new NotFoundException(String.format("user with id %s NOT found!", id)));
+    localUsers.deleteByUser(user);
     users.deleteById(UUID.fromString(id));
   }
 

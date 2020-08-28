@@ -58,13 +58,13 @@ public class AdminController {
   @PatchMapping(value = "/users/{id}")
   public ResponseEntity<?> updateUser(@PathVariable("id") String uuid, @RequestBody UserAccount user2update) throws AuthorizationException {
     UserAccount user = service.updateUser(user2update);
-    return new ResponseEntity<>(user, HttpStatus.OK);
+    return new ResponseEntity<>(user, HttpStatus.ACCEPTED);
   }
 
   @DeleteMapping(value = "/users/{id}")
-  public ResponseEntity<?> deleteUser(@PathVariable("id") String uuid) throws AuthorizationException {
+  public ResponseEntity<?> deleteUser(@PathVariable("id") String uuid) throws AuthorizationException, NotFoundException {
     service.deleteUser(uuid);
-    return new ResponseEntity<>(HttpStatus.GONE);
+    return new ResponseEntity<>(HttpStatus.NO_CONTENT);
   }
 
   @GetMapping(value = "/store")
@@ -87,7 +87,7 @@ public class AdminController {
   @DeleteMapping(value = "/store/{id}")
   public ResponseEntity<?> deleteContainer(@PathVariable("id") String uuid) throws AuthorizationException, NotFoundException {
     boolean acknowledged = service.deleteContainer(uuid);
-    return new ResponseEntity<>(Collections.singletonMap("acknowledged", acknowledged), HttpStatus.GONE);
+    return new ResponseEntity<>(Collections.singletonMap("acknowledged", acknowledged), HttpStatus.NO_CONTENT);
   }
 
   @GetMapping(value = "/datasets")
@@ -108,6 +108,6 @@ public class AdminController {
       throws AuthorizationException, NotFoundException, R2d2TechnicalException {
     long resp = service.deleteDataset(UUID.fromString(uuid));
     Map<String, Object> map = Collections.singletonMap("deleted", resp);
-    return new ResponseEntity<>(map, HttpStatus.ACCEPTED);
+    return new ResponseEntity<>(map, HttpStatus.NO_CONTENT);
   }
 }
