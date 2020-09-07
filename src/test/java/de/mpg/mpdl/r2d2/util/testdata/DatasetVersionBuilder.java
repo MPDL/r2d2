@@ -1,18 +1,18 @@
 package de.mpg.mpdl.r2d2.util.testdata;
 
-import java.time.OffsetDateTime;
-
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-
+import de.mpg.mpdl.r2d2.model.Dataset;
+import de.mpg.mpdl.r2d2.model.DatasetVersion;
+import de.mpg.mpdl.r2d2.model.DatasetVersionMetadata;
+import de.mpg.mpdl.r2d2.model.Person;
+import de.mpg.mpdl.r2d2.util.Utils;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import de.mpg.mpdl.r2d2.model.Dataset;
-import de.mpg.mpdl.r2d2.model.DatasetVersion;
-import de.mpg.mpdl.r2d2.model.DatasetVersionMetadata;
-import de.mpg.mpdl.r2d2.util.Utils;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import java.time.OffsetDateTime;
+import java.util.Arrays;
 
 @Component
 @Scope("prototype")
@@ -49,10 +49,31 @@ public class DatasetVersionBuilder {
     return this;
   }
 
+  public DatasetVersionBuilder setMetadata(DatasetVersionMetadata datasetVersionMetadata) {
+    this.datasetVersion.setMetadata(datasetVersionMetadata);
+
+    return this;
+  }
+
   public DatasetVersionBuilder setMetadata(String title) {
     DatasetVersionMetadata datasetVersionMetadata = new DatasetVersionMetadata();
     datasetVersionMetadata.setTitle(title);
-    this.datasetVersion.setMetadata(datasetVersionMetadata);
+    this.setMetadata(datasetVersionMetadata);
+
+    return this;
+  }
+
+  public DatasetVersionBuilder setMetadata(String title, Person... authors) {
+    DatasetVersionMetadata datasetVersionMetadata = new DatasetVersionMetadata();
+    datasetVersionMetadata.setTitle(title);
+    datasetVersionMetadata.setAuthors(Arrays.asList(authors));
+    this.setMetadata(datasetVersionMetadata);
+
+    return this;
+  }
+
+  public DatasetVersionBuilder setPublicationDate(OffsetDateTime publicationDate) {
+    this.datasetVersion.setPublicationDate(publicationDate);
 
     return this;
   }
