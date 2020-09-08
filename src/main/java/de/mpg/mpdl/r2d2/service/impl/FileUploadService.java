@@ -9,13 +9,15 @@ import java.util.UUID;
 
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PostFilter;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import de.mpg.mpdl.r2d2.db.StagingFileRepository;
+import de.mpg.mpdl.r2d2.db.FileRepository;
 import de.mpg.mpdl.r2d2.exceptions.AuthorizationException;
 import de.mpg.mpdl.r2d2.exceptions.InvalidStateException;
 import de.mpg.mpdl.r2d2.exceptions.NotFoundException;
@@ -24,24 +26,25 @@ import de.mpg.mpdl.r2d2.exceptions.R2d2TechnicalException;
 import de.mpg.mpdl.r2d2.exceptions.ValidationException;
 import de.mpg.mpdl.r2d2.model.FileChunk;
 import de.mpg.mpdl.r2d2.model.FileChunk.Progress;
-import de.mpg.mpdl.r2d2.model.StagingFile;
-import de.mpg.mpdl.r2d2.model.StagingFile.UploadState;
+import de.mpg.mpdl.r2d2.model.VersionId;
+import de.mpg.mpdl.r2d2.model.File;
+import de.mpg.mpdl.r2d2.model.File.UploadState;
 import de.mpg.mpdl.r2d2.model.aa.R2D2Principal;
 import de.mpg.mpdl.r2d2.search.dao.GenericDaoEs;
 import de.mpg.mpdl.r2d2.search.dao.StagingFileDaoEs;
-import de.mpg.mpdl.r2d2.service.StagingFileService;
+import de.mpg.mpdl.r2d2.service.FileService;
 import de.mpg.mpdl.r2d2.service.storage.SwiftObjectStoreRepository;
 
 @Service
-public class FileUploadService extends GenericServiceDbImpl<StagingFile> implements StagingFileService {
+public class FileUploadService extends GenericServiceDbImpl<File> implements FileService {
 
   public FileUploadService() {
-    super(StagingFile.class);
+    super(File.class);
     // TODO Auto-generated constructor stub
   }
 
   @Autowired
-  StagingFileRepository stagingFileRepository;
+  FileRepository fileRepository;
 
   @Autowired
   SwiftObjectStoreRepository objectStoreRepository;
@@ -50,11 +53,10 @@ public class FileUploadService extends GenericServiceDbImpl<StagingFile> impleme
   StagingFileDaoEs stagingFileDaoEs;
 
   @Override
-  public StagingFile create(StagingFile object, R2D2Principal user)
-      throws R2d2TechnicalException, ValidationException, AuthorizationException {
+  public File create(File object, R2D2Principal user) throws R2d2TechnicalException, ValidationException, AuthorizationException {
     setBasicCreationProperties(object, user.getUserAccount());
     try {
-      stagingFileRepository.save(object);
+      fileRepository.save(object);
     } catch (Exception e) {
       throw new R2d2TechnicalException(e);
     }
@@ -62,8 +64,8 @@ public class FileUploadService extends GenericServiceDbImpl<StagingFile> impleme
   }
 
   @Override
-  public StagingFile update(StagingFile object, R2D2Principal user) throws R2d2TechnicalException, OptimisticLockingException,
-      ValidationException, NotFoundException, InvalidStateException, AuthorizationException {
+  public File update(File object, R2D2Principal user) throws R2d2TechnicalException, OptimisticLockingException, ValidationException,
+      NotFoundException, InvalidStateException, AuthorizationException {
     // TODO Auto-generated method stub
     return null;
   }
@@ -73,7 +75,7 @@ public class FileUploadService extends GenericServiceDbImpl<StagingFile> impleme
   public boolean delete(UUID id, R2D2Principal user)
       throws R2d2TechnicalException, OptimisticLockingException, NotFoundException, InvalidStateException, AuthorizationException {
     try {
-      stagingFileRepository.deleteById(id);
+      fileRepository.deleteById(id);
       return objectStoreRepository.deleteContainer(id.toString());
     } catch (Exception e) {
       throw new R2d2TechnicalException(e);
@@ -82,20 +84,20 @@ public class FileUploadService extends GenericServiceDbImpl<StagingFile> impleme
   }
 
   @Override
-  public StagingFile get(UUID id, R2D2Principal user) throws R2d2TechnicalException, NotFoundException, AuthorizationException {
-    StagingFile sf = stagingFileRepository.findById(id)
-        .orElseThrow(() -> new NotFoundException(String.format("File with id %s NOT FOUND!", id.toString())));
+  public File get(UUID id, R2D2Principal user) throws R2d2TechnicalException, NotFoundException, AuthorizationException {
+    File sf =
+        fileRepository.findById(id).orElseThrow(() -> new NotFoundException(String.format("File with id %s NOT FOUND!", id.toString())));
     return sf;
   }
 
   @Override
   @Transactional(rollbackFor = Throwable.class)
-  public StagingFile uploadSingleFile(StagingFile file, InputStream fileStream, R2D2Principal user) throws R2d2TechnicalException,
+  public File uploadSingleFile(File file, InputStream fileStream, R2D2Principal user) throws R2d2TechnicalException,
       OptimisticLockingException, ValidationException, NotFoundException, InvalidStateException, AuthorizationException {
 
     checkAa("upload", user);
 
-    StagingFile sf = create(file, user);
+    File sf = create(file, user);
     objectStoreRepository.createContainer(file.getId().toString());
     String eTag = objectStoreRepository.uploadFile(file, fileStream);
     sf.setChecksum(eTag);
@@ -108,12 +110,12 @@ public class FileUploadService extends GenericServiceDbImpl<StagingFile> impleme
 
   @Override
   @Transactional(rollbackFor = Throwable.class)
-  public StagingFile initNewFile(StagingFile file, R2D2Principal user) throws R2d2TechnicalException, OptimisticLockingException,
-      ValidationException, NotFoundException, InvalidStateException, AuthorizationException {
+  public File initNewFile(File file, R2D2Principal user) throws R2d2TechnicalException, OptimisticLockingException, ValidationException,
+      NotFoundException, InvalidStateException, AuthorizationException {
 
     checkAa("upload", user);
 
-    StagingFile sf = create(file, user);
+    File sf = create(file, user);
     objectStoreRepository.createContainer(file.getId().toString());
     // stagingFileDaoEs.createImmediately(sf.getId().toString(), sf);
 
@@ -127,7 +129,7 @@ public class FileUploadService extends GenericServiceDbImpl<StagingFile> impleme
 
     checkAa("upload", user);
 
-    StagingFile sf = stagingFileRepository.findById(fileId)
+    File sf = fileRepository.findById(fileId)
         .orElseThrow(() -> new NotFoundException(String.format("File with id %s MOT FOUND!", fileId.toString())));
 
     List<FileChunk> chunks = sf.getStateInfo().getChunks();
@@ -154,30 +156,37 @@ public class FileUploadService extends GenericServiceDbImpl<StagingFile> impleme
   }
 
   @Override
-  protected GenericDaoEs<StagingFile> getIndexDao() {
+  protected GenericDaoEs<File> getIndexDao() {
     return stagingFileDaoEs;
   }
 
+  public List<File> listFiles(VersionId id) {
+    Pageable page = PageRequest.of(0, 25);
+    List<File> list= fileRepository.findAllForVersion(id, page);
+    System.out.println("FILES? " + list);
+    return list;
+  }
+
   @PostFilter("filterObject.creator.id == principal.userAccount.id")
-  public List<StagingFile> list() {
-    List<StagingFile> list = new ArrayList<>();
-    stagingFileRepository.findAll().iterator().forEachRemaining(list::add);
+  public List<File> list() {
+    List<File> list = new ArrayList<>();
+    fileRepository.findAll().iterator().forEachRemaining(list::add);
     return list;
   }
 
   @PostAuthorize("returnObject.creator.id == principal.userAccount.id")
-  public StagingFile list(UUID id) throws NotFoundException {
-    StagingFile sf = stagingFileRepository.findById(id)
-        .orElseThrow(() -> new NotFoundException(String.format("File with id %s MOT FOUND!", id.toString())));
+  public File list(UUID id) throws NotFoundException {
+    File sf =
+        fileRepository.findById(id).orElseThrow(() -> new NotFoundException(String.format("File with id %s MOT FOUND!", id.toString())));
     return sf;
   }
 
   @Override
   @Transactional(rollbackFor = Throwable.class)
-  public StagingFile completeChunkedUpload(UUID fileId, int parts, R2D2Principal user) throws R2d2TechnicalException,
-      OptimisticLockingException, ValidationException, NotFoundException, InvalidStateException, AuthorizationException {
+  public File completeChunkedUpload(UUID fileId, int parts, R2D2Principal user) throws R2d2TechnicalException, OptimisticLockingException,
+      ValidationException, NotFoundException, InvalidStateException, AuthorizationException {
     checkAa("upload", user);
-    StagingFile sf = stagingFileRepository.findById(fileId)
+    File sf = fileRepository.findById(fileId)
         .orElseThrow(() -> new NotFoundException(String.format("File with id %s NOT FOUND!", fileId.toString())));
     // TODO: check number of parts in object store ...
     if (sf.getStateInfo().getChunks().size() == parts) {

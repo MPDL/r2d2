@@ -31,7 +31,7 @@ import de.mpg.mpdl.r2d2.db.UserAccountRepository;
 import de.mpg.mpdl.r2d2.model.aa.R2D2Principal;
 import de.mpg.mpdl.r2d2.model.aa.UserAccount;
 import de.mpg.mpdl.r2d2.service.DatasetVersionService;
-import de.mpg.mpdl.r2d2.service.StagingFileService;
+import de.mpg.mpdl.r2d2.service.FileService;
 import de.mpg.mpdl.r2d2.service.UserService;
 import de.mpg.mpdl.r2d2.service.impl.AdminService;
 
@@ -64,7 +64,7 @@ public class WebSecurityTest {
   private AdminService adminService;
 
   @MockBean
-  private StagingFileService stagingFileService;
+  private FileService stagingFileService;
 
   @MockBean
   private DtoMapper dtoMapper;

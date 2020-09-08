@@ -53,13 +53,9 @@ public class DatasetVersion extends BaseDateDb {
   @Column(columnDefinition = "jsonb")
   private DatasetVersionMetadata metadata = new DatasetVersionMetadata();
 
-  @ManyToMany(fetch = FetchType.EAGER, cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
-  @OnDelete(action = OnDeleteAction.CASCADE)
-  private Set<File> files = new HashSet();
-
   @Id
   @MapsId("id")
-  @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
+  @ManyToOne(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
   @OnDelete(action = OnDeleteAction.CASCADE)
   @JoinColumn(name = "id", nullable = false)
   private Dataset dataset = new Dataset();
@@ -102,14 +98,6 @@ public class DatasetVersion extends BaseDateDb {
 
   public void setMetadata(DatasetVersionMetadata metadata) {
     this.metadata = metadata;
-  }
-
-  public Set<File> getFiles() {
-    return files;
-  }
-
-  public void setFiles(Set<File> files) {
-    this.files = files;
   }
 
   @JsonIgnore

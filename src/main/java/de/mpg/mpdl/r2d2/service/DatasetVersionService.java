@@ -26,7 +26,7 @@ public interface DatasetVersionService extends GenericService<DatasetVersion> {
   public DatasetVersion create(DatasetVersion object, R2D2Principal user)
       throws R2d2TechnicalException, ValidationException, AuthorizationException, InvalidStateException;
 
-  public DatasetVersion update(UUID id, DatasetVersion object, R2D2Principal user, boolean metadata) throws R2d2TechnicalException,
+  public DatasetVersion update(UUID id, DatasetVersion object, R2D2Principal user) throws R2d2TechnicalException,
       OptimisticLockingException, ValidationException, NotFoundException, InvalidStateException, AuthorizationException;
 
   public DatasetVersion addOrRemoveFile(UUID id, UUID fileId, OffsetDateTime lastModificationDate, R2D2Principal user, String action)

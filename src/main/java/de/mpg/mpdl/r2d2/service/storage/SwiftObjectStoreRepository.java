@@ -40,7 +40,7 @@ import de.mpg.mpdl.r2d2.SwiftStorageConfigurationProperties;
 import de.mpg.mpdl.r2d2.exceptions.NotFoundException;
 import de.mpg.mpdl.r2d2.model.File;
 import de.mpg.mpdl.r2d2.model.FileChunk;
-import de.mpg.mpdl.r2d2.model.StagingFile;
+import de.mpg.mpdl.r2d2.model.File;
 
 @Repository
 public class SwiftObjectStoreRepository {
@@ -69,7 +69,7 @@ public class SwiftObjectStoreRepository {
   }
 
 
-  public String uploadChunk(StagingFile sf, FileChunk chunk, InputStream is) {
+  public String uploadChunk(File sf, FileChunk chunk, InputStream is) {
 
 
     LOGGER.info("Uploading Chunk to container " + sf.getId());
@@ -98,7 +98,7 @@ public class SwiftObjectStoreRepository {
   }
 
 
-  public String uploadFile(StagingFile file, InputStream is) {
+  public String uploadFile(File file, InputStream is) {
 
 
     LOGGER.info("Uploading single file to container " + file.getId());
@@ -252,7 +252,7 @@ public class SwiftObjectStoreRepository {
   }
 
 
-  public String createManifest(StagingFile sf) {
+  public String createManifest(File sf) {
     String contentType = "application/octet-stream";
     if (sf.getFormat() != null) {
       contentType = sf.getFormat();

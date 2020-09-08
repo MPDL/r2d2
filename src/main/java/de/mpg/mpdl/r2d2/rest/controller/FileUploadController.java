@@ -34,9 +34,9 @@ import de.mpg.mpdl.r2d2.exceptions.R2d2ApplicationException;
 import de.mpg.mpdl.r2d2.exceptions.R2d2TechnicalException;
 import de.mpg.mpdl.r2d2.exceptions.ValidationException;
 import de.mpg.mpdl.r2d2.model.FileChunk;
-import de.mpg.mpdl.r2d2.model.StagingFile;
+import de.mpg.mpdl.r2d2.model.File;
 import de.mpg.mpdl.r2d2.model.aa.R2D2Principal;
-import de.mpg.mpdl.r2d2.service.StagingFileService;
+import de.mpg.mpdl.r2d2.service.FileService;
 import de.mpg.mpdl.r2d2.service.impl.FileUploadService;
 import de.mpg.mpdl.r2d2.util.Utils;
 
@@ -45,13 +45,13 @@ import de.mpg.mpdl.r2d2.util.Utils;
 public class FileUploadController {
 
   @Autowired
-  private StagingFileService stagingFileService;
+  private FileService stagingFileService;
 
   @GetMapping("")
   public ResponseEntity<?> list(@AuthenticationPrincipal R2D2Principal p)
       throws AuthorizationException, R2d2TechnicalException, IOException {
 
-    List<StagingFile> resp = ((FileUploadService) stagingFileService).list();
+    List<File> resp = ((FileUploadService) stagingFileService).list();
     return new ResponseEntity<>(resp, HttpStatus.OK);
   }
 
@@ -59,12 +59,12 @@ public class FileUploadController {
   public ResponseEntity<?> get(@PathVariable("fileId") String fileId, @AuthenticationPrincipal R2D2Principal p)
       throws AuthorizationException, R2d2TechnicalException, IOException, NotFoundException {
 
-    StagingFile resp = ((FileUploadService) stagingFileService).list(UUID.fromString(fileId));
+    File resp = ((FileUploadService) stagingFileService).list(UUID.fromString(fileId));
     return new ResponseEntity<>(resp, HttpStatus.OK);
   }
 
   @PostMapping("")
-  public ResponseEntity<StagingFile> newSingleFileUpload(@RequestHeader("File-Name") String fileName,
+  public ResponseEntity<File> newSingleFileUpload(@RequestHeader("File-Name") String fileName,
       @RequestHeader("Content-Type") String contentType, @RequestHeader(name = "Content-MD5", required = false) String etag,
       HttpServletRequest request, @AuthenticationPrincipal R2D2Principal p)
       throws R2d2ApplicationException, AuthorizationException, R2d2TechnicalException {
@@ -76,7 +76,7 @@ public class FileUploadController {
       throw new R2d2TechnicalException(e);
     }
 
-    StagingFile f = new StagingFile();
+    File f = new File();
     f.setFilename(fileName);
     f.setFormat(contentType);
     if (etag != null) {
@@ -97,11 +97,11 @@ public class FileUploadController {
 
 
   @PostMapping("/multipart")
-  public ResponseEntity<StagingFile> newChunkedFileUpload(@RequestHeader("File-Name") String fileName,
+  public ResponseEntity<File> newChunkedFileUpload(@RequestHeader("File-Name") String fileName,
       @RequestHeader("Content-Type") String contentType, @AuthenticationPrincipal R2D2Principal p)
       throws R2d2ApplicationException, AuthorizationException, R2d2TechnicalException {
 
-    StagingFile f = new StagingFile();
+    File f = new File();
     f.setFilename(fileName);
     f.setFormat(contentType);
 
@@ -151,7 +151,7 @@ public class FileUploadController {
       }
     }
 
-    StagingFile sf = stagingFileService.completeChunkedUpload(UUID.fromString(fileId), parts, p);
+    File sf = stagingFileService.completeChunkedUpload(UUID.fromString(fileId), parts, p);
 
     BodyBuilder responseBuilder = ResponseEntity.status(HttpStatus.CREATED);
 
