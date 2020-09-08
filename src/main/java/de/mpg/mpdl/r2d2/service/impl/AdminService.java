@@ -19,6 +19,8 @@ import org.jclouds.openstack.swift.v1.domain.Container;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -29,7 +31,6 @@ import de.mpg.mpdl.r2d2.db.DatasetRepository;
 import de.mpg.mpdl.r2d2.db.DatasetVersionRepository;
 import de.mpg.mpdl.r2d2.db.FileRepository;
 import de.mpg.mpdl.r2d2.db.LocalUserAccountRepository;
-import de.mpg.mpdl.r2d2.db.StagingFileRepository;
 import de.mpg.mpdl.r2d2.db.UserAccountRepository;
 import de.mpg.mpdl.r2d2.exceptions.NotFoundException;
 import de.mpg.mpdl.r2d2.exceptions.R2d2TechnicalException;
@@ -66,9 +67,6 @@ public class AdminService {
   FileRepository files;
 
   @Autowired
-  StagingFileRepository staging;
-
-  @Autowired
   SwiftObjectStoreRepository objectStore;
 
 
@@ -93,7 +91,8 @@ public class AdminService {
 
   @Transactional
   public void deleteUser(String id) throws NotFoundException {
-	UserAccount user = users.findById(UUID.fromString(id)).orElseThrow(() -> new NotFoundException(String.format("user with id %s NOT found!", id)));
+    UserAccount user =
+        users.findById(UUID.fromString(id)).orElseThrow(() -> new NotFoundException(String.format("user with id %s NOT found!", id)));
     localUsers.deleteByUser(user);
     users.deleteById(UUID.fromString(id));
   }
@@ -114,13 +113,13 @@ public class AdminService {
 
     List<DatasetVersion> versionList = datasets.listAllVersions(id);
     Set<File> fileSet = new HashSet<>();
+    Pageable page = PageRequest.of(0, 25);
     versionList.forEach(v -> {
-      v.getFiles().forEach(f -> fileSet.add(f));
+      files.findAllForVersion(v.getVersionId(), page).forEach(f -> fileSet.add(f));
       versions.deleteById(v.getVersionId());
     });
     fileSet.forEach(f -> {
       files.deleteById(f.getId());
-      staging.deleteById(f.getId());
       try {
         this.deleteContainer(f.getId().toString());
       } catch (NotFoundException e) {
@@ -134,8 +133,9 @@ public class AdminService {
   public String deleteDatasetVersion(VersionId id) throws NotFoundException, R2d2TechnicalException {
     DatasetVersion version =
         versions.findById(id).orElseThrow(() -> new NotFoundException(String.format("Dataset with id %s NOT FOUND", id)));
-    Set<File> files = version.getFiles();
-    files.forEach(file -> {
+    Pageable page = PageRequest.of(0, 25);
+    List<File> fileList = files.findAllForVersion(id, page);
+    fileList.forEach(file -> {
       try {
         deleteContainer(file.getId().toString());
       } catch (NotFoundException e) {

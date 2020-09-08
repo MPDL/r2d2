@@ -1,14 +1,37 @@
 package de.mpg.mpdl.r2d2.model;
 
+import java.util.HashSet;
+import java.util.Set;
+
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
+import javax.persistence.ManyToMany;
 
 import org.hibernate.annotations.Type;
 
 @Entity
 public class File extends BaseDb {
+
+  public enum UploadState {
+    INITIATED,
+    ONGOING,
+    COMPLETE,
+    ATTACHED
+  }
+
+  @Enumerated(EnumType.STRING)
+  private UploadState state = UploadState.INITIATED;
+
+  @Type(type = "jsonb")
+  @Column(columnDefinition = "jsonb")
+  private FileUploadStatus stateInfo = new FileUploadStatus();
+
+  @ManyToMany(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
+  private Set<DatasetVersion> versions = new HashSet();
 
   private String filename;
 
@@ -58,6 +81,30 @@ public class File extends BaseDb {
 
   public void setSize(long size) {
     this.size = size;
+  }
+
+  public UploadState getState() {
+    return state;
+  }
+
+  public void setState(UploadState state) {
+    this.state = state;
+  }
+
+  public FileUploadStatus getStateInfo() {
+    return stateInfo;
+  }
+
+  public void setStateInfo(FileUploadStatus stateInfo) {
+    this.stateInfo = stateInfo;
+  }
+
+  public Set<DatasetVersion> getVersions() {
+    return versions;
+  }
+
+  public void setVersions(Set<DatasetVersion> versions) {
+    this.versions = versions;
   }
 
 }

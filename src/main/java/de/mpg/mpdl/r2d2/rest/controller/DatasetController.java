@@ -7,7 +7,9 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.security.Principal;
 import java.time.OffsetDateTime;
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
@@ -57,8 +59,11 @@ import de.mpg.mpdl.r2d2.model.aa.R2D2Principal;
 import de.mpg.mpdl.r2d2.model.search.SearchQuery;
 import de.mpg.mpdl.r2d2.model.search.SearchResult;
 import de.mpg.mpdl.r2d2.rest.controller.dto.DatasetVersionDto;
+import de.mpg.mpdl.r2d2.rest.controller.dto.FileDto;
 import de.mpg.mpdl.r2d2.rest.controller.dto.DtoMapper;
 import de.mpg.mpdl.r2d2.service.DatasetVersionService;
+import de.mpg.mpdl.r2d2.service.FileService;
+import de.mpg.mpdl.r2d2.service.impl.FileUploadService;
 import de.mpg.mpdl.r2d2.service.util.FileDownloadWrapper;
 import de.mpg.mpdl.r2d2.util.Utils;
 
@@ -74,6 +79,8 @@ public class DatasetController {
   @Autowired
   private DatasetVersionService datasetVersionService;
 
+  @Autowired
+  private FileService fileService;
 
   @Autowired
   private DtoMapper dtoMapper;
@@ -90,14 +97,12 @@ public class DatasetController {
 
 
   @PutMapping(path = "/{id}")
-  public ResponseEntity<DatasetVersionDto> updateDataset(@PathVariable("id") UUID id,
-      @RequestParam(name = "metadata", defaultValue = "false") boolean metadata, @RequestBody DatasetVersionDto givenDatasetVersion,
+  public ResponseEntity<DatasetVersionDto> updateDataset(@PathVariable("id") UUID id, @RequestBody DatasetVersionDto givenDatasetVersion,
       Principal prinz) throws R2d2TechnicalException, R2d2ApplicationException {
 
     DatasetVersion createdDv = null;
 
-    createdDv =
-        datasetVersionService.update(id, dtoMapper.convertToDatasetVersion(givenDatasetVersion), Utils.toCustomPrincipal(prinz), metadata);
+    createdDv = datasetVersionService.update(id, dtoMapper.convertToDatasetVersion(givenDatasetVersion), Utils.toCustomPrincipal(prinz));
     return new ResponseEntity<DatasetVersionDto>(dtoMapper.convertToDatasetVersionDto(createdDv), HttpStatus.CREATED);
   }
 
@@ -156,6 +161,14 @@ public class DatasetController {
     } catch (Exception e) {
       throw new R2d2TechnicalException(e);
     }
+  }
+
+  @GetMapping("/{id}/{version}/files")
+  public ResponseEntity<List<FileDto>> listFiles(@PathVariable("id") String id, @PathVariable("version") int version,
+      @AuthenticationPrincipal R2D2Principal p) {
+    List<File> files = ((FileUploadService) fileService).listFiles(new VersionId(UUID.fromString(id), version));
+    List<FileDto> dtos = files.stream().map(f -> dtoMapper.convertToFileDto(f)).collect(Collectors.toList());
+    return new ResponseEntity<List<FileDto>>(dtos, HttpStatus.OK);
   }
 
 
