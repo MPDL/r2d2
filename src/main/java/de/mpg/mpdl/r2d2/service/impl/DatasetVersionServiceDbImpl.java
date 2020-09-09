@@ -17,6 +17,7 @@ import javax.persistence.PersistenceContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -349,6 +350,7 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
       // em.detach(latestVersion);
       datasetVersionToBeUpdated = buildDatasetVersionToCreate(datasetVersion, user.getUserAccount(), latestVersion.getVersionNumber() + 1,
           latestVersion.getDataset());
+      attachFiles(datasetVersionToBeUpdated, latestVersion);
       setBasicCreationProperties(datasetVersionToBeUpdated, user.getUserAccount());
       datasetVersionToBeUpdated.getDataset().setLatestVersion(datasetVersionToBeUpdated.getVersionNumber());
 
@@ -369,7 +371,25 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
 
     return datasetVersionToBeUpdated;
 
-  }/*
+  }
+
+  private void attachFiles(DatasetVersion nextVersion, DatasetVersion currentVersion) {
+
+    List<File> existingFiles = fileRepository.findAllForVersion(currentVersion.getVersionId(), PageRequest.of(0, 25));
+    if (!existingFiles.isEmpty()) {
+      existingFiles.forEach(file -> {
+        try {
+          file.getVersions().add(nextVersion);
+          fileRepository.saveAndFlush(file);
+        } catch (Exception e) {
+          throw new RuntimeException(e);
+        }
+      });
+    }
+
+  }
+
+  /*
    private Set<File> handleFiles(DatasetVersion newDataset, DatasetVersion latestDataset, R2D2Principal principal)
       throws R2d2TechnicalException, ValidationException, InvalidStateException, AuthorizationException {
    
@@ -534,7 +554,7 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
     if (State.PUBLIC.equals(latestVersion.getState())) {
       result = buildDatasetVersionToCreate(latestVersion, user.getUserAccount(), latestVersion.getVersionNumber() + 1,
           latestVersion.getDataset());
-      // result.setFiles(latestVersion.getFiles());
+      attachFiles(result, latestVersion);
       result.getDataset().setLatestVersion(result.getVersionNumber());
       setBasicCreationProperties(result, user.getUserAccount());
       result = datasetVersionRepository.save(result);
@@ -546,14 +566,14 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
     switch (action) {
       case "add":
         file = fileUploadService.get(fileId, user);
-        if (file.getVersions().add(latestVersion)) {
+        if (file.getVersions().add(result)) {
           file.setState(UploadState.ATTACHED);
         }
         break;
       case "remove":
         file = fileRepository.findById(fileId)
             .orElseThrow(() -> new NotFoundException(String.format("File with id %s NOT FOUND", fileId.toString())));
-        if (file.getVersions().remove(latestVersion)) {
+        if (file.getVersions().remove(result)) {
           file.setState(UploadState.COMPLETE);
         }
         break;

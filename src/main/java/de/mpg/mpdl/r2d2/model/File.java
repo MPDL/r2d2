@@ -20,7 +20,8 @@ public class File extends BaseDb {
     INITIATED,
     ONGOING,
     COMPLETE,
-    ATTACHED
+    ATTACHED,
+    PUBLIC
   }
 
   @Enumerated(EnumType.STRING)

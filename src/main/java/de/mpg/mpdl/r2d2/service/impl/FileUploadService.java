@@ -162,7 +162,7 @@ public class FileUploadService extends GenericServiceDbImpl<File> implements Fil
 
   public List<File> listFiles(VersionId id) {
     Pageable page = PageRequest.of(0, 25);
-    List<File> list= fileRepository.findAllForVersion(id, page);
+    List<File> list = fileRepository.findAllForVersion(id, page);
     System.out.println("FILES? " + list);
     return list;
   }
