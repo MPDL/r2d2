@@ -5,25 +5,7 @@
 			"type": "date"
 		},
 		"creator": {
-			"properties": {
-				"id": {
-					"type": "keyword"
-				},
-				"name": {
-					"type": "text",
-					"fields": {
-						"keyword": {
-							"type": "keyword",
-							"normalizer": "sort"
-						},
-						"auto": {
-							"type": "text",
-							"analyzer": "autocomplete",
-							"search_analyzer": "standard"
-						}
-					}
-				}
-			}
+			"type": "keyword"
 		},
 		"id": {
 			"type": "keyword"
@@ -235,25 +217,7 @@
 			}
 		},
 		"modifier": {
-			"properties": {
-				"id": {
-					"type": "keyword"
-				},
-				"name": {
-					"type": "text",
-					"fields": {
-						"keyword": {
-							"type": "keyword",
-							"normalizer": "sort"
-						},
-						"auto": {
-							"type": "text",
-							"analyzer": "autocomplete",
-							"search_analyzer": "standard"
-						}
-					}
-				}
-			}
+			"type": "keyword"
 		},
 		"dataset": {
 			"properties": {
@@ -261,25 +225,7 @@
 					"type": "date"
 				},
 				"creator": {
-					"properties": {
-						"id": {
-							"type": "keyword"
-						},
-						"name": {
-							"type": "text",
-							"fields": {
-								"keyword": {
-									"type": "keyword",
-									"normalizer": "sort"
-								},
-								"auto": {
-									"type": "text",
-									"analyzer": "autocomplete",
-									"search_analyzer": "standard"
-								}
-							}
-						}
-					}
+					"type": "keyword"
 				},
 				"id": {
 					"type": "keyword"
@@ -288,25 +234,7 @@
 					"type": "date"
 				},
 				"modifier": {
-					"properties": {
-						"id": {
-							"type": "keyword"
-						},
-						"name": {
-							"type": "text",
-							"fields": {
-								"keyword": {
-									"type": "keyword",
-									"normalizer": "sort"
-								},
-								"auto": {
-									"type": "text",
-									"analyzer": "autocomplete",
-									"search_analyzer": "standard"
-								}
-							}
-						}
-					}
+					"type": "keyword"
 				},
 				"datamanager": {
 					"properties": {

@@ -135,8 +135,8 @@ public class UserServiceImpl implements UserService {
 
     account = accountRepository.save(account);
 
-    account.setCreator(new UserAccountRO(account));
-    account.setModifier(new UserAccountRO(account));
+    // account.setCreator(new UserAccountRO(account));
+    // account.setModifier(new UserAccountRO(account));
     return accountRepository.save(account);
   }
 

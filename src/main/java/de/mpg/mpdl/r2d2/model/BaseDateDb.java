@@ -7,6 +7,7 @@ import javax.persistence.AttributeOverride;
 import javax.persistence.AttributeOverrides;
 import javax.persistence.Column;
 import javax.persistence.Embedded;
+import javax.persistence.EntityListeners;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -18,9 +19,17 @@ import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.TypeDef;
 import org.hibernate.annotations.TypeDefs;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.springframework.data.annotation.CreatedBy;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedBy;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonIdentityReference;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import com.vladmihalcea.hibernate.type.array.IntArrayType;
 import com.vladmihalcea.hibernate.type.array.StringArrayType;
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
@@ -28,6 +37,8 @@ import com.vladmihalcea.hibernate.type.json.JsonStringType;
 
 import de.mpg.mpdl.r2d2.model.aa.UserAccount;
 import de.mpg.mpdl.r2d2.model.aa.UserAccountRO;
+
+@EntityListeners(AuditingEntityListener.class)
 
 @MappedSuperclass
 @TypeDefs({@TypeDef(name = "json", typeClass = JsonStringType.class), @TypeDef(name = "jsonb", typeClass = JsonBinaryType.class),
@@ -41,23 +52,24 @@ public class BaseDateDb {
 
 
   @Column(columnDefinition = "TIMESTAMP WITH TIME ZONE", nullable = false, updatable = false)
+  @CreatedDate
   private OffsetDateTime creationDate;
 
   @Column(columnDefinition = "TIMESTAMP WITH TIME ZONE", nullable = false)
+  @LastModifiedDate
   private OffsetDateTime modificationDate;
 
 
-  @Embedded
-  @AttributeOverrides({@AttributeOverride(name = "id", column = @Column(name = "creator_id")),
-      @AttributeOverride(name = "name", column = @Column(name = "creator_name"))})
-  private UserAccountRO creator;
+  @ManyToOne(fetch = FetchType.LAZY)
+  @CreatedBy
+  @JsonIdentityReference(alwaysAsId = true)
+  private UserAccount creator;
 
 
-  @Embedded
-  @AttributeOverrides({@AttributeOverride(name = "id", column = @Column(name = "modifier_id")),
-      @AttributeOverride(name = "name", column = @Column(name = "modifier_name"))})
-  private UserAccountRO modifier;
-
+  @ManyToOne(fetch = FetchType.LAZY)
+  @LastModifiedBy
+  @JsonIdentityReference(alwaysAsId = true)
+  private UserAccount modifier;
 
 
   public OffsetDateTime getCreationDate() {
@@ -76,19 +88,19 @@ public class BaseDateDb {
     this.modificationDate = modificationDate;
   }
 
-  public UserAccountRO getCreator() {
+  public UserAccount getCreator() {
     return creator;
   }
 
-  public void setCreator(UserAccountRO creator) {
+  public void setCreator(UserAccount creator) {
     this.creator = creator;
   }
 
-  public UserAccountRO getModifier() {
+  public UserAccount getModifier() {
     return modifier;
   }
 
-  public void setModifier(UserAccountRO modifier) {
+  public void setModifier(UserAccount modifier) {
     this.modifier = modifier;
   }
 

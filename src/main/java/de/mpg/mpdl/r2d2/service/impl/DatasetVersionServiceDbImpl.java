@@ -127,7 +127,7 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
       throws R2d2TechnicalException, OptimisticLockingException, NotFoundException, InvalidStateException, AuthorizationException {
 
     DatasetVersion datsetVersion = getLatest(id, user);
-    checkEqualModificationDate(lastModificationDate, datsetVersion.getDataset().getModificationDate());
+    checkEqualModificationDate(lastModificationDate, datsetVersion.getModificationDate());
     // TODO Complete deletion if only one version
     // TODO check state
 
@@ -194,7 +194,7 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
     DatasetVersion latestVersion = datasetVersionRepository.findLatestVersion(id);
 
     checkAa("publish", user, latestVersion);
-    checkEqualModificationDate(lastModificationDate, latestVersion.getDataset().getModificationDate());
+    checkEqualModificationDate(lastModificationDate, latestVersion.getModificationDate());
 
     /*
      * if (!id.equals(latestVersion.getId())) { throw new
@@ -209,7 +209,7 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
 
     latestVersion.setState(State.PUBLIC);
     latestVersion.getDataset().setState(State.PUBLIC);
-    setBasicModificationProperties(latestVersion, user.getUserAccount());
+    // setBasicModificationProperties(latestVersion, user.getUserAccount());
     latestVersion.getDataset().setLatestPublicVersion(latestVersion.getVersionNumber());
 
     try {
@@ -336,7 +336,7 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
 
     checkAa("update", user, latestVersion);
     // TODO validation
-    checkEqualModificationDate(datasetVersion.getModificationDate(), latestVersion.getDataset().getModificationDate());
+    checkEqualModificationDate(datasetVersion.getModificationDate(), latestVersion.getModificationDate());
 
     // create new versioin
     if (State.PUBLIC.equals(latestVersion.getState())) {
@@ -351,13 +351,13 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
       datasetVersionToBeUpdated = buildDatasetVersionToCreate(datasetVersion, user.getUserAccount(), latestVersion.getVersionNumber() + 1,
           latestVersion.getDataset());
       attachFiles(datasetVersionToBeUpdated, latestVersion);
-      setBasicCreationProperties(datasetVersionToBeUpdated, user.getUserAccount());
+      // setBasicCreationProperties(datasetVersionToBeUpdated, user.getUserAccount());
       datasetVersionToBeUpdated.getDataset().setLatestVersion(datasetVersionToBeUpdated.getVersionNumber());
 
     } else {
       datasetVersionToBeUpdated = latestVersion;
       datasetVersionToBeUpdated.setMetadata(datasetVersion.getMetadata());
-      setBasicModificationProperties(datasetVersionToBeUpdated, user.getUserAccount());
+      // setBasicModificationProperties(datasetVersionToBeUpdated, user.getUserAccount());
 
     }
 
@@ -475,7 +475,7 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
 
     }
     datasetVersionToCreate.setDataset(datasetToCreate);
-    setBasicCreationProperties(datasetVersionToCreate, creator);
+    // setBasicCreationProperties(datasetVersionToCreate, creator);
 
     return datasetVersionToCreate;
 
@@ -486,6 +486,7 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
     return datasetVersionIndexDao;
   }
 
+  /*
   protected void setBasicCreationProperties(DatasetVersion baseObject, UserAccount creator) {
     OffsetDateTime dateTime = Utils.generateCurrentDateTimeForDatabase();
     super.setBasicCreationProperties(baseObject, creator, dateTime);
@@ -494,15 +495,15 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
     } else {
       super.setBasicModificationProperties(baseObject.getDataset(), creator, dateTime);
     }
-
   }
-
+  */
+  /*
   protected void setBasicModificationProperties(DatasetVersion baseObject, UserAccount creator) {
     OffsetDateTime dateTime = Utils.generateCurrentDateTimeForDatabase();
     super.setBasicModificationProperties(baseObject, creator, dateTime);
     super.setBasicModificationProperties(baseObject.getDataset(), creator, dateTime);
-
   }
+  */
 
   public void reindex(DatasetVersion dv) throws R2d2TechnicalException {
     this.reindex(dv.getDataset(), true);
@@ -548,7 +549,7 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
 
     checkAa("update", user, latestVersion);
     // TODO validation
-    checkEqualModificationDate(lastModificationDate, latestVersion.getDataset().getModificationDate());
+    checkEqualModificationDate(lastModificationDate, latestVersion.getModificationDate());
 
     // create new versioin
     if (State.PUBLIC.equals(latestVersion.getState())) {
@@ -556,7 +557,7 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
           latestVersion.getDataset());
       attachFiles(result, latestVersion);
       result.getDataset().setLatestVersion(result.getVersionNumber());
-      setBasicCreationProperties(result, user.getUserAccount());
+      // setBasicCreationProperties(result, user.getUserAccount());
       result = datasetVersionRepository.save(result);
 
     } else {

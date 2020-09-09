@@ -39,8 +39,8 @@ public class UserAccountBuilder {
 
   public UserAccountBuilder setCreatorAndModifier(UserAccount userAccount) {
     UserAccountRO userAccountRO = new UserAccountRO(userAccount);
-    this.userAccount.setCreator(userAccountRO);
-    this.userAccount.setModifier(userAccountRO);
+    // this.userAccount.setCreator(userAccountRO);
+    // this.userAccount.setModifier(userAccountRO);
 
     return this;
   }

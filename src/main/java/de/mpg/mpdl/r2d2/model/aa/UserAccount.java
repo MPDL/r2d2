@@ -11,11 +11,17 @@ import javax.persistence.Table;
 
 import org.hibernate.annotations.Type;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonIdentityReference;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+
 import de.mpg.mpdl.r2d2.model.BaseDb;
 import de.mpg.mpdl.r2d2.model.Person;
 
 @Entity
 @Table(name = "user_account")
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id", scope = UserAccount.class)
+
 public class UserAccount extends BaseDb {
 
   public enum Role {
