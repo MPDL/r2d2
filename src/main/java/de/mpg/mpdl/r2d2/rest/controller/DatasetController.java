@@ -22,6 +22,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
+import org.springframework.data.domain.Pageable;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -165,8 +166,8 @@ public class DatasetController {
 
   @GetMapping("/{id}/{version}/files")
   public ResponseEntity<List<FileDto>> listFiles(@PathVariable("id") String id, @PathVariable("version") int version,
-      @AuthenticationPrincipal R2D2Principal p) {
-    List<File> files = ((FileUploadService) fileService).listFiles(new VersionId(UUID.fromString(id), version));
+      @AuthenticationPrincipal R2D2Principal p, Pageable pageable) {
+    List<File> files = ((FileUploadService) fileService).listFiles(new VersionId(UUID.fromString(id), version), pageable);
     List<FileDto> dtos = files.stream().map(f -> dtoMapper.convertToFileDto(f)).collect(Collectors.toList());
     return new ResponseEntity<List<FileDto>>(dtos, HttpStatus.OK);
   }

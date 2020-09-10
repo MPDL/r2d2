@@ -30,8 +30,8 @@ import de.mpg.mpdl.r2d2.model.VersionId;
 import de.mpg.mpdl.r2d2.model.File;
 import de.mpg.mpdl.r2d2.model.File.UploadState;
 import de.mpg.mpdl.r2d2.model.aa.R2D2Principal;
+import de.mpg.mpdl.r2d2.search.dao.FileDaoEs;
 import de.mpg.mpdl.r2d2.search.dao.GenericDaoEs;
-import de.mpg.mpdl.r2d2.search.dao.StagingFileDaoEs;
 import de.mpg.mpdl.r2d2.service.FileService;
 import de.mpg.mpdl.r2d2.service.storage.SwiftObjectStoreRepository;
 
@@ -48,9 +48,9 @@ public class FileUploadService extends GenericServiceDbImpl<File> implements Fil
 
   @Autowired
   SwiftObjectStoreRepository objectStoreRepository;
-
+  
   @Autowired
-  StagingFileDaoEs stagingFileDaoEs;
+  FileDaoEs fileDaoEs;
 
   @Override
   public File create(File object, R2D2Principal user) throws R2d2TechnicalException, ValidationException, AuthorizationException {
@@ -157,12 +157,11 @@ public class FileUploadService extends GenericServiceDbImpl<File> implements Fil
 
   @Override
   protected GenericDaoEs<File> getIndexDao() {
-    return stagingFileDaoEs;
+    return fileDaoEs;
   }
 
-  public List<File> listFiles(VersionId id) {
-    Pageable page = PageRequest.of(0, 25);
-    List<File> list = fileRepository.findAllForVersion(id, page);
+  public List<File> listFiles(VersionId id, Pageable pageable) {
+    List<File> list = fileRepository.findAllForVersion(id, pageable);
     return list;
   }
 

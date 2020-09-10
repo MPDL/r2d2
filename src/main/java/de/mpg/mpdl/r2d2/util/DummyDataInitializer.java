@@ -59,8 +59,8 @@ public class DummyDataInitializer {
     person.setFamilyName("Admin");
     user.setPerson(person);
     user.setId(UUID.fromString("2d0dd850-eabb-43fe-8b8f-1a1b54018738"));
-    // user.setCreator(new UserAccountRO(user));
-    // user.setModifier(new UserAccountRO(user));
+    user.setCreator(user);
+    user.setModifier(user);
     // user.setCreationDate(currentDateTime);
     // user.setModificationDate(currentDateTime);
     user.getRoles().add(Role.ADMIN);
@@ -84,8 +84,8 @@ public class DummyDataInitializer {
     person2.setFamilyName("User");
     user2.setPerson(person2);
     user2.setId(UUID.fromString("2d0dd850-eabb-43fe-8b8f-1a1b54018739"));
-    // user2.setCreator(new UserAccountRO(user));
-    // user2.setModifier(new UserAccountRO(user));
+    user2.setCreator(user);
+    user2.setModifier(user);
     // user2.setCreationDate(currentDateTime);
     // user2.setModificationDate(currentDateTime);
     user2.getRoles().add(Role.USER);
@@ -102,8 +102,8 @@ public class DummyDataInitializer {
 
     DatasetVersion dv = new DatasetVersion();
     //dv.setId(UUID.fromString("a6124f2a-9a06-489d-a7e2-40b583ebbd23"));
-    // dv.setCreator(new UserAccountRO(user));
-    // dv.setModifier(new UserAccountRO(user));
+    dv.setCreator(user);
+    dv.setModifier(user);
     // dv.setCreationDate(currentDateTime);
     // dv.setModificationDate(currentDateTime);
     dv.getMetadata().setTitle("Test title");
@@ -115,8 +115,8 @@ public class DummyDataInitializer {
 
     Dataset dataset = new Dataset();
     dataset.setId(UUID.fromString("a6124f2a-9a06-489d-a7e2-40b583ebbd23"));
-    // dataset.setCreator(new UserAccountRO(user));
-    // dataset.setModifier(new UserAccountRO(user));
+    dataset.setCreator(user);
+    dataset.setModifier(user);
     // dataset.setCreationDate(currentDateTime);
     // dataset.setModificationDate(currentDateTime);
     dataset.getDatamanager().add(new UserAccountRO(user));
@@ -129,8 +129,8 @@ public class DummyDataInitializer {
     DatasetVersion dv2 = new DatasetVersion();
     dv2.setState(State.PUBLIC);
     //dv2.setId(UUID.fromString("a6124f2a-9a06-489d-a7e2-40b583ebbd24"));
-    // dv2.setCreator(new UserAccountRO(user));
-    // dv2.setModifier(new UserAccountRO(user));
+    dv2.setCreator(user);
+    dv2.setModifier(user);
     // dv2.setCreationDate(currentDateTime);
     // dv2.setModificationDate(currentDateTime);
     dv2.getMetadata().setTitle("Test title 2");
@@ -142,8 +142,8 @@ public class DummyDataInitializer {
 
     Dataset dataset2 = new Dataset();
     dataset2.setId(UUID.fromString("a6124f2a-9a06-489d-a7e2-40b583ebbd24"));
-    // dataset2.setCreator(new UserAccountRO(user));
-    // dataset2.setModifier(new UserAccountRO(user));
+    dataset2.setCreator(user);
+    dataset2.setModifier(user);
     // dataset2.setCreationDate(currentDateTime);
     // dataset2.setModificationDate(currentDateTime);
     dataset2.setState(State.PUBLIC);
@@ -160,8 +160,8 @@ public class DummyDataInitializer {
     DatasetVersion dv3 = new DatasetVersion();
     dv3.setState(State.PUBLIC);
     //dv3.setId(UUID.fromString("a6124f2a-9a06-489d-a7e2-40b583ebbd25"));
-    // dv3.setCreator(new UserAccountRO(user2));
-    // dv3.setModifier(new UserAccountRO(user2));
+    dv2.setCreator(user);
+    dv3.setModifier(user);
     // dv3.setCreationDate(currentDateTime);
     // dv3.setModificationDate(currentDateTime);
     dv3.getMetadata().setTitle("Test private item from user");
@@ -173,8 +173,8 @@ public class DummyDataInitializer {
 
     Dataset dataset3 = new Dataset();
     dataset3.setId(UUID.fromString("a6124f2a-9a06-489d-a7e2-40b583ebbd25"));
-    // dataset3.setCreator(new UserAccountRO(user2));
-    // dataset3.setModifier(new UserAccountRO(user2));
+    dataset3.setCreator(user);
+    dataset3.setModifier(user);
     // dataset3.setCreationDate(currentDateTime);
     // dataset3.setModificationDate(currentDateTime);
     dataset3.setState(State.PUBLIC);
