@@ -9,6 +9,7 @@ import java.util.UUID;
 
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PostAuthorize;
@@ -160,8 +161,8 @@ public class FileUploadService extends GenericServiceDbImpl<File> implements Fil
     return fileDaoEs;
   }
 
-  public List<File> listFiles(VersionId id, Pageable pageable) {
-    List<File> list = fileRepository.findAllForVersion(id, pageable);
+  public Page<File> listFiles(VersionId id, Pageable pageable) {
+    Page<File> list = fileRepository.findAllForVersion(id, pageable);
     return list;
   }
 

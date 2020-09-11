@@ -17,6 +17,7 @@ import javax.persistence.PersistenceContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -375,7 +376,7 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
 
   private void attachFiles(DatasetVersion nextVersion, DatasetVersion currentVersion) {
 
-    List<File> existingFiles = fileRepository.findAllForVersion(currentVersion.getVersionId(), PageRequest.of(0, 25));
+    Page<File> existingFiles = fileRepository.findAllForVersion(currentVersion.getVersionId(), PageRequest.of(0, 25));
     if (!existingFiles.isEmpty()) {
       existingFiles.forEach(file -> {
         try {

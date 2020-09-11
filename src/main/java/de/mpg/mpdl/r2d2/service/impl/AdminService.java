@@ -19,6 +19,7 @@ import org.jclouds.openstack.swift.v1.domain.Container;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -116,7 +117,7 @@ public class AdminService {
     Pageable page = PageRequest.of(0, 25);
     versionList.forEach(v -> {
       files.findAllForVersion(v.getVersionId(), page).forEach(f -> fileSet.add(f));
-      versions.deleteById(v.getVersionId());
+      // versions.deleteById(v.getVersionId());
     });
     fileSet.forEach(f -> {
       files.deleteById(f.getId());
@@ -126,6 +127,9 @@ public class AdminService {
         LOGGER.warn(String.format("File with id %s for dataset %s NOT FOUND.", f.getId().toString(), id.toString()));
       }
     });
+    versionList.forEach(v -> {
+    	versions.deleteById(v.getVersionId());
+    });
     datasets.deleteById(id);
     return datasetVersionDaoEs.deleteByQuery(QueryBuilders.termQuery("id", id.toString()));
   }
@@ -134,7 +138,7 @@ public class AdminService {
     DatasetVersion version =
         versions.findById(id).orElseThrow(() -> new NotFoundException(String.format("Dataset with id %s NOT FOUND", id)));
     Pageable page = PageRequest.of(0, 25);
-    List<File> fileList = files.findAllForVersion(id, page);
+    Page<File> fileList = files.findAllForVersion(id, page);
     fileList.forEach(file -> {
       try {
         deleteContainer(file.getId().toString());
