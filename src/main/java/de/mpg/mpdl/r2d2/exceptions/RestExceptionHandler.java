@@ -30,7 +30,7 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
 
   private static Logger LOGGER = LoggerFactory.getLogger(RestExceptionHandler.class);
 
-  
+
   @Override
   protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex, HttpHeaders headers, HttpStatus status,
       WebRequest request) {

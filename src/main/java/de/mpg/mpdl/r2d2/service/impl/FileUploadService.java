@@ -48,7 +48,7 @@ public class FileUploadService extends GenericServiceDbImpl<File> implements Fil
 
   @Autowired
   SwiftObjectStoreRepository objectStoreRepository;
-  
+
   @Autowired
   FileDaoEs fileDaoEs;
 

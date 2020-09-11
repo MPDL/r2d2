@@ -20,7 +20,8 @@ import de.mpg.mpdl.r2d2.model.Person;
 
 @Entity
 @Table(name = "user_account")
-@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id", scope = UserAccount.class)
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id", scope = UserAccount.class,
+    resolver = UserAccountIdResolver.class)
 
 public class UserAccount extends BaseDb {
 
