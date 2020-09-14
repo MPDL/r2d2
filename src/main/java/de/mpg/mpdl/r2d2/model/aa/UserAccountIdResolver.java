@@ -14,7 +14,7 @@ import de.mpg.mpdl.r2d2.util.AutowireHelper;
 
 public class UserAccountIdResolver implements ObjectIdResolver {
 
-	@Autowired
+  @Autowired
   private UserAccountRepository users;
 
   @Override
@@ -24,8 +24,8 @@ public class UserAccountIdResolver implements ObjectIdResolver {
 
   @Override
   public Object resolveId(IdKey id) {
-	  AutowireHelper.autowire(this, this.users);
-	  UserAccount ua = users.findById((UUID) id.key).orElseThrow(() -> new RuntimeException("SHIT HAPPENS!"));
+    AutowireHelper.autowire(this, this.users);
+    UserAccount ua = users.findById((UUID) id.key).orElseThrow(() -> new RuntimeException("SHIT HAPPENS!"));
     return ua;
   }
 

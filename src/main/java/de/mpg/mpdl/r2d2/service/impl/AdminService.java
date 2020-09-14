@@ -128,7 +128,7 @@ public class AdminService {
       }
     });
     versionList.forEach(v -> {
-    	versions.deleteById(v.getVersionId());
+      versions.deleteById(v.getVersionId());
     });
     datasets.deleteById(id);
     return datasetVersionDaoEs.deleteByQuery(QueryBuilders.termQuery("id", id.toString()));
