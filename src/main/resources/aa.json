@@ -94,7 +94,7 @@
 		
 	"de.mpg.mpdl.r2d2.service.impl.FileUploadService" : {
 		"technical" : {
-			"order" : ["user", "stagingFile"]
+			"order" : ["user",  "file"]
 		}, 
 		"upload" : [
 			{
@@ -105,6 +105,21 @@
 			{
 				"user" : {
 					"role" : "USER"
+				}
+			}
+		],
+		"get" : [
+			{
+				"user" : {
+					"role" : "ADMIN"
+				}
+			},
+			{
+				"file.state" : ["PUBLIC"]
+			},
+			{
+				"user" : {
+					"field_user_id_match" : "file.creator.id"
 				}
 			}
 		]

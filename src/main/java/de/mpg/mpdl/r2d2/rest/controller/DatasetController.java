@@ -1,8 +1,6 @@
 package de.mpg.mpdl.r2d2.rest.controller;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.security.Principal;
@@ -11,8 +9,6 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import javax.inject.Inject;
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.elasticsearch.action.search.SearchResponse;
@@ -29,7 +25,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.ResponseEntity.BodyBuilder;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -37,7 +32,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -47,15 +41,10 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import de.mpg.mpdl.r2d2.exceptions.AuthorizationException;
-import de.mpg.mpdl.r2d2.exceptions.InvalidStateException;
-import de.mpg.mpdl.r2d2.exceptions.NotFoundException;
-import de.mpg.mpdl.r2d2.exceptions.OptimisticLockingException;
 import de.mpg.mpdl.r2d2.exceptions.R2d2ApplicationException;
 import de.mpg.mpdl.r2d2.exceptions.R2d2TechnicalException;
-import de.mpg.mpdl.r2d2.exceptions.ValidationException;
 import de.mpg.mpdl.r2d2.model.DatasetVersion;
 import de.mpg.mpdl.r2d2.model.File;
-import de.mpg.mpdl.r2d2.model.FileChunk;
 import de.mpg.mpdl.r2d2.model.VersionId;
 import de.mpg.mpdl.r2d2.model.aa.R2D2Principal;
 import de.mpg.mpdl.r2d2.model.search.SearchQuery;
@@ -97,7 +86,7 @@ public class DatasetController {
   }
 
 
-
+// /metadata
   @PutMapping(path = "/{id}")
   public ResponseEntity<DatasetVersionDto> updateDataset(@PathVariable("id") UUID id, @RequestBody DatasetVersionDto givenDatasetVersion,
       Principal prinz) throws R2d2TechnicalException, R2d2ApplicationException {
@@ -108,6 +97,7 @@ public class DatasetController {
     return new ResponseEntity<DatasetVersionDto>(dtoMapper.convertToDatasetVersionDto(createdDv), HttpStatus.CREATED);
   }
 
+  // reolace with /state
   @PutMapping(path = "/{id}/publish")
   public ResponseEntity<DatasetVersionDto> publish(@PathVariable("id") String id,
       @RequestParam(name = "lmd") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime lmd, Principal prinz)
@@ -117,6 +107,7 @@ public class DatasetController {
     return new ResponseEntity<DatasetVersionDto>(dtoMapper.convertToDatasetVersionDto(publishedDv), HttpStatus.CREATED);
   }
 
+  /*
   @GetMapping(path = "/{id}")
   public DatasetVersionDto getLatestDataset(@PathVariable("id") String id, Principal p)
       throws R2d2TechnicalException, R2d2ApplicationException {
@@ -124,7 +115,8 @@ public class DatasetController {
     return dtoMapper.convertToDatasetVersionDto(datasetVersionService.getLatest(UUID.fromString(id), Utils.toCustomPrincipal(p)));
 
   }
-
+  */
+// version number as query string
   @GetMapping(path = "/{id}/{versionNumber}")
   public DatasetVersionDto getDataset(@PathVariable("id") String id, @PathVariable("versionNumber") int versionNumber, Principal p)
       throws R2d2TechnicalException, R2d2ApplicationException {
@@ -134,7 +126,7 @@ public class DatasetController {
 
   }
 
-
+// move to File Controller
   @GetMapping("/{id}/{versionNumber}/files/{fileId}")
   public ResponseEntity<?> download(@PathVariable("id") String datasetId, @PathVariable("versionNumber") int versionNumber,
       @PathVariable("fileId") String fileId,
@@ -165,10 +157,10 @@ public class DatasetController {
     }
   }
 
-  @GetMapping("/{id}/{version}/files")
-  public ResponseEntity<List<FileDto>> listFiles(@PathVariable("id") String id, @PathVariable("version") int version,
-      @AuthenticationPrincipal R2D2Principal p, Pageable pageable) {
-    Page<File> files = ((FileUploadService) fileService).listFiles(new VersionId(UUID.fromString(id), version), pageable);
+  @GetMapping("/{id}/files") // optional ver num 
+  public ResponseEntity<List<FileDto>> listFiles(@PathVariable("id") String id, 
+      @AuthenticationPrincipal R2D2Principal p, Pageable pageable) throws AuthorizationException, R2d2TechnicalException {
+    Page<File> files = ((FileUploadService) fileService).listFiles(UUID.fromString(id), pageable, p);
     List<FileDto> dtos = files.stream().map(f -> dtoMapper.convertToFileDto(f)).collect(Collectors.toList());
     HttpHeaders headers = new HttpHeaders();
     headers.add("Total-Number-of-Elements", Long.toString(files.getTotalElements()));
@@ -176,6 +168,7 @@ public class DatasetController {
     return new ResponseEntity<List<FileDto>>(dtos, headers, HttpStatus.OK);
   }
 
+  //POST files
 
   @PutMapping("/{id}/files/{fileId}")
   public ResponseEntity<DatasetVersionDto> addFile(@PathVariable("id") String id, @PathVariable("fileId") String fileId,

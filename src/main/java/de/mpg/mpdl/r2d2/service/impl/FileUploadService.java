@@ -18,6 +18,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import de.mpg.mpdl.r2d2.db.DatasetVersionRepository;
 import de.mpg.mpdl.r2d2.db.FileRepository;
 import de.mpg.mpdl.r2d2.exceptions.AuthorizationException;
 import de.mpg.mpdl.r2d2.exceptions.InvalidStateException;
@@ -28,6 +29,7 @@ import de.mpg.mpdl.r2d2.exceptions.ValidationException;
 import de.mpg.mpdl.r2d2.model.FileChunk;
 import de.mpg.mpdl.r2d2.model.FileChunk.Progress;
 import de.mpg.mpdl.r2d2.model.VersionId;
+import de.mpg.mpdl.r2d2.model.DatasetVersion;
 import de.mpg.mpdl.r2d2.model.File;
 import de.mpg.mpdl.r2d2.model.File.UploadState;
 import de.mpg.mpdl.r2d2.model.aa.R2D2Principal;
@@ -46,6 +48,9 @@ public class FileUploadService extends GenericServiceDbImpl<File> implements Fil
 
   @Autowired
   FileRepository fileRepository;
+  
+  @Autowired
+  DatasetVersionRepository datasetVersionRepository;
 
   @Autowired
   SwiftObjectStoreRepository objectStoreRepository;
@@ -160,9 +165,13 @@ public class FileUploadService extends GenericServiceDbImpl<File> implements Fil
   protected GenericDaoEs<File> getIndexDao() {
     return fileDaoEs;
   }
+// move 2 dataset service
+  public Page<File> listFiles(UUID id, Pageable pageable, R2D2Principal user) throws AuthorizationException, R2d2TechnicalException {
+	  
+	  DatasetVersion latestVersion = datasetVersionRepository.findLatestVersion(id);
 
-  public Page<File> listFiles(VersionId id, Pageable pageable) {
-    Page<File> list = fileRepository.findAllForVersion(id, pageable);
+	    checkAa("get", user, latestVersion);
+    Page<File> list = fileRepository.findAllForVersion(latestVersion.getVersionId(), pageable);
     return list;
   }
 
