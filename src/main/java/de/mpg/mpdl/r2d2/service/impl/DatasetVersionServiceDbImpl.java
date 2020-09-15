@@ -1,14 +1,7 @@
 package de.mpg.mpdl.r2d2.service.impl;
 
-import java.io.InputStream;
 import java.time.OffsetDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 import java.util.UUID;
 
 import javax.persistence.EntityManager;
@@ -19,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,16 +23,13 @@ import de.mpg.mpdl.r2d2.exceptions.AuthorizationException;
 import de.mpg.mpdl.r2d2.exceptions.InvalidStateException;
 import de.mpg.mpdl.r2d2.exceptions.NotFoundException;
 import de.mpg.mpdl.r2d2.exceptions.OptimisticLockingException;
-import de.mpg.mpdl.r2d2.exceptions.R2d2ApplicationException;
 import de.mpg.mpdl.r2d2.exceptions.R2d2TechnicalException;
 import de.mpg.mpdl.r2d2.exceptions.ValidationException;
 import de.mpg.mpdl.r2d2.model.Dataset;
 import de.mpg.mpdl.r2d2.model.Dataset.State;
 import de.mpg.mpdl.r2d2.model.DatasetVersion;
-import de.mpg.mpdl.r2d2.model.DatasetVersionMetadata;
 import de.mpg.mpdl.r2d2.model.File;
 import de.mpg.mpdl.r2d2.model.File.UploadState;
-import de.mpg.mpdl.r2d2.model.File;
 import de.mpg.mpdl.r2d2.model.VersionId;
 import de.mpg.mpdl.r2d2.model.aa.R2D2Principal;
 import de.mpg.mpdl.r2d2.model.aa.UserAccount;
@@ -46,8 +37,6 @@ import de.mpg.mpdl.r2d2.search.dao.DatasetVersionDaoEs;
 import de.mpg.mpdl.r2d2.search.dao.GenericDaoEs;
 import de.mpg.mpdl.r2d2.service.DatasetVersionService;
 import de.mpg.mpdl.r2d2.service.storage.SwiftObjectStoreRepository;
-import de.mpg.mpdl.r2d2.service.util.FileDownloadWrapper;
-import de.mpg.mpdl.r2d2.util.Utils;
 
 @Service
 public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVersion> implements DatasetVersionService {
@@ -177,12 +166,17 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
   public DatasetVersion get(VersionId id, R2D2Principal principal)
       throws R2d2TechnicalException, NotFoundException, AuthorizationException {
 
-    DatasetVersion datasetVersion =
-        datasetVersionRepository.findById(id).orElseThrow(() -> new NotFoundException("Dataset version with id " + id + " not found"));
+    if (id.getVersionNumber() == null) {
+      return getLatest(id.getId(), principal);
 
-    checkAa("get", principal, datasetVersion);
+    } else {
+      DatasetVersion datasetVersion =
+          datasetVersionRepository.findById(id).orElseThrow(() -> new NotFoundException("Dataset version with id " + id + " not found"));
+      checkAa("get", principal, datasetVersion);
+      return datasetVersion;
+    }
 
-    return datasetVersion;
+
 
   }
 
@@ -224,17 +218,38 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
 
   }
 
+  public Page<File> listFiles(VersionId datasetId, Pageable pageable, R2D2Principal user)
+      throws AuthorizationException, R2d2TechnicalException, NotFoundException {
+    DatasetVersion dv = get(datasetId, user);
+    Page<File> list = fileRepository.findAllForVersion(dv.getVersionId(), pageable);
+    return list;
+  }
+
+  public File getFileForDataset(VersionId datasetId, UUID fileId, R2D2Principal user)
+      throws AuthorizationException, R2d2TechnicalException, NotFoundException {
+    DatasetVersion dv = get(datasetId, user);
+    File f = fileRepository.findById(fileId).orElseThrow(() -> new NotFoundException("File with id " + fileId + " not found"));
+
+    if (!f.getVersions().stream().anyMatch(i -> i.equals(dv.getVersionId()))) {
+      throw new NotFoundException("File with id " + fileId + " not part of dataset " + dv.getVersionId());
+    }
+    return f;
+  }
+
+
+  /*
   public FileDownloadWrapper getFileContent(VersionId versionId, UUID fileId, R2D2Principal user) throws R2d2TechnicalException,
       OptimisticLockingException, ValidationException, NotFoundException, InvalidStateException, AuthorizationException {
     DatasetVersion dv = get(versionId, user);
     File file = fileRepository.findById(fileId).orElseThrow(() -> new NotFoundException("File with id " + fileId + " not found"));
     checkAa("download", user, dv);
-
+  
     FileDownloadWrapper fd = new FileDownloadWrapper(file, objectStoreRepository);
-
+  
     return fd;
-
+  
   }
+  */
 
   private DatasetVersion update1(UUID id, DatasetVersion datasetVersion, R2D2Principal user) throws R2d2TechnicalException,
       OptimisticLockingException, ValidationException, NotFoundException, InvalidStateException, AuthorizationException {

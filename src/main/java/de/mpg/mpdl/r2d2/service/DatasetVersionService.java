@@ -6,6 +6,9 @@ import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
 import de.mpg.mpdl.r2d2.exceptions.AuthorizationException;
 import de.mpg.mpdl.r2d2.exceptions.InvalidStateException;
 import de.mpg.mpdl.r2d2.exceptions.NotFoundException;
@@ -48,8 +51,14 @@ public interface DatasetVersionService extends GenericService<DatasetVersion> {
   public DatasetVersion publish(UUID id, OffsetDateTime lastModificationDate, R2D2Principal user) throws R2d2TechnicalException,
       OptimisticLockingException, ValidationException, NotFoundException, InvalidStateException, AuthorizationException;
 
-  public FileDownloadWrapper getFileContent(VersionId datasetId, UUID fileId, R2D2Principal user) throws R2d2TechnicalException,
-      OptimisticLockingException, ValidationException, NotFoundException, InvalidStateException, AuthorizationException;
+  //public FileDownloadWrapper getFileContent(VersionId datasetId, UUID fileId, R2D2Principal user) throws R2d2TechnicalException,
+  //   OptimisticLockingException, ValidationException, NotFoundException, InvalidStateException, AuthorizationException;
+
+  public Page<File> listFiles(VersionId datasetId, Pageable pageable, R2D2Principal user)
+      throws AuthorizationException, R2d2TechnicalException, NotFoundException;
+
+  public File getFileForDataset(VersionId datasetId, UUID fileId, R2D2Principal user)
+      throws AuthorizationException, R2d2TechnicalException, NotFoundException;
 
   /*
   public File uploadSingleFile(UUID datasetId, File file, InputStream fileStream, R2D2Principal user) throws R2d2TechnicalException,

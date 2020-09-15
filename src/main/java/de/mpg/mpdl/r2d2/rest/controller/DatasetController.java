@@ -41,8 +41,10 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import de.mpg.mpdl.r2d2.exceptions.AuthorizationException;
+import de.mpg.mpdl.r2d2.exceptions.NotFoundException;
 import de.mpg.mpdl.r2d2.exceptions.R2d2ApplicationException;
 import de.mpg.mpdl.r2d2.exceptions.R2d2TechnicalException;
+import de.mpg.mpdl.r2d2.model.Dataset;
 import de.mpg.mpdl.r2d2.model.DatasetVersion;
 import de.mpg.mpdl.r2d2.model.File;
 import de.mpg.mpdl.r2d2.model.VersionId;
@@ -86,54 +88,95 @@ public class DatasetController {
   }
 
 
-// /metadata
-  @PutMapping(path = "/{id}")
-  public ResponseEntity<DatasetVersionDto> updateDataset(@PathVariable("id") UUID id, @RequestBody DatasetVersionDto givenDatasetVersion,
-      Principal prinz) throws R2d2TechnicalException, R2d2ApplicationException {
+  @PutMapping(path = "/{id}/metadata")
+  public ResponseEntity<DatasetVersionDto> updateDatasetMetadata(@PathVariable("id") UUID id,
+      @RequestBody DatasetVersionDto givenDatasetVersion, Principal prinz) throws R2d2TechnicalException, R2d2ApplicationException {
 
     DatasetVersion createdDv = null;
 
     createdDv = datasetVersionService.update(id, dtoMapper.convertToDatasetVersion(givenDatasetVersion), Utils.toCustomPrincipal(prinz));
-    return new ResponseEntity<DatasetVersionDto>(dtoMapper.convertToDatasetVersionDto(createdDv), HttpStatus.CREATED);
+    return new ResponseEntity<DatasetVersionDto>(dtoMapper.convertToDatasetVersionDto(createdDv), HttpStatus.OK);
   }
 
-  // reolace with /state
-  @PutMapping(path = "/{id}/publish")
-  public ResponseEntity<DatasetVersionDto> publish(@PathVariable("id") String id,
-      @RequestParam(name = "lmd") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime lmd, Principal prinz)
-      throws R2d2TechnicalException, R2d2ApplicationException {
 
-    DatasetVersion publishedDv = datasetVersionService.publish(UUID.fromString(id), lmd, Utils.toCustomPrincipal(prinz));
-    return new ResponseEntity<DatasetVersionDto>(dtoMapper.convertToDatasetVersionDto(publishedDv), HttpStatus.CREATED);
+  @PutMapping(path = "/{id}/state")
+  public ResponseEntity<DatasetVersionDto> changeDatasetState(@PathVariable("id") String id, @RequestBody DatasetVersionDto datasetVersion,
+      Principal prinz) throws R2d2TechnicalException, R2d2ApplicationException {
+
+
+    DatasetVersionDto dvToReturn = null;
+    switch (datasetVersion.getState()) {
+
+      case PUBLIC: {
+        DatasetVersion publishedDv =
+            datasetVersionService.publish(UUID.fromString(id), datasetVersion.getModificationDate(), Utils.toCustomPrincipal(prinz));
+        return new ResponseEntity<DatasetVersionDto>(dtoMapper.convertToDatasetVersionDto(publishedDv), HttpStatus.OK);
+
+      }
+      case WITHDRAWN: {
+        //TODO
+        //DatasetVersion publishedDv = datasetVersionService.withdraw(UUID.fromString(id), datasetVersion.getModificationDate(), Utils.toCustomPrincipal(prinz));
+        //return new ResponseEntity<DatasetVersionDto>(dtoMapper.convertToDatasetVersionDto(publishedDv), HttpStatus.OK);
+        break;
+      }
+      default: {
+        throw new R2d2ApplicationException("Unknown state: " + datasetVersion.getState());
+      }
+    }
+
+    return null;
   }
 
-  /*
+
   @GetMapping(path = "/{id}")
-  public DatasetVersionDto getLatestDataset(@PathVariable("id") String id, Principal p)
+  public DatasetVersionDto getDataset(@PathVariable("id") String id, @RequestParam("v") Integer versionNumber, Principal p)
       throws R2d2TechnicalException, R2d2ApplicationException {
 
-    return dtoMapper.convertToDatasetVersionDto(datasetVersionService.getLatest(UUID.fromString(id), Utils.toCustomPrincipal(p)));
+    DatasetVersion dvToReturn = null;
+    if (versionNumber == null) {
+      dvToReturn = datasetVersionService.getLatest(UUID.fromString(id), Utils.toCustomPrincipal(p));
+    } else {
+      dvToReturn = datasetVersionService.get(new VersionId(UUID.fromString(id), versionNumber), Utils.toCustomPrincipal(p));
+    }
 
-  }
-  */
-// version number as query string
-  @GetMapping(path = "/{id}/{versionNumber}")
-  public DatasetVersionDto getDataset(@PathVariable("id") String id, @PathVariable("versionNumber") int versionNumber, Principal p)
-      throws R2d2TechnicalException, R2d2ApplicationException {
-
-    return dtoMapper.convertToDatasetVersionDto(
-        datasetVersionService.get(new VersionId(UUID.fromString(id), versionNumber), Utils.toCustomPrincipal(p)));
+    return dtoMapper.convertToDatasetVersionDto(dvToReturn);
 
   }
 
-// move to File Controller
+  @GetMapping("/{id}/files")
+  public ResponseEntity<List<FileDto>> listFilesOfDataset(@PathVariable("id") String id, @RequestParam("v") Integer versionNumber,
+      @AuthenticationPrincipal R2D2Principal p, Pageable pageable)
+      throws AuthorizationException, R2d2TechnicalException, NotFoundException {
+    VersionId versionId = new VersionId(UUID.fromString(id), versionNumber);
+    Page<File> files = datasetVersionService.listFiles(versionId, pageable, p);
+    List<FileDto> dtos = files.stream().map(f -> dtoMapper.convertToFileDto(f)).collect(Collectors.toList());
+    HttpHeaders headers = new HttpHeaders();
+    headers.add("Total-Number-of-Elements", Long.toString(files.getTotalElements()));
+    headers.add("Elements-on-this-Page", Integer.toString(files.getNumberOfElements()));
+    return new ResponseEntity<List<FileDto>>(dtos, headers, HttpStatus.OK);
+  }
+
+
+
+  @GetMapping("/{id}/files/{fileId}")
+  public ResponseEntity<FileDto> getFileOfDataset(@PathVariable("id") String datasetId, @PathVariable("fileId") String fileId,
+      @RequestParam("v") Integer versionNumber, @AuthenticationPrincipal R2D2Principal p)
+      throws R2d2ApplicationException, AuthorizationException, R2d2TechnicalException {
+    VersionId versionId = new VersionId(UUID.fromString(datasetId), versionNumber);
+    File file = datasetVersionService.getFileForDataset(versionId, UUID.fromString(fileId), p);
+    return new ResponseEntity<FileDto>(dtoMapper.convertToFileDto(file), HttpStatus.OK);
+
+  }
+
+  // move to File Controller
+  /*
   @GetMapping("/{id}/{versionNumber}/files/{fileId}")
   public ResponseEntity<?> download(@PathVariable("id") String datasetId, @PathVariable("versionNumber") int versionNumber,
       @PathVariable("fileId") String fileId,
       @RequestParam(value = "download", required = false, defaultValue = "false") boolean forceDownload, HttpServletResponse response,
       Principal prinz) throws R2d2ApplicationException, AuthorizationException, R2d2TechnicalException {
-
-
+  
+  
     FileDownloadWrapper fd = datasetVersionService.getFileContent(new VersionId(UUID.fromString(datasetId), versionNumber),
         UUID.fromString(fileId), Utils.toCustomPrincipal(prinz));
     try {
@@ -141,32 +184,24 @@ public class DatasetController {
       if (forceDownload) {
         contentDispositionType = "attachment";
       }
-
+  
       response.setContentType(fd.getFile().getFormat());
-
+  
       //Add filename and RFC 5987 encoded filename as content disposition headers
       response.setHeader("Content-Disposition", contentDispositionType + "; "
       //Leave only utf-8 encoded filename, as normal filename could lead to encoding problems in Apache
       //+ "filename=\"" + fileVOWrapper.getFileVO().getName() + "\"; "
           + "filename*=UTF-8''"
           + URLEncoder.encode(fd.getFile().getFilename(), StandardCharsets.UTF_8.toString()).replaceAll("\\+", "%20"));
-
+  
       return new ResponseEntity<InputStreamResource>(new InputStreamResource(fd.readFile()), HttpStatus.OK);
     } catch (Exception e) {
       throw new R2d2TechnicalException(e);
     }
   }
+  */
 
-  @GetMapping("/{id}/files") // optional ver num 
-  public ResponseEntity<List<FileDto>> listFiles(@PathVariable("id") String id, 
-      @AuthenticationPrincipal R2D2Principal p, Pageable pageable) throws AuthorizationException, R2d2TechnicalException {
-    Page<File> files = ((FileUploadService) fileService).listFiles(UUID.fromString(id), pageable, p);
-    List<FileDto> dtos = files.stream().map(f -> dtoMapper.convertToFileDto(f)).collect(Collectors.toList());
-    HttpHeaders headers = new HttpHeaders();
-    headers.add("Total-Number-of-Elements", Long.toString(files.getTotalElements()));
-    headers.add("Elements-on-this-Page", Integer.toString(files.getNumberOfElements()));
-    return new ResponseEntity<List<FileDto>>(dtos, headers, HttpStatus.OK);
-  }
+
 
   //POST files
 
