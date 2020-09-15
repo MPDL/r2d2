@@ -230,7 +230,7 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
     DatasetVersion dv = get(datasetId, user);
     File f = fileRepository.findById(fileId).orElseThrow(() -> new NotFoundException("File with id " + fileId + " not found"));
 
-    if (!f.getVersions().stream().anyMatch(i -> i.equals(dv.getVersionId()))) {
+    if (!f.getVersions().stream().anyMatch(i -> i.getVersionId().equals(dv.getVersionId()))) {
       throw new NotFoundException("File with id " + fileId + " not part of dataset " + dv.getVersionId());
     }
     return f;
