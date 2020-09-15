@@ -129,7 +129,7 @@ public class DatasetController {
 
 
   @GetMapping(path = "/{id}")
-  public DatasetVersionDto getDataset(@PathVariable("id") String id, @RequestParam("v") Integer versionNumber, Principal p)
+  public DatasetVersionDto getDataset(@PathVariable("id") String id, @RequestParam(name = "v", required = false) Integer versionNumber, Principal p)
       throws R2d2TechnicalException, R2d2ApplicationException {
 
     DatasetVersion dvToReturn = null;
@@ -144,7 +144,7 @@ public class DatasetController {
   }
 
   @GetMapping("/{id}/files")
-  public ResponseEntity<List<FileDto>> listFilesOfDataset(@PathVariable("id") String id, @RequestParam("v") Integer versionNumber,
+  public ResponseEntity<List<FileDto>> listFilesOfDataset(@PathVariable("id") String id, @RequestParam(name = "v", required = false) Integer versionNumber,
       @AuthenticationPrincipal R2D2Principal p, Pageable pageable)
       throws AuthorizationException, R2d2TechnicalException, NotFoundException {
     VersionId versionId = new VersionId(UUID.fromString(id), versionNumber);
@@ -160,7 +160,7 @@ public class DatasetController {
 
   @GetMapping("/{id}/files/{fileId}")
   public ResponseEntity<FileDto> getFileOfDataset(@PathVariable("id") String datasetId, @PathVariable("fileId") String fileId,
-      @RequestParam("v") Integer versionNumber, @AuthenticationPrincipal R2D2Principal p)
+      @RequestParam(name = "v", required = false) Integer versionNumber, @AuthenticationPrincipal R2D2Principal p)
       throws R2d2ApplicationException, AuthorizationException, R2d2TechnicalException {
     VersionId versionId = new VersionId(UUID.fromString(datasetId), versionNumber);
     File file = datasetVersionService.getFileForDataset(versionId, UUID.fromString(fileId), p);
