@@ -189,7 +189,7 @@ public class FileUploadController {
   @GetMapping("/{fileId}/content")
   public ResponseEntity<?> download(@PathVariable("fileId") String fileId,
       @RequestParam(value = "download", required = false, defaultValue = "false") boolean forceDownload, HttpServletResponse response,
-      R2D2Principal p) throws R2d2ApplicationException, AuthorizationException, R2d2TechnicalException {
+      @AuthenticationPrincipal R2D2Principal p) throws R2d2ApplicationException, AuthorizationException, R2d2TechnicalException {
 
     FileDownloadWrapper fd = fileService.getFileContent(UUID.fromString(fileId), p);
     try {
