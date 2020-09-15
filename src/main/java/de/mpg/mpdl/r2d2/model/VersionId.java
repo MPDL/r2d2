@@ -23,7 +23,7 @@ public class VersionId implements Serializable {
 
   }
 
-  public VersionId(UUID id, int versionNumber) {
+  public VersionId(UUID id, Integer versionNumber) {
     super();
     this.dataset = id;
     this.versionNumber = versionNumber;

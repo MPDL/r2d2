@@ -147,12 +147,7 @@ public class DatasetController {
   public ResponseEntity<List<FileDto>> listFilesOfDataset(@PathVariable("id") String id,
       @RequestParam(name = "v", required = false) Integer versionNumber, @AuthenticationPrincipal R2D2Principal p, Pageable pageable)
       throws AuthorizationException, R2d2TechnicalException, NotFoundException {
-	  VersionId versionId = null;
-	  if (versionNumber != null) {
-		    versionId = new VersionId(UUID.fromString(id), versionNumber);
-	  } else {
-		  versionId = new VersionId(UUID.fromString(id));
-	  }
+	VersionId versionId = new VersionId(UUID.fromString(id), versionNumber);
     Page<File> files = datasetVersionService.listFiles(versionId, pageable, p);
     List<FileDto> dtos = files.stream().map(f -> dtoMapper.convertToFileDto(f)).collect(Collectors.toList());
     HttpHeaders headers = new HttpHeaders();
