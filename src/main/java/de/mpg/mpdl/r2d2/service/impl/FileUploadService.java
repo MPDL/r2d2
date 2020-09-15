@@ -7,7 +7,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -37,18 +36,18 @@ import de.mpg.mpdl.r2d2.search.dao.FileDaoEs;
 import de.mpg.mpdl.r2d2.search.dao.GenericDaoEs;
 import de.mpg.mpdl.r2d2.service.FileService;
 import de.mpg.mpdl.r2d2.service.storage.SwiftObjectStoreRepository;
+import de.mpg.mpdl.r2d2.service.util.FileDownloadWrapper;
 
 @Service
 public class FileUploadService extends GenericServiceDbImpl<File> implements FileService {
 
   public FileUploadService() {
     super(File.class);
-    // TODO Auto-generated constructor stub
   }
 
   @Autowired
   FileRepository fileRepository;
-  
+
   @Autowired
   DatasetVersionRepository datasetVersionRepository;
 
@@ -60,7 +59,6 @@ public class FileUploadService extends GenericServiceDbImpl<File> implements Fil
 
   @Override
   public File create(File object, R2D2Principal user) throws R2d2TechnicalException, ValidationException, AuthorizationException {
-    // setBasicCreationProperties(object, user.getUserAccount());
     try {
       fileRepository.save(object);
     } catch (Exception e) {
@@ -77,55 +75,59 @@ public class FileUploadService extends GenericServiceDbImpl<File> implements Fil
   }
 
   @Override
-  @PreAuthorize("hasRole('ADMIN') or hasRole('USER')")
   public boolean delete(UUID id, R2D2Principal user)
       throws R2d2TechnicalException, OptimisticLockingException, NotFoundException, InvalidStateException, AuthorizationException {
-    try {
-      fileRepository.deleteById(id);
-      return objectStoreRepository.deleteContainer(id.toString());
-    } catch (Exception e) {
-      throw new R2d2TechnicalException(e);
+    File file =
+        fileRepository.findById(id).orElseThrow(() -> new NotFoundException(String.format("File with id %s NOT FOUND!", id.toString())));
+    checkAa("get", user, file);
+    if (file.getState().equals(UploadState.PUBLIC) || file.getState().equals(UploadState.ATTACHED)) {
+      throw new InvalidStateException(String.format("File with id %s is part of a dataset!", id.toString()));
+    } else {
+      try {
+        fileRepository.deleteById(id);
+        return objectStoreRepository.deleteContainer(id.toString());
+      } catch (Exception e) {
+        throw new R2d2TechnicalException(e);
+      }
     }
-    // stagingFileDaoEs.deleteImmediatly(id.toString());
   }
 
   @Override
   public File get(UUID id, R2D2Principal user) throws R2d2TechnicalException, NotFoundException, AuthorizationException {
-    File sf =
+    File file =
         fileRepository.findById(id).orElseThrow(() -> new NotFoundException(String.format("File with id %s NOT FOUND!", id.toString())));
-    return sf;
+    checkAa("get", user, file);
+    return file;
   }
 
   @Override
   @Transactional(rollbackFor = Throwable.class)
-  public File uploadSingleFile(File file, InputStream fileStream, R2D2Principal user) throws R2d2TechnicalException,
+  public File uploadSingleFile(File file2upload, InputStream fileStream, R2D2Principal user) throws R2d2TechnicalException,
       OptimisticLockingException, ValidationException, NotFoundException, InvalidStateException, AuthorizationException {
 
     checkAa("upload", user);
 
-    File sf = create(file, user);
-    objectStoreRepository.createContainer(file.getId().toString());
-    String eTag = objectStoreRepository.uploadFile(file, fileStream);
-    sf.setChecksum(eTag);
-    sf.setState(UploadState.COMPLETE);
-    sf.setStorageLocation(objectStoreRepository.getPublicURI(file.getId().toString()));
-    // stagingFileDaoEs.createImmediately(sf.getId().toString(), sf);
+    File file = create(file2upload, user);
+    objectStoreRepository.createContainer(file2upload.getId().toString());
+    String eTag = objectStoreRepository.uploadFile(file2upload, fileStream);
+    file.setChecksum(eTag);
+    file.setState(UploadState.COMPLETE);
+    file.setStorageLocation(objectStoreRepository.getPublicURI(file2upload.getId().toString()));
 
-    return sf;
+    return file;
   }
 
   @Override
   @Transactional(rollbackFor = Throwable.class)
-  public File initNewFile(File file, R2D2Principal user) throws R2d2TechnicalException, OptimisticLockingException, ValidationException,
-      NotFoundException, InvalidStateException, AuthorizationException {
+  public File initNewFile(File file2upload, R2D2Principal user) throws R2d2TechnicalException, OptimisticLockingException,
+      ValidationException, NotFoundException, InvalidStateException, AuthorizationException {
 
     checkAa("upload", user);
 
-    File sf = create(file, user);
-    objectStoreRepository.createContainer(file.getId().toString());
-    // stagingFileDaoEs.createImmediately(sf.getId().toString(), sf);
+    File file = create(file2upload, user);
+    objectStoreRepository.createContainer(file2upload.getId().toString());
 
-    return sf;
+    return file;
   }
 
   @Override
@@ -135,12 +137,12 @@ public class FileUploadService extends GenericServiceDbImpl<File> implements Fil
 
     checkAa("upload", user);
 
-    File sf = fileRepository.findById(fileId)
+    File file = fileRepository.findById(fileId)
         .orElseThrow(() -> new NotFoundException(String.format("File with id %s MOT FOUND!", fileId.toString())));
 
-    List<FileChunk> chunks = sf.getStateInfo().getChunks();
-    if (sf.getState().equals(UploadState.COMPLETE)) {
-      throw new InvalidStateException(String.format("File with id %s is in state %s", fileId.toString(), sf.getState().name()));
+    List<FileChunk> chunks = file.getStateInfo().getChunks();
+    if (file.getState().equals(UploadState.COMPLETE)) {
+      throw new InvalidStateException(String.format("File with id %s is in state %s", fileId.toString(), file.getState().name()));
     }
 
     if (chunks.stream().anyMatch(c -> c.getNumber() == chunk.getNumber())) {
@@ -152,11 +154,11 @@ public class FileUploadService extends GenericServiceDbImpl<File> implements Fil
       }
     }
 
-    String etag = objectStoreRepository.uploadChunk(sf, chunk, fileStream);
+    String etag = objectStoreRepository.uploadChunk(file, chunk, fileStream);
     chunk.setServerEtag(etag);
     chunk.setProgress(Progress.COMPLETE);
     chunks.add(chunk);
-    sf.setState(UploadState.ONGOING);
+    file.setState(UploadState.ONGOING);
 
     return chunk;
   }
@@ -165,28 +167,15 @@ public class FileUploadService extends GenericServiceDbImpl<File> implements Fil
   protected GenericDaoEs<File> getIndexDao() {
     return fileDaoEs;
   }
-// move 2 dataset service
-  public Page<File> listFiles(UUID id, Pageable pageable, R2D2Principal user) throws AuthorizationException, R2d2TechnicalException {
-	  
-	  DatasetVersion latestVersion = datasetVersionRepository.findLatestVersion(id);
 
-	    checkAa("get", user, latestVersion);
+  // move 2 dataset service
+  public Page<File> listFiles(UUID id, Pageable pageable, R2D2Principal user) throws AuthorizationException, R2d2TechnicalException {
+
+    DatasetVersion latestVersion = datasetVersionRepository.findLatestVersion(id);
+
+    checkAa("get", user, latestVersion);
     Page<File> list = fileRepository.findAllForVersion(latestVersion.getVersionId(), pageable);
     return list;
-  }
-
-  @PostFilter("filterObject.creator.id == principal.userAccount.id")
-  public List<File> list() {
-    List<File> list = new ArrayList<>();
-    fileRepository.findAll().iterator().forEachRemaining(list::add);
-    return list;
-  }
-
-  @PostAuthorize("returnObject.creator.id == principal.userAccount.id")
-  public File list(UUID id) throws NotFoundException {
-    File sf =
-        fileRepository.findById(id).orElseThrow(() -> new NotFoundException(String.format("File with id %s MOT FOUND!", id.toString())));
-    return sf;
   }
 
   @Override
@@ -194,21 +183,36 @@ public class FileUploadService extends GenericServiceDbImpl<File> implements Fil
   public File completeChunkedUpload(UUID fileId, int parts, R2D2Principal user) throws R2d2TechnicalException, OptimisticLockingException,
       ValidationException, NotFoundException, InvalidStateException, AuthorizationException {
     checkAa("upload", user);
-    File sf = fileRepository.findById(fileId)
+    File file = fileRepository.findById(fileId)
         .orElseThrow(() -> new NotFoundException(String.format("File with id %s NOT FOUND!", fileId.toString())));
     // TODO: check number of parts in object store ...
-    if (sf.getStateInfo().getChunks().size() == parts) {
-      String etag = objectStoreRepository.createManifest(sf);
-      sf.setChecksum(etag);
-      sf.getStateInfo().setExpectedNumberOfChunks(parts);
-      sf.setState(UploadState.COMPLETE);
-      sf.setStorageLocation(objectStoreRepository.getPublicURI(sf.getId().toString()));
-      return sf;
+    if (file.getStateInfo().getChunks().size() == parts) {
+      String etag = objectStoreRepository.createManifest(file);
+      file.setChecksum(etag);
+      file.getStateInfo().setExpectedNumberOfChunks(parts);
+      file.setState(UploadState.COMPLETE);
+      file.setStorageLocation(objectStoreRepository.getPublicURI(file.getId().toString()));
+      return file;
     } else {
       throw new InvalidStateException(String.format("Incorrect number of parts (expected %d, but got %d) in file with id %s", parts,
-          sf.getStateInfo().getChunks().size(), fileId.toString()));
+          file.getStateInfo().getChunks().size(), fileId.toString()));
     }
 
+  }
+
+  @Override
+  public Page<File> list(Pageable pageable, R2D2Principal user) throws R2d2TechnicalException, NotFoundException, AuthorizationException {
+    return fileRepository.findAll(pageable);
+  }
+
+  @Override
+  public FileDownloadWrapper getFileContent(UUID id, R2D2Principal user) throws R2d2TechnicalException, OptimisticLockingException,
+      ValidationException, NotFoundException, InvalidStateException, AuthorizationException {
+    File file =
+        fileRepository.findById(id).orElseThrow(() -> new NotFoundException(String.format("File with id %s NOT FOUND!", id.toString())));
+    checkAa("get", user, file);
+    FileDownloadWrapper wrapper = new FileDownloadWrapper(file, objectStoreRepository);
+    return wrapper;
   }
 
 }

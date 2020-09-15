@@ -2,16 +2,22 @@ package de.mpg.mpdl.r2d2.rest.controller;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.security.Principal;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.ResponseEntity.BodyBuilder;
@@ -34,10 +40,14 @@ import de.mpg.mpdl.r2d2.exceptions.R2d2ApplicationException;
 import de.mpg.mpdl.r2d2.exceptions.R2d2TechnicalException;
 import de.mpg.mpdl.r2d2.exceptions.ValidationException;
 import de.mpg.mpdl.r2d2.model.FileChunk;
+import de.mpg.mpdl.r2d2.model.VersionId;
 import de.mpg.mpdl.r2d2.model.File;
 import de.mpg.mpdl.r2d2.model.aa.R2D2Principal;
+import de.mpg.mpdl.r2d2.rest.controller.dto.DtoMapper;
+import de.mpg.mpdl.r2d2.rest.controller.dto.FileDto;
 import de.mpg.mpdl.r2d2.service.FileService;
 import de.mpg.mpdl.r2d2.service.impl.FileUploadService;
+import de.mpg.mpdl.r2d2.service.util.FileDownloadWrapper;
 import de.mpg.mpdl.r2d2.util.Utils;
 
 @RestController
@@ -45,21 +55,25 @@ import de.mpg.mpdl.r2d2.util.Utils;
 public class FileUploadController {
 
   @Autowired
-  private FileService stagingFileService;
+  private FileService fileService;
+
+  @Autowired
+  private DtoMapper dtoMapper;
 
   @GetMapping("")
-  public ResponseEntity<?> list(@AuthenticationPrincipal R2D2Principal p)
-      throws AuthorizationException, R2d2TechnicalException, IOException {
+  public ResponseEntity<List<File>> list(Pageable pageable, @AuthenticationPrincipal R2D2Principal p)
+      throws AuthorizationException, R2d2TechnicalException, IOException, NotFoundException {
 
-    List<File> resp = ((FileUploadService) stagingFileService).list();
-    return new ResponseEntity<>(resp, HttpStatus.OK);
+    Page<File> files = fileService.list(pageable, p);
+    List<File> list = files.toList();
+    return new ResponseEntity<List<File>>(list, HttpStatus.OK);
   }
 
   @GetMapping("/{fileId}")
   public ResponseEntity<?> get(@PathVariable("fileId") String fileId, @AuthenticationPrincipal R2D2Principal p)
       throws AuthorizationException, R2d2TechnicalException, IOException, NotFoundException {
 
-    File resp = ((FileUploadService) stagingFileService).list(UUID.fromString(fileId));
+    File resp = fileService.get(UUID.fromString(fileId), p);
     return new ResponseEntity<>(resp, HttpStatus.OK);
   }
 
@@ -83,7 +97,7 @@ public class FileUploadController {
       f.setChecksum(etag);
     }
 
-    f = stagingFileService.uploadSingleFile(f, is, p);
+    f = fileService.uploadSingleFile(f, is, p);
 
     BodyBuilder responseBuilder = ResponseEntity.status(HttpStatus.CREATED);
 
@@ -105,7 +119,7 @@ public class FileUploadController {
     f.setFilename(fileName);
     f.setFormat(contentType);
 
-    f = stagingFileService.initNewFile(f, p);
+    f = fileService.initNewFile(f, p);
 
     BodyBuilder responseBuilder = ResponseEntity.status(HttpStatus.CREATED);
 
@@ -132,7 +146,7 @@ public class FileUploadController {
     }
     chunk.setNumber(part);
 
-    FileChunk resultChunk = stagingFileService.uploadFileChunk(UUID.fromString(fileId), chunk, is, p);
+    FileChunk resultChunk = fileService.uploadFileChunk(UUID.fromString(fileId), chunk, is, p);
 
     ResponseEntity<FileChunk> re = ResponseEntity.status(HttpStatus.CREATED).header("ETag", resultChunk.getServerEtag()).body(resultChunk);
 
@@ -145,13 +159,13 @@ public class FileUploadController {
       InvalidStateException, AuthorizationException, ValidationException {
 
     if (parts == 0) {
-      if (stagingFileService.delete(UUID.fromString(fileId), p)) {
+      if (fileService.delete(UUID.fromString(fileId), p)) {
         Map<String, Boolean> map = Collections.singletonMap("Acknowledged", true);
         return new ResponseEntity<>(map, HttpStatus.ACCEPTED);
       }
     }
 
-    File sf = stagingFileService.completeChunkedUpload(UUID.fromString(fileId), parts, p);
+    File sf = fileService.completeChunkedUpload(UUID.fromString(fileId), parts, p);
 
     BodyBuilder responseBuilder = ResponseEntity.status(HttpStatus.CREATED);
 
@@ -165,10 +179,37 @@ public class FileUploadController {
   @DeleteMapping("/{fileId}")
   public ResponseEntity<?> delete(@PathVariable("fileId") String fileId, @AuthenticationPrincipal R2D2Principal p)
       throws R2d2TechnicalException, OptimisticLockingException, NotFoundException, InvalidStateException, AuthorizationException {
-    if (stagingFileService.delete(UUID.fromString(fileId), p)) {
+    if (fileService.delete(UUID.fromString(fileId), p)) {
       Map<String, Boolean> map = Collections.singletonMap("Acknowledged", true);
       return new ResponseEntity<>(map, HttpStatus.ACCEPTED);
     }
     return null;
+  }
+
+  @GetMapping("/{fileId}/content")
+  public ResponseEntity<?> download(@PathVariable("fileId") String fileId,
+      @RequestParam(value = "download", required = false, defaultValue = "false") boolean forceDownload, HttpServletResponse response,
+      R2D2Principal p) throws R2d2ApplicationException, AuthorizationException, R2d2TechnicalException {
+
+    FileDownloadWrapper fd = fileService.getFileContent(UUID.fromString(fileId), p);
+    try {
+      String contentDispositionType = "inline";
+      if (forceDownload) {
+        contentDispositionType = "attachment";
+      }
+
+      response.setContentType(fd.getFile().getFormat());
+
+      //Add filename and RFC 5987 encoded filename as content disposition headers
+      response.setHeader("Content-Disposition", contentDispositionType + "; "
+      //Leave only utf-8 encoded filename, as normal filename could lead to encoding problems in Apache
+      //+ "filename=\"" + fileVOWrapper.getFileVO().getName() + "\"; "
+          + "filename*=UTF-8''"
+          + URLEncoder.encode(fd.getFile().getFilename(), StandardCharsets.UTF_8.toString()).replaceAll("\\+", "%20"));
+
+      return new ResponseEntity<InputStreamResource>(new InputStreamResource(fd.readFile()), HttpStatus.OK);
+    } catch (Exception e) {
+      throw new R2d2TechnicalException(e);
+    }
   }
 }
