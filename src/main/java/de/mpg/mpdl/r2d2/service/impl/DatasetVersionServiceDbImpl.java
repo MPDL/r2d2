@@ -1,6 +1,8 @@
 package de.mpg.mpdl.r2d2.service.impl;
 
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -23,6 +25,7 @@ import de.mpg.mpdl.r2d2.exceptions.AuthorizationException;
 import de.mpg.mpdl.r2d2.exceptions.InvalidStateException;
 import de.mpg.mpdl.r2d2.exceptions.NotFoundException;
 import de.mpg.mpdl.r2d2.exceptions.OptimisticLockingException;
+import de.mpg.mpdl.r2d2.exceptions.R2d2ApplicationException;
 import de.mpg.mpdl.r2d2.exceptions.R2d2TechnicalException;
 import de.mpg.mpdl.r2d2.exceptions.ValidationException;
 import de.mpg.mpdl.r2d2.model.Dataset;
@@ -460,59 +463,148 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
 
   }
 
+
   @Override
   @Transactional(rollbackFor = Throwable.class)
-  public DatasetVersion addOrRemoveFile(UUID id, UUID fileId, OffsetDateTime lastModificationDate, R2D2Principal user, String action)
+  public DatasetVersion addFile(UUID id, UUID fileId, OffsetDateTime lastModificationDate, R2D2Principal user)
       throws R2d2TechnicalException, OptimisticLockingException, ValidationException, NotFoundException, InvalidStateException,
       AuthorizationException {
 
+    List<UUID> filesToRemove = new ArrayList<UUID>();
+    filesToRemove.add(fileId);
+    return addOrRemoveFile(id, null, filesToRemove, lastModificationDate, user);
+
+  }
+
+  @Override
+  @Transactional(rollbackFor = Throwable.class)
+  public DatasetVersion removeFile(UUID id, UUID fileId, OffsetDateTime lastModificationDate, R2D2Principal user)
+      throws R2d2TechnicalException, OptimisticLockingException, ValidationException, NotFoundException, InvalidStateException,
+      AuthorizationException {
+
+    List<UUID> filesToAdd = new ArrayList<UUID>();
+    filesToAdd.add(fileId);
+    return addOrRemoveFile(id, filesToAdd, null, lastModificationDate, user);
+
+  }
+
+  @Override
+  @Transactional(rollbackFor = Throwable.class)
+  public DatasetVersion updateFiles(UUID id, List<UUID> fileIds, OffsetDateTime lastModificationDate, R2D2Principal user)
+      throws R2d2TechnicalException, OptimisticLockingException, ValidationException, NotFoundException, InvalidStateException,
+      AuthorizationException {
     DatasetVersion latestVersion = datasetVersionRepository.findLatestVersion(id);
-    DatasetVersion result;
-    File file = null;
+    List<UUID> currentFileIds = fileRepository.findAllIdsForVersion(latestVersion.getVersionId());
+
+    List<UUID> filesToRemove = new ArrayList<UUID>(currentFileIds);
+    List<UUID> filesToAdd = new ArrayList<UUID>();
+
+    for (UUID fileId : fileIds) {
+      //File is already there. Remove from remove-list
+      if (currentFileIds.contains(fileId)) {
+        filesToRemove.remove(fileId);
+      } else {
+        //File is not there yet. Add to add-list
+        filesToAdd.add(fileId);
+      }
+    }
+
+
+
+    return addOrRemoveFile(id, filesToAdd, filesToRemove, lastModificationDate, user);
+
+  }
+
+
+
+  private DatasetVersion addOrRemoveFile(UUID id, List<UUID> fileIdsToAdd, List<UUID> fileIdsToRemove, OffsetDateTime lastModificationDate,
+      R2D2Principal user) throws R2d2TechnicalException, OptimisticLockingException, ValidationException, NotFoundException,
+      InvalidStateException, AuthorizationException {
+
+    DatasetVersion latestVersion = datasetVersionRepository.findLatestVersion(id);
+    DatasetVersion resultedDataset = null;
 
     checkAa("update", user, latestVersion);
-    // TODO validation
+    //AA of file via getFile, see below
+
     checkEqualModificationDate(lastModificationDate, latestVersion.getModificationDate());
 
-    // create new versioin
+    // create new version
     if (State.PUBLIC.equals(latestVersion.getState())) {
-      result = buildDatasetVersionToCreate(latestVersion, user.getUserAccount(), latestVersion.getVersionNumber() + 1,
+      LOGGER.info("Creating new version of dataset " + latestVersion.getVersionId() + " while adding/removing files");
+      resultedDataset = buildDatasetVersionToCreate(latestVersion, user.getUserAccount(), latestVersion.getVersionNumber() + 1,
           latestVersion.getDataset());
-      attachFiles(result, latestVersion);
-      result.getDataset().setLatestVersion(result.getVersionNumber());
+      attachFiles(resultedDataset, latestVersion);
+      resultedDataset.getDataset().setLatestVersion(resultedDataset.getVersionNumber());
       // setBasicCreationProperties(result, user.getUserAccount());
-      result = datasetVersionRepository.save(result);
+      latestVersion = datasetVersionRepository.save(resultedDataset);
 
     } else {
-      result = latestVersion;
+      resultedDataset = latestVersion;
     }
 
-    switch (action) {
-      case "add":
-        file = fileUploadService.get(fileId, user);
-        if (file.getVersions().add(result)) {
-          file.setState(UploadState.ATTACHED);
+
+
+    for (UUID fileIdToAdd : fileIdsToAdd) {
+      LOGGER.info("Trying to add file with id " + fileIdToAdd + " to dataset version " + resultedDataset.getVersionId());
+      File file = fileUploadService.get(fileIdToAdd, user);
+      DatasetVersion readableDataset = resultedDataset;
+      if (!file.getVersions().stream().anyMatch(i -> i.getVersionId().equals(readableDataset.getVersionId()))) {
+        switch (file.getState()) {
+          case COMPLETE: {
+            file.setState(UploadState.ATTACHED);
+            file.getVersions().add(resultedDataset);
+            break;
+          }
+          case PUBLIC: {
+            file.getVersions().add(resultedDataset);
+            break;
+          }
+          default: {
+            throw new ValidationException("Ignoring adding file. Invalid state " + file.getState() + " of file with id " + fileIdToAdd);
+          }
         }
-        break;
-      case "remove":
-        file = fileRepository.findById(fileId)
-            .orElseThrow(() -> new NotFoundException(String.format("File with id %s NOT FOUND", fileId.toString())));
-        if (file.getVersions().remove(result)) {
-          file.setState(UploadState.COMPLETE);
-        }
-        break;
-      default:
-        break;
+      } else {
+        LOGGER.warn("File with id " + fileIdToAdd + " already in dataset version " + resultedDataset.getVersionId());
+      }
     }
+
+    for (UUID fileIdToRemove : fileIdsToRemove) {
+      LOGGER.info("Trying to remove file with id " + fileIdToRemove + " from dataset version " + resultedDataset.getVersionId());
+      File file = fileUploadService.get(fileIdToRemove, user);
+      DatasetVersion readableDataset = resultedDataset;
+      if (file.getVersions().stream().anyMatch(i -> i.getVersionId().equals(readableDataset.getVersionId()))) {
+        switch (file.getState()) {
+          case ATTACHED: {
+            file.setState(UploadState.COMPLETE);
+            file.getVersions().remove(resultedDataset);
+            break;
+          }
+          case PUBLIC: {
+            file.getVersions().remove(resultedDataset);
+            if (file.getVersions().isEmpty()) {
+              file.setState(UploadState.COMPLETE);
+            }
+            break;
+          }
+          default: {
+            throw new ValidationException("Cannot remove file. Invalid state " + file.getState() + " of file with id " + fileIdToRemove);
+          }
+        }
+      } else {
+        LOGGER.warn(
+            "Ignoring removal of file. File with id " + fileIdToRemove + " not found in dataset version " + resultedDataset.getVersionId());
+      }
+    }
+
     try {
-      result = datasetVersionRepository.saveAndFlush(result);
-      file = fileRepository.saveAndFlush(file);
+      resultedDataset = datasetVersionRepository.saveAndFlush(resultedDataset);
     } catch (Exception e) {
       throw new R2d2TechnicalException(e);
     }
-    reindex(result);
+    reindex(resultedDataset);
 
-    return result;
+    return resultedDataset;
   }
 
 }

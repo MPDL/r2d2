@@ -129,8 +129,8 @@ public class DatasetController {
 
 
   @GetMapping(path = "/{id}")
-  public DatasetVersionDto getDataset(@PathVariable("id") String id, @RequestParam(name = "v", required = false) Integer versionNumber, Principal p)
-      throws R2d2TechnicalException, R2d2ApplicationException {
+  public DatasetVersionDto getDataset(@PathVariable("id") String id, @RequestParam(name = "v", required = false) Integer versionNumber,
+      Principal p) throws R2d2TechnicalException, R2d2ApplicationException {
 
     DatasetVersion dvToReturn = null;
     if (versionNumber == null) {
@@ -144,10 +144,15 @@ public class DatasetController {
   }
 
   @GetMapping("/{id}/files")
-  public ResponseEntity<List<FileDto>> listFilesOfDataset(@PathVariable("id") String id, @RequestParam(name = "v", required = false) Integer versionNumber,
-      @AuthenticationPrincipal R2D2Principal p, Pageable pageable)
+  public ResponseEntity<List<FileDto>> listFilesOfDataset(@PathVariable("id") String id,
+      @RequestParam(name = "v", required = false) Integer versionNumber, @AuthenticationPrincipal R2D2Principal p, Pageable pageable)
       throws AuthorizationException, R2d2TechnicalException, NotFoundException {
-    VersionId versionId = new VersionId(UUID.fromString(id), versionNumber);
+	  VersionId versionId = null;
+	  if (versionNumber != null) {
+		    versionId = new VersionId(UUID.fromString(id), versionNumber);
+	  } else {
+		  versionId = new VersionId(UUID.fromString(id));
+	  }
     Page<File> files = datasetVersionService.listFiles(versionId, pageable, p);
     List<FileDto> dtos = files.stream().map(f -> dtoMapper.convertToFileDto(f)).collect(Collectors.toList());
     HttpHeaders headers = new HttpHeaders();
@@ -210,7 +215,7 @@ public class DatasetController {
       @RequestParam(name = "lmd") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime lmd,
       @AuthenticationPrincipal R2D2Principal p) throws R2d2ApplicationException, AuthorizationException, R2d2TechnicalException {
     DatasetVersion response = null;
-    response = datasetVersionService.addOrRemoveFile(UUID.fromString(id), UUID.fromString(fileId), lmd, p, "add");
+    response = datasetVersionService.addFile(UUID.fromString(id), UUID.fromString(fileId), lmd, p);
 
     return new ResponseEntity<DatasetVersionDto>(dtoMapper.convertToDatasetVersionDto(response), HttpStatus.ACCEPTED);
   }
@@ -220,7 +225,7 @@ public class DatasetController {
       @RequestParam(name = "lmd") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime lmd,
       @AuthenticationPrincipal R2D2Principal p) throws R2d2ApplicationException, AuthorizationException, R2d2TechnicalException {
     DatasetVersion response = null;
-    response = datasetVersionService.addOrRemoveFile(UUID.fromString(id), UUID.fromString(fileId), lmd, p, "remove");
+    response = datasetVersionService.removeFile(UUID.fromString(id), UUID.fromString(fileId), lmd, p);
 
     return new ResponseEntity<DatasetVersionDto>(dtoMapper.convertToDatasetVersionDto(response), HttpStatus.ACCEPTED);
   }
