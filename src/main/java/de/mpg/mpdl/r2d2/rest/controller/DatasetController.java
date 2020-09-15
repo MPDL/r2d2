@@ -86,7 +86,7 @@ public class DatasetController {
   }
 
 
-// /metadata
+  // /metadata
   @PutMapping(path = "/{id}")
   public ResponseEntity<DatasetVersionDto> updateDataset(@PathVariable("id") UUID id, @RequestBody DatasetVersionDto givenDatasetVersion,
       Principal prinz) throws R2d2TechnicalException, R2d2ApplicationException {
@@ -107,16 +107,14 @@ public class DatasetController {
     return new ResponseEntity<DatasetVersionDto>(dtoMapper.convertToDatasetVersionDto(publishedDv), HttpStatus.CREATED);
   }
 
-  /*
   @GetMapping(path = "/{id}")
   public DatasetVersionDto getLatestDataset(@PathVariable("id") String id, Principal p)
       throws R2d2TechnicalException, R2d2ApplicationException {
-
+  
     return dtoMapper.convertToDatasetVersionDto(datasetVersionService.getLatest(UUID.fromString(id), Utils.toCustomPrincipal(p)));
-
+  
   }
-  */
-// version number as query string
+  // version number as query string
   @GetMapping(path = "/{id}/{versionNumber}")
   public DatasetVersionDto getDataset(@PathVariable("id") String id, @PathVariable("versionNumber") int versionNumber, Principal p)
       throws R2d2TechnicalException, R2d2ApplicationException {
@@ -126,7 +124,7 @@ public class DatasetController {
 
   }
 
-// move to File Controller
+  // move to File Controller
   @GetMapping("/{id}/{versionNumber}/files/{fileId}")
   public ResponseEntity<?> download(@PathVariable("id") String datasetId, @PathVariable("versionNumber") int versionNumber,
       @PathVariable("fileId") String fileId,
@@ -158,8 +156,8 @@ public class DatasetController {
   }
 
   @GetMapping("/{id}/files") // optional ver num 
-  public ResponseEntity<List<FileDto>> listFiles(@PathVariable("id") String id, 
-      @AuthenticationPrincipal R2D2Principal p, Pageable pageable) throws AuthorizationException, R2d2TechnicalException {
+  public ResponseEntity<List<FileDto>> listFiles(@PathVariable("id") String id, @AuthenticationPrincipal R2D2Principal p, Pageable pageable)
+      throws AuthorizationException, R2d2TechnicalException {
     Page<File> files = ((FileUploadService) fileService).listFiles(UUID.fromString(id), pageable, p);
     List<FileDto> dtos = files.stream().map(f -> dtoMapper.convertToFileDto(f)).collect(Collectors.toList());
     HttpHeaders headers = new HttpHeaders();
