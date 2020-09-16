@@ -1,8 +1,6 @@
 package de.mpg.mpdl.r2d2.rest.controller;
 
 import java.io.IOException;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.security.Principal;
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -17,7 +15,6 @@ import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.InputStreamResource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -44,7 +41,6 @@ import de.mpg.mpdl.r2d2.exceptions.AuthorizationException;
 import de.mpg.mpdl.r2d2.exceptions.NotFoundException;
 import de.mpg.mpdl.r2d2.exceptions.R2d2ApplicationException;
 import de.mpg.mpdl.r2d2.exceptions.R2d2TechnicalException;
-import de.mpg.mpdl.r2d2.model.Dataset;
 import de.mpg.mpdl.r2d2.model.DatasetVersion;
 import de.mpg.mpdl.r2d2.model.File;
 import de.mpg.mpdl.r2d2.model.VersionId;
@@ -52,12 +48,11 @@ import de.mpg.mpdl.r2d2.model.aa.R2D2Principal;
 import de.mpg.mpdl.r2d2.model.search.SearchQuery;
 import de.mpg.mpdl.r2d2.model.search.SearchResult;
 import de.mpg.mpdl.r2d2.rest.controller.dto.DatasetVersionDto;
-import de.mpg.mpdl.r2d2.rest.controller.dto.FileDto;
 import de.mpg.mpdl.r2d2.rest.controller.dto.DtoMapper;
+import de.mpg.mpdl.r2d2.rest.controller.dto.FileDto;
+import de.mpg.mpdl.r2d2.rest.controller.dto.SetFilesDto;
 import de.mpg.mpdl.r2d2.service.DatasetVersionService;
 import de.mpg.mpdl.r2d2.service.FileService;
-import de.mpg.mpdl.r2d2.service.impl.FileUploadService;
-import de.mpg.mpdl.r2d2.service.util.FileDownloadWrapper;
 import de.mpg.mpdl.r2d2.util.Utils;
 
 @RestController
@@ -79,37 +74,36 @@ public class DatasetController {
   private DtoMapper dtoMapper;
 
   @PostMapping(path = "")
-  public ResponseEntity<DatasetVersionDto> createDataset(@RequestBody DatasetVersionDto givenDatasetVersion, Principal prinz)
-      throws R2d2TechnicalException, R2d2ApplicationException {
+  public ResponseEntity<DatasetVersionDto> createDataset(@RequestBody DatasetVersionDto givenDatasetVersion,
+      @AuthenticationPrincipal R2D2Principal p) throws R2d2TechnicalException, R2d2ApplicationException {
 
-    DatasetVersion createdDv =
-        datasetVersionService.create(dtoMapper.convertToDatasetVersion(givenDatasetVersion), Utils.toCustomPrincipal(prinz));
+    DatasetVersion createdDv = datasetVersionService.create(dtoMapper.convertToDatasetVersion(givenDatasetVersion), p);
     return new ResponseEntity<DatasetVersionDto>(dtoMapper.convertToDatasetVersionDto(createdDv), HttpStatus.CREATED);
   }
 
 
   @PutMapping(path = "/{id}/metadata")
   public ResponseEntity<DatasetVersionDto> updateDatasetMetadata(@PathVariable("id") UUID id,
-      @RequestBody DatasetVersionDto givenDatasetVersion, Principal prinz) throws R2d2TechnicalException, R2d2ApplicationException {
+      @RequestBody DatasetVersionDto givenDatasetVersion, @AuthenticationPrincipal R2D2Principal p)
+      throws R2d2TechnicalException, R2d2ApplicationException {
 
     DatasetVersion createdDv = null;
 
-    createdDv = datasetVersionService.update(id, dtoMapper.convertToDatasetVersion(givenDatasetVersion), Utils.toCustomPrincipal(prinz));
+    createdDv = datasetVersionService.update(id, dtoMapper.convertToDatasetVersion(givenDatasetVersion), p);
     return new ResponseEntity<DatasetVersionDto>(dtoMapper.convertToDatasetVersionDto(createdDv), HttpStatus.OK);
   }
 
 
   @PutMapping(path = "/{id}/state")
   public ResponseEntity<DatasetVersionDto> changeDatasetState(@PathVariable("id") String id, @RequestBody DatasetVersionDto datasetVersion,
-      Principal prinz) throws R2d2TechnicalException, R2d2ApplicationException {
+      @AuthenticationPrincipal R2D2Principal p) throws R2d2TechnicalException, R2d2ApplicationException {
 
 
     DatasetVersionDto dvToReturn = null;
     switch (datasetVersion.getState()) {
 
       case PUBLIC: {
-        DatasetVersion publishedDv =
-            datasetVersionService.publish(UUID.fromString(id), datasetVersion.getModificationDate(), Utils.toCustomPrincipal(prinz));
+        DatasetVersion publishedDv = datasetVersionService.publish(UUID.fromString(id), datasetVersion.getModificationDate(), p);
         return new ResponseEntity<DatasetVersionDto>(dtoMapper.convertToDatasetVersionDto(publishedDv), HttpStatus.OK);
 
       }
@@ -130,13 +124,13 @@ public class DatasetController {
 
   @GetMapping(path = "/{id}")
   public DatasetVersionDto getDataset(@PathVariable("id") String id, @RequestParam(name = "v", required = false) Integer versionNumber,
-      Principal p) throws R2d2TechnicalException, R2d2ApplicationException {
+      @AuthenticationPrincipal R2D2Principal p) throws R2d2TechnicalException, R2d2ApplicationException {
 
     DatasetVersion dvToReturn = null;
     if (versionNumber == null) {
-      dvToReturn = datasetVersionService.getLatest(UUID.fromString(id), Utils.toCustomPrincipal(p));
+      dvToReturn = datasetVersionService.getLatest(UUID.fromString(id), p);
     } else {
-      dvToReturn = datasetVersionService.get(new VersionId(UUID.fromString(id), versionNumber), Utils.toCustomPrincipal(p));
+      dvToReturn = datasetVersionService.get(new VersionId(UUID.fromString(id), versionNumber), p);
     }
 
     return dtoMapper.convertToDatasetVersionDto(dvToReturn);
@@ -212,7 +206,7 @@ public class DatasetController {
     DatasetVersion response = null;
     response = datasetVersionService.addFile(UUID.fromString(id), UUID.fromString(fileId), lmd, p);
 
-    return new ResponseEntity<DatasetVersionDto>(dtoMapper.convertToDatasetVersionDto(response), HttpStatus.ACCEPTED);
+    return new ResponseEntity<DatasetVersionDto>(dtoMapper.convertToDatasetVersionDto(response), HttpStatus.OK);
   }
 
   @DeleteMapping("/{id}/files/{fileId}")
@@ -222,7 +216,16 @@ public class DatasetController {
     DatasetVersion response = null;
     response = datasetVersionService.removeFile(UUID.fromString(id), UUID.fromString(fileId), lmd, p);
 
-    return new ResponseEntity<DatasetVersionDto>(dtoMapper.convertToDatasetVersionDto(response), HttpStatus.ACCEPTED);
+    return new ResponseEntity<DatasetVersionDto>(dtoMapper.convertToDatasetVersionDto(response), HttpStatus.OK);
+  }
+
+
+  @PutMapping("/{id}/files")
+  public ResponseEntity<DatasetVersionDto> updateFiles(@PathVariable("id") String id, @RequestBody SetFilesDto filesDto,
+      @AuthenticationPrincipal R2D2Principal p) throws R2d2ApplicationException, AuthorizationException, R2d2TechnicalException {
+    DatasetVersion response = null;
+    response = datasetVersionService.updateFiles(UUID.fromString(id), filesDto.getFiles(), filesDto.getModificationDate(), p);
+    return new ResponseEntity<DatasetVersionDto>(dtoMapper.convertToDatasetVersionDto(response), HttpStatus.OK);
   }
 
   @RequestMapping(value = "/search", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE,
