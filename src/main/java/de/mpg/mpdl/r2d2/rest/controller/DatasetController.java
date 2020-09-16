@@ -200,7 +200,7 @@ public class DatasetController {
   //POST files
 
   @PutMapping("/{id}/files/{fileId}")
-  public ResponseEntity<DatasetVersionDto> addFile(@PathVariable("id") String id, @PathVariable("fileId") String fileId,
+  public ResponseEntity<DatasetVersionDto> kann(@PathVariable("id") String id, @PathVariable("fileId") String fileId,
       @RequestParam(name = "lmd") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime lmd,
       @AuthenticationPrincipal R2D2Principal p) throws R2d2ApplicationException, AuthorizationException, R2d2TechnicalException {
     DatasetVersion response = null;

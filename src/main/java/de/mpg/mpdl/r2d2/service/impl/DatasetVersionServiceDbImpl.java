@@ -195,21 +195,23 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
     checkAa("publish", user, latestVersion);
     checkEqualModificationDate(lastModificationDate, latestVersion.getModificationDate());
 
-    /*
-     * if (!id.equals(latestVersion.getId())) { throw new
-     * InvalidStateException("Only the latest dataset version can be published. Given version: "
-     * + datasetVersionToBeUpdated.getVersionNumber() + "; Latest version: " +
-     * latestVersion.getVersionNumber()); }
-     */
-
     if (!State.PRIVATE.equals(latestVersion.getState())) {
       throw new InvalidStateException("Dataset in state " + latestVersion.getState() + "cannot be published.");
     }
 
     latestVersion.setState(State.PUBLIC);
     latestVersion.getDataset().setState(State.PUBLIC);
-    // setBasicModificationProperties(latestVersion, user.getUserAccount());
     latestVersion.getDataset().setLatestPublicVersion(latestVersion.getVersionNumber());
+    latestVersion.setPublicationDate(OffsetDateTime.now());
+
+    //set all files to Public  
+    List<File> filesOfDatasetVersion = fileRepository.findAllForVersion(latestVersion.getVersionId());
+    for (File f : filesOfDatasetVersion) {
+      if (!UploadState.PUBLIC.equals(f.getState())) {
+        f.setState(UploadState.PUBLIC);
+      }
+
+    }
 
     try {
       latestVersion = datasetVersionRepository.saveAndFlush(latestVersion);
@@ -224,6 +226,7 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
 
   public Page<File> listFiles(VersionId datasetId, Pageable pageable, R2D2Principal user)
       throws AuthorizationException, R2d2TechnicalException, NotFoundException {
+    //AA via get
     DatasetVersion dv = get(datasetId, user);
     Page<File> list = fileRepository.findAllForVersion(dv.getVersionId(), pageable);
     return list;
@@ -231,6 +234,7 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
 
   public File getFileForDataset(VersionId datasetId, UUID fileId, R2D2Principal user)
       throws AuthorizationException, R2d2TechnicalException, NotFoundException {
+    //AA via get
     DatasetVersion dv = get(datasetId, user);
     File f = fileRepository.findById(fileId).orElseThrow(() -> new NotFoundException("File with id " + fileId + " not found"));
 
