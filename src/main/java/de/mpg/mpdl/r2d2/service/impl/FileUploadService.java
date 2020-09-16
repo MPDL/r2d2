@@ -168,15 +168,6 @@ public class FileUploadService extends GenericServiceDbImpl<File> implements Fil
     return fileDaoEs;
   }
 
-  // move 2 dataset service
-  public Page<File> listFiles(UUID id, Pageable pageable, R2D2Principal user) throws AuthorizationException, R2d2TechnicalException {
-
-    DatasetVersion latestVersion = datasetVersionRepository.findLatestVersion(id);
-
-    checkAa("get", user, latestVersion);
-    Page<File> list = fileRepository.findAllForVersion(latestVersion.getVersionId(), pageable);
-    return list;
-  }
 
   @Override
   @Transactional(rollbackFor = Throwable.class)

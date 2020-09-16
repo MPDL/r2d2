@@ -2,6 +2,7 @@ package de.mpg.mpdl.r2d2.service.impl;
 
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -470,9 +471,9 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
       throws R2d2TechnicalException, OptimisticLockingException, ValidationException, NotFoundException, InvalidStateException,
       AuthorizationException {
 
-    List<UUID> filesToRemove = new ArrayList<UUID>();
-    filesToRemove.add(fileId);
-    return addOrRemoveFile(id, null, filesToRemove, lastModificationDate, user);
+	  List<UUID> filesToAdd = new ArrayList<UUID>();
+	    filesToAdd.add(fileId);
+	    return addOrRemoveFile(id, filesToAdd, Collections.emptyList(), lastModificationDate, user);
 
   }
 
@@ -481,10 +482,10 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
   public DatasetVersion removeFile(UUID id, UUID fileId, OffsetDateTime lastModificationDate, R2D2Principal user)
       throws R2d2TechnicalException, OptimisticLockingException, ValidationException, NotFoundException, InvalidStateException,
       AuthorizationException {
-
-    List<UUID> filesToAdd = new ArrayList<UUID>();
-    filesToAdd.add(fileId);
-    return addOrRemoveFile(id, filesToAdd, null, lastModificationDate, user);
+	  
+	  List<UUID> filesToRemove = new ArrayList<UUID>();
+	    filesToRemove.add(fileId);
+	    return addOrRemoveFile(id, Collections.emptyList(), filesToRemove, lastModificationDate, user);
 
   }
 
