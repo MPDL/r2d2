@@ -471,9 +471,9 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
       throws R2d2TechnicalException, OptimisticLockingException, ValidationException, NotFoundException, InvalidStateException,
       AuthorizationException {
 
-	  List<UUID> filesToAdd = new ArrayList<UUID>();
-	    filesToAdd.add(fileId);
-	    return addOrRemoveFile(id, filesToAdd, Collections.emptyList(), lastModificationDate, user);
+    List<UUID> filesToAdd = new ArrayList<UUID>();
+    filesToAdd.add(fileId);
+    return addOrRemoveFile(id, filesToAdd, Collections.emptyList(), lastModificationDate, user);
 
   }
 
@@ -482,10 +482,10 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
   public DatasetVersion removeFile(UUID id, UUID fileId, OffsetDateTime lastModificationDate, R2D2Principal user)
       throws R2d2TechnicalException, OptimisticLockingException, ValidationException, NotFoundException, InvalidStateException,
       AuthorizationException {
-	  
-	  List<UUID> filesToRemove = new ArrayList<UUID>();
-	    filesToRemove.add(fileId);
-	    return addOrRemoveFile(id, Collections.emptyList(), filesToRemove, lastModificationDate, user);
+
+    List<UUID> filesToRemove = new ArrayList<UUID>();
+    filesToRemove.add(fileId);
+    return addOrRemoveFile(id, Collections.emptyList(), filesToRemove, lastModificationDate, user);
 
   }
 
