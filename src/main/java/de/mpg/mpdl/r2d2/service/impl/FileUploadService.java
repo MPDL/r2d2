@@ -57,6 +57,7 @@ public class FileUploadService extends GenericServiceDbImpl<File> implements Fil
   @Autowired
   FileDaoEs fileDaoEs;
 
+  //should be private
   @Override
   public File create(File object, R2D2Principal user) throws R2d2TechnicalException, ValidationException, AuthorizationException {
     try {
@@ -67,6 +68,7 @@ public class FileUploadService extends GenericServiceDbImpl<File> implements Fil
     return object;
   }
 
+  //delete this method
   @Override
   public File update(File object, R2D2Principal user) throws R2d2TechnicalException, OptimisticLockingException, ValidationException,
       NotFoundException, InvalidStateException, AuthorizationException {
@@ -74,12 +76,15 @@ public class FileUploadService extends GenericServiceDbImpl<File> implements Fil
     return null;
   }
 
+
   @Override
+  //should return void. Throw exception if deletion of object storage fails
   public boolean delete(UUID id, R2D2Principal user)
       throws R2d2TechnicalException, OptimisticLockingException, NotFoundException, InvalidStateException, AuthorizationException {
     File file =
         fileRepository.findById(id).orElseThrow(() -> new NotFoundException(String.format("File with id %s NOT FOUND!", id.toString())));
     checkAa("get", user, file);
+    //check if list of dataset versions is empty
     if (file.getState().equals(UploadState.PUBLIC) || file.getState().equals(UploadState.ATTACHED)) {
       throw new InvalidStateException(String.format("File with id %s is part of a dataset!", id.toString()));
     } else {
@@ -110,6 +115,7 @@ public class FileUploadService extends GenericServiceDbImpl<File> implements Fil
     File file = create(file2upload, user);
     objectStoreRepository.createContainer(file2upload.getId().toString());
     String eTag = objectStoreRepository.uploadFile(file2upload, fileStream);
+    //TODO compare client etag with server etag 
     file.setChecksum(eTag);
     file.setState(UploadState.COMPLETE);
     file.setStorageLocation(objectStoreRepository.getPublicURI(file2upload.getId().toString()));
@@ -179,6 +185,7 @@ public class FileUploadService extends GenericServiceDbImpl<File> implements Fil
     // TODO: check number of parts in object store ...
     if (file.getStateInfo().getChunks().size() == parts) {
       String etag = objectStoreRepository.createManifest(file);
+      //TODO compare client etag with server etag 
       file.setChecksum(etag);
       file.getStateInfo().setExpectedNumberOfChunks(parts);
       file.setState(UploadState.COMPLETE);
@@ -192,6 +199,9 @@ public class FileUploadService extends GenericServiceDbImpl<File> implements Fil
   }
 
   @Override
+  //Files should be indexed in elasticsearch
+  //query "q" should pe possible
+  //reindex files async, but datasets sync ? 
   public Page<File> list(Pageable pageable, R2D2Principal user) throws R2d2TechnicalException, NotFoundException, AuthorizationException {
     return fileRepository.findAll(pageable);
   }

@@ -130,6 +130,7 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
     datasetRepository.deleteById(id);
     datasetVersionIndexDao.delete(id.toString());
     // TODO delete dataset object, not only version?
+    //TODO change file relations and states
 
   }
 

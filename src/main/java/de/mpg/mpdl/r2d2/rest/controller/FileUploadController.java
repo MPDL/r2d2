@@ -61,6 +61,7 @@ public class FileUploadController {
   private DtoMapper dtoMapper;
 
   @GetMapping("")
+  //Use DTO as return value
   public ResponseEntity<List<File>> list(Pageable pageable, @AuthenticationPrincipal R2D2Principal p)
       throws AuthorizationException, R2d2TechnicalException, IOException, NotFoundException {
 
@@ -69,7 +70,9 @@ public class FileUploadController {
     return new ResponseEntity<List<File>>(list, HttpStatus.OK);
   }
 
+
   @GetMapping("/{fileId}")
+  //Use DTO as return value
   public ResponseEntity<?> get(@PathVariable("fileId") String fileId, @AuthenticationPrincipal R2D2Principal p)
       throws AuthorizationException, R2d2TechnicalException, IOException, NotFoundException {
 
@@ -77,7 +80,10 @@ public class FileUploadController {
     return new ResponseEntity<>(resp, HttpStatus.OK);
   }
 
+  //new method get /{fileId}/uploadstate
+
   @PostMapping("")
+  //Use DTO as return value
   public ResponseEntity<File> newSingleFileUpload(@RequestHeader("File-Name") String fileName,
       @RequestHeader("Content-Type") String contentType, @RequestHeader(name = "Content-MD5", required = false) String etag,
       HttpServletRequest request, @AuthenticationPrincipal R2D2Principal p)
@@ -92,6 +98,8 @@ public class FileUploadController {
 
     File f = new File();
     f.setFilename(fileName);
+
+    //TODO format is not set, please check
     f.setFormat(contentType);
     if (etag != null) {
       f.setChecksum(etag);
@@ -111,6 +119,7 @@ public class FileUploadController {
 
 
   @PostMapping("/multipart")
+  // Use DTO as return value
   public ResponseEntity<File> newChunkedFileUpload(@RequestHeader("File-Name") String fileName,
       @RequestHeader("Content-Type") String contentType, @AuthenticationPrincipal R2D2Principal p)
       throws R2d2ApplicationException, AuthorizationException, R2d2TechnicalException {
@@ -154,6 +163,8 @@ public class FileUploadController {
   }
 
   @PostMapping("/multipart/{fileId}")
+  //Use DTO as return value
+  //Send optional etag Content-MD5 instead of parts
   public ResponseEntity<?> finishChunkedFileUpload(@PathVariable("fileId") String fileId, @RequestParam("parts") int parts,
       @AuthenticationPrincipal R2D2Principal p) throws R2d2TechnicalException, OptimisticLockingException, NotFoundException,
       InvalidStateException, AuthorizationException, ValidationException {
@@ -161,7 +172,7 @@ public class FileUploadController {
     if (parts == 0) {
       if (fileService.delete(UUID.fromString(fileId), p)) {
         Map<String, Boolean> map = Collections.singletonMap("Acknowledged", true);
-        return new ResponseEntity<>(map, HttpStatus.ACCEPTED);
+        return new ResponseEntity<>(map, HttpStatus.OK);
       }
     }
 
@@ -181,7 +192,7 @@ public class FileUploadController {
       throws R2d2TechnicalException, OptimisticLockingException, NotFoundException, InvalidStateException, AuthorizationException {
     if (fileService.delete(UUID.fromString(fileId), p)) {
       Map<String, Boolean> map = Collections.singletonMap("Acknowledged", true);
-      return new ResponseEntity<>(map, HttpStatus.ACCEPTED);
+      return new ResponseEntity<>(map, HttpStatus.OK);
     }
     return null;
   }
