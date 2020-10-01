@@ -1,11 +1,17 @@
 package de.mpg.mpdl.r2d2.transformation.doi.model;
 
+import javax.xml.bind.annotation.*;
+
+@XmlType
+@XmlAccessorType(XmlAccessType.FIELD)
 public class DoiResourceType {
 
   public static final String RESOURCE_TYPE_GENERAL_DATASET = "Dataset";
 
+  @XmlAttribute
   private String resourceTypeGeneral = RESOURCE_TYPE_GENERAL_DATASET;
 
+  @XmlValue
   private String resourceType;
 
   public String getResourceTypeGeneral() {
