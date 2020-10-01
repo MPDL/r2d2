@@ -107,7 +107,7 @@ public class WebSecurityTest {
   @Test
   public void testPutMethodIsPermitted() throws Exception {
     //Given
-    String path = "/datasets/" + UUID.randomUUID();
+    String path = "/datasets/" + UUID.randomUUID() + "/metadata";
     String body = "{}";
 
     //When
@@ -115,7 +115,7 @@ public class WebSecurityTest {
         .header("Access-Control-Request-Method", "Any value").header("Origin", "Any value"));
 
     //Then
-    putDatasetResult.andExpect(status().isCreated());
+    putDatasetResult.andExpect(status().isOk());
   }
 
   @Test
@@ -125,11 +125,11 @@ public class WebSecurityTest {
     String body = "{}";
 
     //When
-    ResultActions putDatasetResult = mockMvc.perform(post(path).content(body).contentType(MediaType.APPLICATION_JSON)
+    ResultActions postDatasetResult = mockMvc.perform(post(path).content(body).contentType(MediaType.APPLICATION_JSON)
         .header("Access-Control-Request-Method", "Any value").header("Origin", "Any value"));
 
     //Then
-    putDatasetResult.andExpect(status().isCreated());
+    postDatasetResult.andExpect(status().isCreated());
   }
 
   @Test
@@ -168,17 +168,17 @@ public class WebSecurityTest {
 
     Mockito.when(this.userAccountRepository.findById(Mockito.any())).thenReturn(Optional.of(userAccount));
 
-    String path = "/datasets/" + UUID.randomUUID();
+    String path = "/datasets/";
     String tokenPrefix = "Bearer ";
     String token = JWT.create().withSubject("testUsername").withClaim("user_id", UUID.randomUUID().toString())
         .sign(Algorithm.HMAC512(JWTLoginFilter.SECRET));
 
     //When
-    ResultActions putDatasetResult =
-        mockMvc.perform(put(path).header("Authorization", tokenPrefix + token).content("{}").contentType(MediaType.APPLICATION_JSON));
+    ResultActions postDatasetResult =
+        mockMvc.perform(post(path).header("Authorization", tokenPrefix + token).content("{}").contentType(MediaType.APPLICATION_JSON));
 
     //Then
-    putDatasetResult.andExpect(status().isCreated());
+    postDatasetResult.andExpect(status().isCreated());
     //TODO: Check the authentication is set to the SecurityContext 
   }
 
