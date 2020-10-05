@@ -21,12 +21,11 @@ import de.mpg.mpdl.r2d2.service.util.FileDownloadWrapper;
 
 public interface FileService extends GenericService<File> {
 
-  public File create(File object, R2D2Principal user) throws R2d2TechnicalException, ValidationException, AuthorizationException;
+  // public File create(File object, R2D2Principal user) throws R2d2TechnicalException, ValidationException, AuthorizationException;
 
-  public File update(File object, R2D2Principal user) throws R2d2TechnicalException, OptimisticLockingException, ValidationException,
-      NotFoundException, InvalidStateException, AuthorizationException;
+  // public File update(File object, R2D2Principal user) throws R2d2TechnicalException, OptimisticLockingException, ValidationException,  NotFoundException, InvalidStateException, AuthorizationException;
 
-  public boolean delete(UUID id, R2D2Principal user)
+  public void delete(UUID id, R2D2Principal user)
       throws R2d2TechnicalException, OptimisticLockingException, NotFoundException, InvalidStateException, AuthorizationException;
 
   public File get(UUID id, R2D2Principal user) throws R2d2TechnicalException, NotFoundException, AuthorizationException;

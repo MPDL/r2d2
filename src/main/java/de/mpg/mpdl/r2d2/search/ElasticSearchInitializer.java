@@ -53,12 +53,16 @@ public class ElasticSearchInitializer {
         .readString(Paths.get(ElasticSearchInitializer.class.getClassLoader().getResource("es/datasets_index_mapping.json").toURI()));
       */
 
-      Resource settings = resourceLoader.getResource("classpath:es/datasets_index_settings.json");
-      Resource mapping = resourceLoader.getResource("classpath:es/datasets_index_mapping.json");
-      String datasetIndexSettings = StreamUtils.copyToString(settings.getInputStream(), Charset.forName("UTF-8"));
-      String datasetIndexMapping = StreamUtils.copyToString(mapping.getInputStream(), Charset.forName("UTF-8"));
+      Resource datasets_index_settings = resourceLoader.getResource("classpath:es/datasets_index_settings.json");
+      Resource datasets_index_mapping = resourceLoader.getResource("classpath:es/datasets_index_mapping.json");
+      String datasetIndexSettings = StreamUtils.copyToString(datasets_index_settings.getInputStream(), Charset.forName("UTF-8"));
+      String datasetIndexMapping = StreamUtils.copyToString(datasets_index_mapping.getInputStream(), Charset.forName("UTF-8"));
+
+      String fileIndexSettings = StreamUtils.copyToString(datasets_index_settings.getInputStream(), Charset.forName("UTF-8"));
+      String fileIndexMapping = StreamUtils.copyToString(datasets_index_mapping.getInputStream(), Charset.forName("UTF-8"));
 
       esAdminController.createIndex(env.getProperty("index.dataset.name"), true, datasetIndexSettings, datasetIndexMapping);
+      esAdminController.createIndex(env.getProperty("index.file.name"), true, fileIndexSettings, null);
     } catch (Exception e) {
       LOGGER.error("Error while initialzing index", e);
     }

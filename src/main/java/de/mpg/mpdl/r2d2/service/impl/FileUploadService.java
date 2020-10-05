@@ -57,9 +57,7 @@ public class FileUploadService extends GenericServiceDbImpl<File> implements Fil
   @Autowired
   FileDaoEs fileDaoEs;
 
-  //should be private
-  @Override
-  public File create(File object, R2D2Principal user) throws R2d2TechnicalException, ValidationException, AuthorizationException {
+  private File create(File object, R2D2Principal user) throws R2d2TechnicalException, ValidationException, AuthorizationException {
     try {
       fileRepository.save(object);
     } catch (Exception e) {
@@ -68,18 +66,10 @@ public class FileUploadService extends GenericServiceDbImpl<File> implements Fil
     return object;
   }
 
-  //delete this method
-  @Override
-  public File update(File object, R2D2Principal user) throws R2d2TechnicalException, OptimisticLockingException, ValidationException,
-      NotFoundException, InvalidStateException, AuthorizationException {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
 
   @Override
   //should return void. Throw exception if deletion of object storage fails
-  public boolean delete(UUID id, R2D2Principal user)
+  public void delete(UUID id, R2D2Principal user)
       throws R2d2TechnicalException, OptimisticLockingException, NotFoundException, InvalidStateException, AuthorizationException {
     File file =
         fileRepository.findById(id).orElseThrow(() -> new NotFoundException(String.format("File with id %s NOT FOUND!", id.toString())));
@@ -90,7 +80,7 @@ public class FileUploadService extends GenericServiceDbImpl<File> implements Fil
     } else {
       try {
         fileRepository.deleteById(id);
-        return objectStoreRepository.deleteContainer(id.toString());
+        objectStoreRepository.deleteContainer(id.toString());
       } catch (Exception e) {
         throw new R2d2TechnicalException(e);
       }

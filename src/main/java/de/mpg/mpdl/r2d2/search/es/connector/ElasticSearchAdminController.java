@@ -49,15 +49,21 @@ public class ElasticSearchAdminController {
         boolean exists = client.indices().exists(request, RequestOptions.DEFAULT);
 
         if (exists) {
-
           GetAliasesRequest requestWithAlias = new GetAliasesRequest(indexName);
           GetAliasesResponse response = client.indices().getAlias(requestWithAlias, RequestOptions.DEFAULT);
           String name = (String) response.getAliases().keySet().iterator().next();
           deleteIndex(name);
         }
         String name4index = indexName + "_" + System.currentTimeMillis();
-        CreateIndexRequest createIndexRequest = new CreateIndexRequest(name4index).alias(new Alias(indexName))
-            .mapping(mapping, XContentType.JSON).settings(settings, XContentType.JSON);
+        CreateIndexRequest createIndexRequest = null;
+        if (mapping != null) {
+        	createIndexRequest = new CreateIndexRequest(name4index).alias(new Alias(indexName))
+                    .mapping(mapping, XContentType.JSON).settings(settings, XContentType.JSON);
+        } else {
+        	createIndexRequest = new CreateIndexRequest(name4index).alias(new Alias(indexName))
+                    .settings(settings, XContentType.JSON);
+        }
+        
 
         CreateIndexResponse createIndexResponse = client.indices().create(createIndexRequest, RequestOptions.DEFAULT);
         return createIndexResponse.isAcknowledged();
