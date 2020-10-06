@@ -81,6 +81,7 @@ public class FileUploadService extends GenericServiceDbImpl<File> implements Fil
       try {
         fileRepository.deleteById(id);
         objectStoreRepository.deleteContainer(id.toString());
+        fileDaoEs.deleteImmediatly(id.toString());
       } catch (Exception e) {
         throw new R2d2TechnicalException(e);
       }
@@ -110,6 +111,7 @@ public class FileUploadService extends GenericServiceDbImpl<File> implements Fil
     file.setState(UploadState.COMPLETE);
     file.setStorageLocation(objectStoreRepository.getPublicURI(file2upload.getId().toString()));
 
+    fileDaoEs.createImmediately(file.getId().toString(), file);
     return file;
   }
 
@@ -122,6 +124,7 @@ public class FileUploadService extends GenericServiceDbImpl<File> implements Fil
 
     File file = create(file2upload, user);
     objectStoreRepository.createContainer(file2upload.getId().toString());
+    fileDaoEs.createImmediately(file.getId().toString(), file);
 
     return file;
   }
@@ -156,6 +159,7 @@ public class FileUploadService extends GenericServiceDbImpl<File> implements Fil
     chunks.add(chunk);
     file.setState(UploadState.ONGOING);
 
+    fileDaoEs.updateImmediately(file.getId().toString(), file);
     return chunk;
   }
 
@@ -180,6 +184,8 @@ public class FileUploadService extends GenericServiceDbImpl<File> implements Fil
       file.getStateInfo().setExpectedNumberOfChunks(parts);
       file.setState(UploadState.COMPLETE);
       file.setStorageLocation(objectStoreRepository.getPublicURI(file.getId().toString()));
+      fileDaoEs.updateImmediately(file.getId().toString(), file);
+
       return file;
     } else {
       throw new InvalidStateException(String.format("Incorrect number of parts (expected %d, but got %d) in file with id %s", parts,

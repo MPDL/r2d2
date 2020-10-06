@@ -57,13 +57,12 @@ public class ElasticSearchAdminController {
         String name4index = indexName + "_" + System.currentTimeMillis();
         CreateIndexRequest createIndexRequest = null;
         if (mapping != null) {
-        	createIndexRequest = new CreateIndexRequest(name4index).alias(new Alias(indexName))
-                    .mapping(mapping, XContentType.JSON).settings(settings, XContentType.JSON);
+          createIndexRequest = new CreateIndexRequest(name4index).alias(new Alias(indexName)).mapping(mapping, XContentType.JSON)
+              .settings(settings, XContentType.JSON);
         } else {
-        	createIndexRequest = new CreateIndexRequest(name4index).alias(new Alias(indexName))
-                    .settings(settings, XContentType.JSON);
+          createIndexRequest = new CreateIndexRequest(name4index).alias(new Alias(indexName)).settings(settings, XContentType.JSON);
         }
-        
+
 
         CreateIndexResponse createIndexResponse = client.indices().create(createIndexRequest, RequestOptions.DEFAULT);
         return createIndexResponse.isAcknowledged();

@@ -3,6 +3,10 @@ package de.mpg.mpdl.r2d2.rest.controller.dto;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
+import de.mpg.mpdl.r2d2.model.File;
+import de.mpg.mpdl.r2d2.model.File.UploadState;
+import net.schmizz.sshj.xfer.FilePermission;
+
 public class FileDto {
 
 
@@ -34,6 +38,9 @@ public class FileDto {
 
 
   private long size;
+
+
+  private File.UploadState state;
 
   public UUID getId() {
     return id;
@@ -113,6 +120,14 @@ public class FileDto {
 
   public void setSize(long size) {
     this.size = size;
+  }
+
+  public File.UploadState getState() {
+    return state;
+  }
+
+  public void setState(File.UploadState state) {
+    this.state = state;
   }
 
 

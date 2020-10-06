@@ -40,9 +40,14 @@ import de.mpg.mpdl.r2d2.exceptions.R2d2ApplicationException;
 import de.mpg.mpdl.r2d2.exceptions.R2d2TechnicalException;
 import de.mpg.mpdl.r2d2.exceptions.ValidationException;
 import de.mpg.mpdl.r2d2.model.FileChunk;
+import de.mpg.mpdl.r2d2.model.FileUploadStatus;
 import de.mpg.mpdl.r2d2.model.VersionId;
+import de.mpg.mpdl.r2d2.model.DatasetVersion;
 import de.mpg.mpdl.r2d2.model.File;
 import de.mpg.mpdl.r2d2.model.aa.R2D2Principal;
+import de.mpg.mpdl.r2d2.model.search.SearchQuery;
+import de.mpg.mpdl.r2d2.model.search.SearchResult;
+import de.mpg.mpdl.r2d2.rest.controller.dto.DatasetVersionDto;
 import de.mpg.mpdl.r2d2.rest.controller.dto.DtoMapper;
 import de.mpg.mpdl.r2d2.rest.controller.dto.FileDto;
 import de.mpg.mpdl.r2d2.service.FileService;
@@ -54,170 +59,191 @@ import de.mpg.mpdl.r2d2.util.Utils;
 @RequestMapping("files")
 public class FileUploadController {
 
-	@Autowired
-	private FileService fileService;
+  @Autowired
+  private FileService fileService;
 
-	@Autowired
-	private DtoMapper dtoMapper;
+  @Autowired
+  private DtoMapper dtoMapper;
 
-	@GetMapping("")
-	// dto lacks state information (required by the client 2 determine add/remove ability)
-	public ResponseEntity<List<File>> list(Pageable pageable, @AuthenticationPrincipal R2D2Principal p)
-			throws AuthorizationException, R2d2TechnicalException, IOException, NotFoundException {
+  /*
+  @GetMapping("")
+  public ResponseEntity<List<FileDto>> list(Pageable pageable, @AuthenticationPrincipal R2D2Principal p)
+      throws AuthorizationException, R2d2TechnicalException, IOException, NotFoundException {
+  
+    Page<File> files = fileService.list(pageable, p);
+    List<FileDto> list = files.map(f -> dtoMapper.convertToFileDto(f)).toList();
+    return new ResponseEntity<List<FileDto>>(list, HttpStatus.OK);
+  }
+  */
 
-		Page<File> files = fileService.list(pageable, p);
-		// List<FileDto> list = files.map(f -> dtoMapper.convertToFileDto(f)).toList();
-		return new ResponseEntity<List<File>>(files.toList(), HttpStatus.OK);
-	}
+  @GetMapping("")
+  public ResponseEntity<SearchResult<FileDto>> search(@RequestParam(name = "q", required = false) String query,
+      @RequestParam(name = "scroll", required = false) String scrollTimeValue, @RequestParam(name = "from", required = false) Integer from,
+      @RequestParam(name = "size", required = false) Integer size, HttpServletResponse httpResponse,
+      @AuthenticationPrincipal R2D2Principal p) throws AuthorizationException, R2d2TechnicalException, IOException {
 
-	@GetMapping("/{fileId}")
-	public ResponseEntity<FileDto> get(@PathVariable("fileId") String fileId, @AuthenticationPrincipal R2D2Principal p)
-			throws AuthorizationException, R2d2TechnicalException, IOException, NotFoundException {
+    SearchQuery sq = new SearchQuery();
+    sq.setQuery(query);
+    if (from != null) {
+      sq.setFrom(from);
+    }
+    if (size != null) {
+      sq.setSize(size);
+    }
 
-		File resp = fileService.get(UUID.fromString(fileId), p);
-		FileDto dto = dtoMapper.convertToFileDto(resp);
-		return new ResponseEntity<FileDto>(dto, HttpStatus.OK);
-	}
+    SearchResult<File> resp = fileService.search(sq, p);
 
-	// new method get /{fileId}/uploadstate
+    return new ResponseEntity<SearchResult<FileDto>>(dtoMapper.convertToFileSearchResultDto(resp), HttpStatus.OK);
+  }
 
-	@PostMapping("")
-	public ResponseEntity<FileDto> newSingleFileUpload(@RequestHeader("File-Name") String fileName,
-			@RequestHeader("Content-Type") String contentType,
-			@RequestHeader(name = "Content-MD5", required = false) String etag, HttpServletRequest request,
-			@AuthenticationPrincipal R2D2Principal p)
-			throws R2d2ApplicationException, AuthorizationException, R2d2TechnicalException {
-		InputStream is;
 
-		try {
-			is = request.getInputStream();
-		} catch (IOException e) {
-			throw new R2d2TechnicalException(e);
-		}
+  @GetMapping("/{fileId}")
+  public ResponseEntity<FileDto> get(@PathVariable("fileId") String fileId, @AuthenticationPrincipal R2D2Principal p)
+      throws AuthorizationException, R2d2TechnicalException, IOException, NotFoundException {
 
-		File f = new File();
-		f.setFilename(fileName);
+    File resp = fileService.get(UUID.fromString(fileId), p);
+    FileDto dto = dtoMapper.convertToFileDto(resp);
+    return new ResponseEntity<FileDto>(dto, HttpStatus.OK);
+  }
 
-		// TODO format is not set, please check
-		f.setFormat(contentType);
-		if (etag != null) {
-			f.setChecksum(etag);
-		}
+  @GetMapping("/{fileId}/uploadstate")
+  public ResponseEntity<FileUploadStatus> getUploadState(@PathVariable("fileId") String fileId, @AuthenticationPrincipal R2D2Principal p)
+      throws AuthorizationException, R2d2TechnicalException, IOException, NotFoundException {
+    File resp = fileService.get(UUID.fromString(fileId), p);
+    FileUploadStatus state = resp.getStateInfo();
+    return new ResponseEntity<FileUploadStatus>(state, HttpStatus.OK);
+  }
 
-		f = fileService.uploadSingleFile(f, is, p);
+  @PostMapping("")
+  public ResponseEntity<FileDto> newSingleFileUpload(@RequestHeader("File-Name") String fileName,
+      @RequestHeader("Content-Type") String contentType, @RequestHeader(name = "Content-MD5", required = false) String etag,
+      HttpServletRequest request, @AuthenticationPrincipal R2D2Principal p)
+      throws R2d2ApplicationException, AuthorizationException, R2d2TechnicalException {
+    InputStream is;
 
-		BodyBuilder responseBuilder = ResponseEntity.status(HttpStatus.CREATED);
+    try {
+      is = request.getInputStream();
+    } catch (IOException e) {
+      throw new R2d2TechnicalException(e);
+    }
 
-		if (f.getChecksum() != null) {
-			responseBuilder.header("ETag", f.getChecksum());
-		}
+    File f = new File();
+    f.setFilename(fileName);
 
-		return responseBuilder.body(dtoMapper.convertToFileDto(f));
+    // TODO format is not set, please check
+    f.setFormat(contentType);
+    if (etag != null) {
+      f.setChecksum(etag);
+    }
 
-	}
+    f = fileService.uploadSingleFile(f, is, p);
 
-	@PostMapping("/multipart")
-	public ResponseEntity<FileDto> newChunkedFileUpload(@RequestHeader("File-Name") String fileName,
-			@RequestHeader("Content-Type") String contentType, @AuthenticationPrincipal R2D2Principal p)
-			throws R2d2ApplicationException, AuthorizationException, R2d2TechnicalException {
+    BodyBuilder responseBuilder = ResponseEntity.status(HttpStatus.CREATED);
 
-		File f = new File();
-		f.setFilename(fileName);
-		f.setFormat(contentType);
+    if (f.getChecksum() != null) {
+      responseBuilder.header("ETag", f.getChecksum());
+    }
 
-		f = fileService.initNewFile(f, p);
+    return responseBuilder.body(dtoMapper.convertToFileDto(f));
 
-		BodyBuilder responseBuilder = ResponseEntity.status(HttpStatus.CREATED);
+  }
 
-		return responseBuilder.body(dtoMapper.convertToFileDto(f));
-	}
+  @PostMapping("/multipart")
+  public ResponseEntity<FileDto> newChunkedFileUpload(@RequestHeader("File-Name") String fileName,
+      @RequestHeader("Content-Type") String contentType, @AuthenticationPrincipal R2D2Principal p)
+      throws R2d2ApplicationException, AuthorizationException, R2d2TechnicalException {
 
-	@PutMapping("/multipart/{fileId}")
-	public ResponseEntity<FileChunk> uploadFileChunk(@PathVariable("fileId") String fileId,
-			@RequestParam("part") int part, @RequestHeader(name = "Content-MD5", required = false) String etag,
-			HttpServletRequest req, @AuthenticationPrincipal R2D2Principal p)
-			throws R2d2ApplicationException, AuthorizationException, R2d2TechnicalException {
+    File f = new File();
+    f.setFilename(fileName);
+    f.setFormat(contentType);
 
-		InputStream is;
+    f = fileService.initNewFile(f, p);
 
-		try {
-			is = req.getInputStream();
-		} catch (IOException e) {
-			throw new R2d2TechnicalException(e);
-		}
+    BodyBuilder responseBuilder = ResponseEntity.status(HttpStatus.CREATED);
 
-		FileChunk chunk = new FileChunk();
-		if (etag != null) {
-			chunk.setClientEtag(etag);
-		}
-		chunk.setNumber(part);
+    return responseBuilder.body(dtoMapper.convertToFileDto(f));
+  }
 
-		FileChunk resultChunk = fileService.uploadFileChunk(UUID.fromString(fileId), chunk, is, p);
+  @PutMapping("/multipart/{fileId}")
+  public ResponseEntity<FileChunk> uploadFileChunk(@PathVariable("fileId") String fileId, @RequestParam("part") int part,
+      @RequestHeader(name = "Content-MD5", required = false) String etag, HttpServletRequest req, @AuthenticationPrincipal R2D2Principal p)
+      throws R2d2ApplicationException, AuthorizationException, R2d2TechnicalException {
 
-		ResponseEntity<FileChunk> re = ResponseEntity.status(HttpStatus.CREATED)
-				.header("ETag", resultChunk.getServerEtag()).body(resultChunk);
+    InputStream is;
 
-		return re;
-	}
+    try {
+      is = req.getInputStream();
+    } catch (IOException e) {
+      throw new R2d2TechnicalException(e);
+    }
 
-	@PostMapping("/multipart/{fileId}")
-	// Send optional etag Content-MD5 instead of parts
-	public ResponseEntity<FileDto> finishChunkedFileUpload(@PathVariable("fileId") String fileId,
-			@RequestParam("parts") int parts, @AuthenticationPrincipal R2D2Principal p)
-			throws R2d2TechnicalException, OptimisticLockingException, NotFoundException, InvalidStateException,
-			AuthorizationException, ValidationException {
+    FileChunk chunk = new FileChunk();
+    if (etag != null) {
+      chunk.setClientEtag(etag);
+    }
+    chunk.setNumber(part);
 
-		if (parts == 0) {
-			fileService.delete(UUID.fromString(fileId), p);
-				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-		}
+    FileChunk resultChunk = fileService.uploadFileChunk(UUID.fromString(fileId), chunk, is, p);
 
-		File sf = fileService.completeChunkedUpload(UUID.fromString(fileId), parts, p);
+    ResponseEntity<FileChunk> re = ResponseEntity.status(HttpStatus.CREATED).header("ETag", resultChunk.getServerEtag()).body(resultChunk);
 
-		BodyBuilder responseBuilder = ResponseEntity.status(HttpStatus.CREATED);
+    return re;
+  }
 
-		if (sf.getChecksum() != null) {
-			responseBuilder.header("ETag", sf.getChecksum());
-		}
+  @PostMapping("/multipart/{fileId}")
+  // Send optional etag Content-MD5 instead of parts
+  public ResponseEntity<FileDto> finishChunkedFileUpload(@PathVariable("fileId") String fileId, @RequestParam("parts") int parts,
+      @AuthenticationPrincipal R2D2Principal p) throws R2d2TechnicalException, OptimisticLockingException, NotFoundException,
+      InvalidStateException, AuthorizationException, ValidationException {
 
-		return responseBuilder.body(dtoMapper.convertToFileDto(sf));
-	}
+    if (parts == 0) {
+      fileService.delete(UUID.fromString(fileId), p);
+      return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
 
-	@DeleteMapping("/{fileId}")
-	public ResponseEntity<?> delete(@PathVariable("fileId") String fileId, @AuthenticationPrincipal R2D2Principal p)
-			throws R2d2TechnicalException, OptimisticLockingException, NotFoundException, InvalidStateException,
-			AuthorizationException {
-		fileService.delete(UUID.fromString(fileId), p);
-		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-	}
+    File sf = fileService.completeChunkedUpload(UUID.fromString(fileId), parts, p);
 
-	@GetMapping("/{fileId}/content")
-	public ResponseEntity<?> download(@PathVariable("fileId") String fileId,
-			@RequestParam(value = "download", required = false, defaultValue = "false") boolean forceDownload,
-			HttpServletResponse response, @AuthenticationPrincipal R2D2Principal p)
-			throws R2d2ApplicationException, AuthorizationException, R2d2TechnicalException {
+    BodyBuilder responseBuilder = ResponseEntity.status(HttpStatus.CREATED);
 
-		FileDownloadWrapper fd = fileService.getFileContent(UUID.fromString(fileId), p);
-		try {
-			String contentDispositionType = "inline";
-			if (forceDownload) {
-				contentDispositionType = "attachment";
-			}
+    if (sf.getChecksum() != null) {
+      responseBuilder.header("ETag", sf.getChecksum());
+    }
 
-			response.setContentType(fd.getFile().getFormat());
+    return responseBuilder.body(dtoMapper.convertToFileDto(sf));
+  }
 
-			// Add filename and RFC 5987 encoded filename as content disposition headers
-			response.setHeader("Content-Disposition", contentDispositionType + "; "
-			// Leave only utf-8 encoded filename, as normal filename could lead to encoding
-			// problems in Apache
-			// + "filename=\"" + fileVOWrapper.getFileVO().getName() + "\"; "
-					+ "filename*=UTF-8''"
-					+ URLEncoder.encode(fd.getFile().getFilename(), StandardCharsets.UTF_8.toString()).replaceAll("\\+",
-							"%20"));
+  @DeleteMapping("/{fileId}")
+  public ResponseEntity<?> delete(@PathVariable("fileId") String fileId, @AuthenticationPrincipal R2D2Principal p)
+      throws R2d2TechnicalException, OptimisticLockingException, NotFoundException, InvalidStateException, AuthorizationException {
+    fileService.delete(UUID.fromString(fileId), p);
+    return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+  }
 
-			return new ResponseEntity<InputStreamResource>(new InputStreamResource(fd.readFile()), HttpStatus.OK);
-		} catch (Exception e) {
-			throw new R2d2TechnicalException(e);
-		}
-	}
+  @GetMapping("/{fileId}/content")
+  public ResponseEntity<?> download(@PathVariable("fileId") String fileId,
+      @RequestParam(value = "download", required = false, defaultValue = "false") boolean forceDownload, HttpServletResponse response,
+      @AuthenticationPrincipal R2D2Principal p) throws R2d2ApplicationException, AuthorizationException, R2d2TechnicalException {
+
+    FileDownloadWrapper fd = fileService.getFileContent(UUID.fromString(fileId), p);
+    try {
+      String contentDispositionType = "inline";
+      if (forceDownload) {
+        contentDispositionType = "attachment";
+      }
+
+      response.setContentType(fd.getFile().getFormat());
+
+      // Add filename and RFC 5987 encoded filename as content disposition headers
+      response.setHeader("Content-Disposition", contentDispositionType + "; "
+      // Leave only utf-8 encoded filename, as normal filename could lead to encoding
+      // problems in Apache
+      // + "filename=\"" + fileVOWrapper.getFileVO().getName() + "\"; "
+          + "filename*=UTF-8''"
+          + URLEncoder.encode(fd.getFile().getFilename(), StandardCharsets.UTF_8.toString()).replaceAll("\\+", "%20"));
+
+      return new ResponseEntity<InputStreamResource>(new InputStreamResource(fd.readFile()), HttpStatus.OK);
+    } catch (Exception e) {
+      throw new R2d2TechnicalException(e);
+    }
+  }
 }

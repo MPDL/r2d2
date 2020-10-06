@@ -44,6 +44,7 @@ public abstract class DtoMapper {
 
   public abstract SearchResult<DatasetVersionDto> convertToSearchResultDto(SearchResult<DatasetVersion> sr);
 
+  public abstract SearchResult<FileDto> convertToFileSearchResultDto(SearchResult<File> sr);
 
 
 }
