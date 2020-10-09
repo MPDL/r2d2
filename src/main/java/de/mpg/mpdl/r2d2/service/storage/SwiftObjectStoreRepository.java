@@ -201,6 +201,10 @@ public class SwiftObjectStoreRepository {
     return store.blobMetadata(container, CONTENT).getPublicUri().toString();
   }
 
+  public Long getFileSize(String container) {
+    return store.blobMetadata(container, CONTENT).getSize();
+  }
+
   public boolean deleteFile(String container, String name) {
 
     boolean isFileRemoved = false;

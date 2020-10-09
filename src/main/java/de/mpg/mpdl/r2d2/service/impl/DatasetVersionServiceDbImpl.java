@@ -38,6 +38,7 @@ import de.mpg.mpdl.r2d2.model.VersionId;
 import de.mpg.mpdl.r2d2.model.aa.R2D2Principal;
 import de.mpg.mpdl.r2d2.model.aa.UserAccount;
 import de.mpg.mpdl.r2d2.search.dao.DatasetVersionDaoEs;
+import de.mpg.mpdl.r2d2.search.dao.FileDaoEs;
 import de.mpg.mpdl.r2d2.search.dao.GenericDaoEs;
 import de.mpg.mpdl.r2d2.service.DatasetVersionService;
 import de.mpg.mpdl.r2d2.service.storage.SwiftObjectStoreRepository;
@@ -58,6 +59,9 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
 
   @Autowired
   private DatasetVersionDaoEs datasetVersionIndexDao;
+
+  @Autowired
+  private FileDaoEs fileDaoEs;
 
   @Autowired
   private SwiftObjectStoreRepository objectStoreRepository;
@@ -210,6 +214,7 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
     for (File f : filesOfDatasetVersion) {
       if (!UploadState.PUBLIC.equals(f.getState())) {
         f.setState(UploadState.PUBLIC);
+        fileDaoEs.createImmediately(f.getId().toString(), f);
       }
 
     }
@@ -313,6 +318,7 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
         try {
           file.getVersions().add(nextVersion);
           fileRepository.saveAndFlush(file);
+          fileDaoEs.createImmediately(file.getId().toString(), file);
         } catch (Exception e) {
           throw new RuntimeException(e);
         }
@@ -560,10 +566,12 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
           case COMPLETE: {
             file.setState(UploadState.ATTACHED);
             file.getVersions().add(resultedDataset);
+            fileDaoEs.createImmediately(file.getId().toString(), file);
             break;
           }
           case PUBLIC: {
             file.getVersions().add(resultedDataset);
+            fileDaoEs.createImmediately(file.getId().toString(), file);
             break;
           }
           default: {
@@ -584,6 +592,7 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
           case ATTACHED: {
             file.setState(UploadState.COMPLETE);
             file.getVersions().remove(resultedDataset);
+            fileDaoEs.createImmediately(file.getId().toString(), file);
             break;
           }
           case PUBLIC: {
@@ -591,6 +600,7 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
             if (file.getVersions().isEmpty()) {
               file.setState(UploadState.COMPLETE);
             }
+            fileDaoEs.createImmediately(file.getId().toString(), file);
             break;
           }
           default: {

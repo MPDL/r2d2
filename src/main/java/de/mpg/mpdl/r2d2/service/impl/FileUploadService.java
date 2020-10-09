@@ -110,7 +110,7 @@ public class FileUploadService extends GenericServiceDbImpl<File> implements Fil
     file.setChecksum(eTag);
     file.setState(UploadState.COMPLETE);
     file.setStorageLocation(objectStoreRepository.getPublicURI(file2upload.getId().toString()));
-
+    file.setSize(objectStoreRepository.getFileSize(file2upload.getId().toString()));
     fileDaoEs.createImmediately(file.getId().toString(), file);
     return file;
   }
@@ -159,7 +159,7 @@ public class FileUploadService extends GenericServiceDbImpl<File> implements Fil
     chunks.add(chunk);
     file.setState(UploadState.ONGOING);
 
-    fileDaoEs.updateImmediately(file.getId().toString(), file);
+    fileDaoEs.createImmediately(file.getId().toString(), file);
     return chunk;
   }
 
@@ -184,6 +184,7 @@ public class FileUploadService extends GenericServiceDbImpl<File> implements Fil
       file.getStateInfo().setExpectedNumberOfChunks(parts);
       file.setState(UploadState.COMPLETE);
       file.setStorageLocation(objectStoreRepository.getPublicURI(file.getId().toString()));
+      file.setSize(objectStoreRepository.getFileSize(file.getId().toString()));
       fileDaoEs.updateImmediately(file.getId().toString(), file);
 
       return file;
