@@ -1,4 +1,4 @@
-package de.mpg.mpdl.r2d2.rest.controller.dto;
+package de.mpg.mpdl.r2d2.util;
 
 import org.mapstruct.InheritInverseConfiguration;
 import org.mapstruct.Mapper;
@@ -8,7 +8,12 @@ import org.springframework.stereotype.Component;
 import de.mpg.mpdl.r2d2.model.Dataset;
 import de.mpg.mpdl.r2d2.model.DatasetVersion;
 import de.mpg.mpdl.r2d2.model.File;
-import de.mpg.mpdl.r2d2.model.search.SearchResult;
+import de.mpg.mpdl.r2d2.rest.controller.dto.DatasetDto;
+import de.mpg.mpdl.r2d2.rest.controller.dto.DatasetVersionDto;
+import de.mpg.mpdl.r2d2.rest.controller.dto.FileDto;
+import de.mpg.mpdl.r2d2.search.model.DatasetVersionIto;
+import de.mpg.mpdl.r2d2.search.model.FileIto;
+import de.mpg.mpdl.r2d2.search.model.SearchResult;
 
 @Mapper(componentModel = "spring")
 public abstract class DtoMapper {
@@ -42,9 +47,23 @@ public abstract class DtoMapper {
   public abstract File convertToFile(FileDto dvDto);
 
 
-  public abstract SearchResult<DatasetVersionDto> convertToSearchResultDto(SearchResult<DatasetVersion> sr);
+  public abstract DatasetVersionIto convertToDatasetVersionIto(DatasetVersion dv);
 
-  public abstract SearchResult<FileDto> convertToFileSearchResultDto(SearchResult<File> sr);
+  @InheritInverseConfiguration
+  public abstract DatasetVersion convertToDatasetVersion(DatasetVersionIto dv);
+
+
+  public abstract FileIto convertToFileIto(File f);
+
+  @InheritInverseConfiguration
+  public abstract File convertToFile(FileIto fi);
+
+
+
+  public abstract SearchResult<FileDto> convertToFileSearchResultDto(SearchResult<FileIto> sr);
+
+  public abstract SearchResult<DatasetVersionDto> convertToSearchResultDto(SearchResult<DatasetVersionIto> sr);
+
 
 
 }

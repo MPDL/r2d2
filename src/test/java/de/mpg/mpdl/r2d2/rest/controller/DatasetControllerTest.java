@@ -3,8 +3,9 @@ package de.mpg.mpdl.r2d2.rest.controller;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import de.mpg.mpdl.r2d2.rest.controller.dto.DtoMapper;
 import de.mpg.mpdl.r2d2.service.FileService;
+import de.mpg.mpdl.r2d2.util.DtoMapper;
+
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -9,26 +9,23 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import de.mpg.mpdl.r2d2.model.DatasetVersion;
 import de.mpg.mpdl.r2d2.search.dao.DatasetVersionDaoEs;
+import de.mpg.mpdl.r2d2.search.model.DatasetVersionIto;
 
-@Repository
-public class DataSetVersionDAOImpl extends ElasticSearchGenericDAOImpl<DatasetVersion> implements DatasetVersionDaoEs {
+public abstract class DatasetVersionDaoImpl extends ElasticSearchGenericDAOImpl<DatasetVersionIto> implements DatasetVersionDaoEs {
 
-  @Autowired
-  private Environment env;
-
-  private static final Class<DatasetVersion> typeParameterClass = DatasetVersion.class;
+  private static final Class<DatasetVersionIto> typeParameterClass = DatasetVersionIto.class;
 
   private static final String JOIN_FIELD_NAME = "joinField";
 
   private static final String[] SOURCE_EXCLUSIONS = new String[] {"joinField.name", "sort-metadata-creators-first",
       "sort-metadata-creators-compound", "sort-metadata-dates-by-category", "sort-metadata-dates-by-category-year"};
 
-  public DataSetVersionDAOImpl(@Autowired Environment env) {
-    super(env.getProperty("index.dataset.name"), typeParameterClass);
+  public DatasetVersionDaoImpl(String indexName) {
+    super(indexName, typeParameterClass);
   }
 
   @Override
-  protected JsonNode applyCustomValues(DatasetVersion datasetVersion) {
+  protected JsonNode applyCustomValues(DatasetVersionIto datasetVersion) {
 
     ObjectNode node = (ObjectNode) super.applyCustomValues(datasetVersion);
 

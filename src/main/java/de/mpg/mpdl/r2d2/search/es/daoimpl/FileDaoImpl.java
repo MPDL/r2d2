@@ -6,11 +6,12 @@ import org.springframework.stereotype.Repository;
 
 import de.mpg.mpdl.r2d2.model.File;
 import de.mpg.mpdl.r2d2.search.dao.FileDaoEs;
+import de.mpg.mpdl.r2d2.search.model.FileIto;
 
 @Repository
-public class FileDaoImpl extends ElasticSearchGenericDAOImpl<File> implements FileDaoEs {
+public class FileDaoImpl extends ElasticSearchGenericDAOImpl<FileIto> implements FileDaoEs {
 
-  private static final Class<File> typeParameterClass = File.class;
+  private static final Class<FileIto> typeParameterClass = FileIto.class;
 
   private static final String[] SOURCE_EXCLUSIONS = new String[] {};
 

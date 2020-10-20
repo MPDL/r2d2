@@ -19,6 +19,7 @@ import org.jclouds.openstack.swift.v1.domain.Container;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -62,6 +63,7 @@ public class AdminService {
   DatasetVersionRepository versions;
 
   @Autowired
+  @Qualifier("PublicDatasetVersionDaoImpl")
   DatasetVersionDaoEs datasetVersionDaoEs;
 
   @Autowired

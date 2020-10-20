@@ -1,4 +1,4 @@
-package de.mpg.mpdl.r2d2.service.impl;
+package de.mpg.mpdl.r2d2.search.service.impl;
 
 import java.io.IOException;
 import java.time.Instant;
@@ -38,11 +38,12 @@ import de.mpg.mpdl.r2d2.search.dao.GenericDaoEs;
 import de.mpg.mpdl.r2d2.search.model.SearchQuery;
 import de.mpg.mpdl.r2d2.search.model.SearchRecord;
 import de.mpg.mpdl.r2d2.search.model.SearchResult;
+import de.mpg.mpdl.r2d2.search.service.GenericSearchService;
 import de.mpg.mpdl.r2d2.util.Utils;
 
-public abstract class GenericServiceDbImpl<E> {
+public abstract class GenericSearchServiceImpl<E> implements GenericSearchService<E> {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(GenericServiceDbImpl.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(GenericSearchServiceImpl.class);
 
   @Autowired
   private AuthorizationService aaService;
@@ -53,51 +54,50 @@ public abstract class GenericServiceDbImpl<E> {
 
   private Class<E> modelClazz;
 
-  public GenericServiceDbImpl(Class<E> modelClazz) {
+  public GenericSearchServiceImpl(Class<E> modelClazz) {
     this.modelClazz = modelClazz;
   }
 
-  /*
   public SearchResponse searchDetailed(SearchSourceBuilder ssb, R2D2Principal principal)
       throws R2d2TechnicalException, AuthorizationException {
-  
+
     return searchDetailed(ssb, -1, principal);
   }
-  
+
   public SearchResponse searchDetailed(SearchSourceBuilder ssb, long scrollTime, R2D2Principal principal)
       throws R2d2TechnicalException, AuthorizationException {
-  
+
     if (getIndexDao() != null) {
       QueryBuilder qb = ssb.query();
       if (principal != null) {
-        qb = aaService.modifyQueryForAa(this.getClass().getCanonicalName(), qb, principal);
+        qb = aaService.modifyQueryForAa(getAaKey(), getAaMethod(), qb, principal);
       } else {
-        qb = aaService.modifyQueryForAa(this.getClass().getCanonicalName(), qb, null);
+        qb = aaService.modifyQueryForAa(getAaKey(), getAaMethod(), qb, null);
       }
       ssb.query(qb);
       return getIndexDao().searchDetailed(ssb, scrollTime);
     }
     return null;
   }
-  
-  
+
+
   public SearchResult<E> search(SearchQuery sq, R2D2Principal principal) throws R2d2TechnicalException, AuthorizationException {
     QueryBuilder qb = QueryBuilders.queryStringQuery(sq.getQuery() != null ? sq.getQuery() : "*");
     SearchSourceBuilder ssb = SearchSourceBuilder.searchSource();
-  
+
     ssb.query(qb);
     ssb.size(sq.getSize());
     ssb.from(sq.getFrom());
-  
-  
-  
+
+
+
     SearchResponse resp = searchDetailed(ssb, principal);
     return getSearchRetrieveResponseFromElasticSearchResponse(resp);
-  
-  
-  
+
+
+
   }
-  
+
   private SearchResult<E> getSearchRetrieveResponseFromElasticSearchResponse(SearchResponse sr) throws R2d2TechnicalException {
     SearchResult<E> srrVO;
     try {
@@ -105,76 +105,34 @@ public abstract class GenericServiceDbImpl<E> {
       //srrVO.setOriginalResponse(sr);
       srrVO.setTotal((int) sr.getHits().getTotalHits().value);
       srrVO.setScrollId(sr.getScrollId());
-  
+
       List<SearchRecord<E>> hitList = new ArrayList<>();
       srrVO.setHits(hitList);
       for (SearchHit hit : sr.getHits().getHits()) {
         SearchRecord<E> srr = new SearchRecord<E>();
         hitList.add(srr);
-  
+
         E source = jsonObjectMapper.readValue(hit.getSourceAsString(), modelClazz);
-  
+
         srr.setSource(source);
         srr.setId(hit.getId());
-  
+
       }
     } catch (Exception e) {
       throw new R2d2TechnicalException(e);
     }
-  
-  
+
+
     return srrVO;
   }
-  
-  
-  
-  
-  
-  /*
-  protected void setBasicCreationProperties(BaseDateDb baseObject, UserAccount creator) {
-    //Truncate to microseconds, as the database doesn't support more
-    setBasicCreationProperties(baseObject, creator, Utils.generateCurrentDateTimeForDatabase());
-  }
-  */
-  /*
-  protected void setBasicCreationProperties(BaseDateDb baseObject, UserAccount creator, OffsetDateTime dateTime) {
-    baseObject.setCreator(new UserAccountRO(creator));
-    baseObject.setCreationDate(dateTime);
-    setBasicModificationProperties(baseObject, creator, dateTime);
-  }
-  */
-  /*
-  protected void setBasicModificationProperties(BaseDateDb baseObject, UserAccount creator) {
-    //Truncate to microseconds, as the database doesn't support more
-    setBasicModificationProperties(baseObject, creator, Utils.generateCurrentDateTimeForDatabase());
-  }
-  */
-  /*
-  protected void setBasicModificationProperties(BaseDateDb baseObject, UserAccount creator, OffsetDateTime dateTime) {
-    baseObject.setModifier(new UserAccountRO(creator));
-    baseObject.setModificationDate(dateTime);
-  }
-  
-  
+
+
+
   protected abstract GenericDaoEs<E> getIndexDao();
-  */
 
-  protected void checkEqualModificationDate(OffsetDateTime date1, OffsetDateTime date2) throws OptimisticLockingException {
-    LOGGER.debug("Compare date " + date1 + " with " + date2);
-    if (date1 == null || date2 == null || !date1.toInstant().equals(date2.toInstant())) {
-      throw new OptimisticLockingException("Object changed in the meantime: " + date1 + "  does not equal  " + date2);
-    }
-  }
+  protected abstract String getAaKey();
 
-
-  protected void checkAa(String method, R2D2Principal userAccount, Object... objects)
-      throws R2d2TechnicalException, AuthorizationException {
-    if (objects == null) {
-      objects = new Object[0];
-    }
-    objects = Stream.concat(Arrays.stream(new Object[] {userAccount}), Arrays.stream(objects)).toArray();
-    aaService.checkAuthorization(this.getClass().getCanonicalName(), method, objects);
-  }
+  protected abstract String getAaMethod();
 
 
 }

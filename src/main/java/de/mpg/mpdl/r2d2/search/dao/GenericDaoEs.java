@@ -9,8 +9,8 @@ import org.elasticsearch.search.builder.SearchSourceBuilder;
 
 
 import de.mpg.mpdl.r2d2.exceptions.R2d2TechnicalException;
-import de.mpg.mpdl.r2d2.model.search.SearchQuery;
-import de.mpg.mpdl.r2d2.model.search.SearchResult;
+import de.mpg.mpdl.r2d2.search.model.SearchQuery;
+import de.mpg.mpdl.r2d2.search.model.SearchResult;
 import de.mpg.mpdl.r2d2.search.util.ElasticSearchIndexField;
 
 /**

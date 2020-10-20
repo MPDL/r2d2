@@ -1,4 +1,4 @@
-package de.mpg.mpdl.r2d2.model.search;
+package de.mpg.mpdl.r2d2.search.model;
 
 public class SearchRecord<T> {
 

@@ -45,14 +45,16 @@ import de.mpg.mpdl.r2d2.model.DatasetVersion;
 import de.mpg.mpdl.r2d2.model.File;
 import de.mpg.mpdl.r2d2.model.VersionId;
 import de.mpg.mpdl.r2d2.model.aa.R2D2Principal;
-import de.mpg.mpdl.r2d2.model.search.SearchQuery;
-import de.mpg.mpdl.r2d2.model.search.SearchResult;
 import de.mpg.mpdl.r2d2.rest.controller.dto.DatasetVersionDto;
-import de.mpg.mpdl.r2d2.rest.controller.dto.DtoMapper;
 import de.mpg.mpdl.r2d2.rest.controller.dto.FileDto;
 import de.mpg.mpdl.r2d2.rest.controller.dto.SetFilesDto;
+import de.mpg.mpdl.r2d2.search.model.DatasetVersionIto;
+import de.mpg.mpdl.r2d2.search.model.SearchQuery;
+import de.mpg.mpdl.r2d2.search.model.SearchResult;
+import de.mpg.mpdl.r2d2.search.service.DatasetSearchService;
 import de.mpg.mpdl.r2d2.service.DatasetVersionService;
 import de.mpg.mpdl.r2d2.service.FileService;
+import de.mpg.mpdl.r2d2.util.DtoMapper;
 import de.mpg.mpdl.r2d2.util.Utils;
 
 @RestController
@@ -72,6 +74,10 @@ public class DatasetController {
 
   @Autowired
   private DtoMapper dtoMapper;
+
+  @Autowired
+
+  private DatasetSearchService datasetSearchService;
 
   @PostMapping(path = "")
   public ResponseEntity<DatasetVersionDto> createDataset(@RequestBody DatasetVersionDto givenDatasetVersion,
@@ -200,7 +206,7 @@ public class DatasetController {
   //POST files
 
   @PutMapping("/{id}/files/{fileId}")
-  public ResponseEntity<DatasetVersionDto> kann(@PathVariable("id") String id, @PathVariable("fileId") String fileId,
+  public ResponseEntity<DatasetVersionDto> addFile(@PathVariable("id") String id, @PathVariable("fileId") String fileId,
       @RequestParam(name = "lmd") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime lmd,
       @AuthenticationPrincipal R2D2Principal p) throws R2d2ApplicationException, AuthorizationException, R2d2TechnicalException {
     DatasetVersion response = null;
@@ -245,7 +251,7 @@ public class DatasetController {
     SearchSourceBuilder ssb = Utils.parseJsonToSearchSourceBuilder(searchSourceText);
 
     // SearchResponse resp = datasetVersionService.searchDetailed(ssb, scrollTime, Utils.toCustomPrincipal(p));
-    SearchResponse resp = datasetVersionService.searchDetailed(ssb, scrollTime, p);
+    SearchResponse resp = datasetSearchService.searchDetailed(ssb, scrollTime, p);
 
 
     httpResponse.setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
@@ -276,7 +282,7 @@ public class DatasetController {
 
 
 
-    SearchResult<DatasetVersion> resp = datasetVersionService.search(sq, p);
+    SearchResult<DatasetVersionIto> resp = datasetSearchService.search(sq, p);
 
 
     return new ResponseEntity<SearchResult<DatasetVersionDto>>(dtoMapper.convertToSearchResultDto(resp), HttpStatus.OK);

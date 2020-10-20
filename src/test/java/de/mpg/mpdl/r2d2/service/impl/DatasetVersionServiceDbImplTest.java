@@ -14,6 +14,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 
 import de.mpg.mpdl.r2d2.aa.AuthorizationService;
@@ -30,6 +31,7 @@ import de.mpg.mpdl.r2d2.model.aa.R2D2Principal;
 import de.mpg.mpdl.r2d2.model.aa.UserAccount;
 import de.mpg.mpdl.r2d2.search.dao.DatasetVersionDaoEs;
 import de.mpg.mpdl.r2d2.service.storage.SwiftObjectStoreRepository;
+import de.mpg.mpdl.r2d2.util.DtoMapper;
 
 /**
  * Test class for DatasetVersionServiceDbImpl.
@@ -57,6 +59,9 @@ public class DatasetVersionServiceDbImplTest {
 
   @InjectMocks
   private DatasetVersionServiceDbImpl datasetVersionServiceDbImpl = new DatasetVersionServiceDbImpl();
+
+  @Autowired
+  private DtoMapper mapper;
 
   @Test
   public void testCreateMethodDelegationAndControlFlow()
@@ -101,7 +106,8 @@ public class DatasetVersionServiceDbImplTest {
     inOrder.verify(datasetVersionRepository).saveAndFlush(datasetVersionArgument.capture());
     assertThat(datasetVersionArgument.getValue()).extracting("metadata").isEqualTo(datasetVersionMetadata);
 
-    inOrder.verify(datasetVersionIndexDao).createImmediately(Mockito.eq(savedDatasetVersionId), Mockito.eq(savedDatasetVersion));
+    inOrder.verify(datasetVersionIndexDao).createImmediately(Mockito.eq(savedDatasetVersionId),
+        Mockito.eq(mapper.convertToDatasetVersionIto(savedDatasetVersion)));
   }
 
 }

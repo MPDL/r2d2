@@ -45,14 +45,16 @@ import de.mpg.mpdl.r2d2.model.VersionId;
 import de.mpg.mpdl.r2d2.model.DatasetVersion;
 import de.mpg.mpdl.r2d2.model.File;
 import de.mpg.mpdl.r2d2.model.aa.R2D2Principal;
-import de.mpg.mpdl.r2d2.model.search.SearchQuery;
-import de.mpg.mpdl.r2d2.model.search.SearchResult;
 import de.mpg.mpdl.r2d2.rest.controller.dto.DatasetVersionDto;
-import de.mpg.mpdl.r2d2.rest.controller.dto.DtoMapper;
 import de.mpg.mpdl.r2d2.rest.controller.dto.FileDto;
+import de.mpg.mpdl.r2d2.search.model.FileIto;
+import de.mpg.mpdl.r2d2.search.model.SearchQuery;
+import de.mpg.mpdl.r2d2.search.model.SearchResult;
+import de.mpg.mpdl.r2d2.search.service.FileSearchService;
 import de.mpg.mpdl.r2d2.service.FileService;
 import de.mpg.mpdl.r2d2.service.impl.FileUploadService;
 import de.mpg.mpdl.r2d2.service.util.FileDownloadWrapper;
+import de.mpg.mpdl.r2d2.util.DtoMapper;
 import de.mpg.mpdl.r2d2.util.Utils;
 
 @RestController
@@ -61,6 +63,9 @@ public class FileUploadController {
 
   @Autowired
   private FileService fileService;
+
+  @Autowired
+  private FileSearchService fileSearchService;
 
   @Autowired
   private DtoMapper dtoMapper;
@@ -91,7 +96,7 @@ public class FileUploadController {
       sq.setSize(size);
     }
 
-    SearchResult<File> resp = fileService.search(sq, p);
+    SearchResult<FileIto> resp = fileSearchService.search(sq, p);
 
     return new ResponseEntity<SearchResult<FileDto>>(dtoMapper.convertToFileSearchResultDto(resp), HttpStatus.OK);
   }

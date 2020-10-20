@@ -42,10 +42,10 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import de.mpg.mpdl.r2d2.exceptions.R2d2TechnicalException;
-import de.mpg.mpdl.r2d2.model.search.SearchQuery;
-import de.mpg.mpdl.r2d2.model.search.SearchRecord;
-import de.mpg.mpdl.r2d2.model.search.SearchResult;
 import de.mpg.mpdl.r2d2.search.dao.GenericDaoEs;
+import de.mpg.mpdl.r2d2.search.model.SearchQuery;
+import de.mpg.mpdl.r2d2.search.model.SearchRecord;
+import de.mpg.mpdl.r2d2.search.model.SearchResult;
 import de.mpg.mpdl.r2d2.search.util.ElasticSearchIndexField;
 import de.mpg.mpdl.r2d2.search.util.ElasticSearchIndexField.Type;
 

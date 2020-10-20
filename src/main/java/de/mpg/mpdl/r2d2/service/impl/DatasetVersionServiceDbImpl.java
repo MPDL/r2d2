@@ -26,7 +26,6 @@ import de.mpg.mpdl.r2d2.exceptions.AuthorizationException;
 import de.mpg.mpdl.r2d2.exceptions.InvalidStateException;
 import de.mpg.mpdl.r2d2.exceptions.NotFoundException;
 import de.mpg.mpdl.r2d2.exceptions.OptimisticLockingException;
-import de.mpg.mpdl.r2d2.exceptions.R2d2ApplicationException;
 import de.mpg.mpdl.r2d2.exceptions.R2d2TechnicalException;
 import de.mpg.mpdl.r2d2.exceptions.ValidationException;
 import de.mpg.mpdl.r2d2.model.Dataset;
@@ -38,8 +37,7 @@ import de.mpg.mpdl.r2d2.model.VersionId;
 import de.mpg.mpdl.r2d2.model.aa.R2D2Principal;
 import de.mpg.mpdl.r2d2.model.aa.UserAccount;
 import de.mpg.mpdl.r2d2.search.dao.DatasetVersionDaoEs;
-import de.mpg.mpdl.r2d2.search.dao.FileDaoEs;
-import de.mpg.mpdl.r2d2.search.dao.GenericDaoEs;
+import de.mpg.mpdl.r2d2.search.service.impl.IndexingService;
 import de.mpg.mpdl.r2d2.service.DatasetVersionService;
 import de.mpg.mpdl.r2d2.service.storage.SwiftObjectStoreRepository;
 
@@ -58,12 +56,6 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
   private FileRepository fileRepository;
 
   @Autowired
-  private DatasetVersionDaoEs datasetVersionIndexDao;
-
-  @Autowired
-  private FileDaoEs fileDaoEs;
-
-  @Autowired
   private SwiftObjectStoreRepository objectStoreRepository;
 
   @PersistenceContext
@@ -71,6 +63,9 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
 
   @Autowired
   private FileUploadService fileUploadService;
+
+  @Autowired
+  private IndexingService indexingService;
 
   public DatasetVersionServiceDbImpl() {
     super(DatasetVersion.class);
@@ -96,7 +91,7 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
       throw new R2d2TechnicalException(e);
     }
 
-    reindex(datasetVersionToCreate);
+    indexingService.reindexDataset(datasetVersionToCreate.getId(), true);
 
     return datasetVersionToCreate;
   }
@@ -132,7 +127,7 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
     // TODO delete from version list in dataset
     // TODO Authorization
     datasetRepository.deleteById(id);
-    datasetVersionIndexDao.delete(id.toString());
+    indexingService.deleteDataset(id);
     // TODO delete dataset object, not only version?
     //TODO change file relations and states
 
@@ -214,7 +209,8 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
     for (File f : filesOfDatasetVersion) {
       if (!UploadState.PUBLIC.equals(f.getState())) {
         f.setState(UploadState.PUBLIC);
-        fileDaoEs.createImmediately(f.getId().toString(), f);
+        indexingService.reindexFile(f, true);
+
       }
 
     }
@@ -224,7 +220,7 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
     } catch (Exception e) {
       throw new R2d2TechnicalException(e);
     }
-    reindex(latestVersion);
+    indexingService.reindexDataset(latestVersion.getId(), true);
 
     return latestVersion;
 
@@ -304,7 +300,7 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
       throw new R2d2TechnicalException(e);
     }
 
-    reindex(datasetVersionToBeUpdated);
+    indexingService.reindexDataset(datasetVersionToBeUpdated.getId(), true);
 
     return datasetVersionToBeUpdated;
 
@@ -318,7 +314,7 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
         try {
           file.getVersions().add(nextVersion);
           fileRepository.saveAndFlush(file);
-          fileDaoEs.createImmediately(file.getId().toString(), file);
+          indexingService.reindexFile(file, true);
         } catch (Exception e) {
           throw new RuntimeException(e);
         }
@@ -419,11 +415,6 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
 
   }
 
-  @Override
-  protected GenericDaoEs<DatasetVersion> getIndexDao() {
-    return datasetVersionIndexDao;
-  }
-
   /*
   protected void setBasicCreationProperties(DatasetVersion baseObject, UserAccount creator) {
     OffsetDateTime dateTime = Utils.generateCurrentDateTimeForDatabase();
@@ -443,37 +434,6 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
   }
   */
 
-  public void reindex(DatasetVersion dv) throws R2d2TechnicalException {
-    this.reindex(dv.getDataset(), true);
-  }
-
-  private void reindex(Dataset dataset, boolean immediate) throws R2d2TechnicalException {
-
-    // Delete old version, if exists
-    VersionId oldVersion = new VersionId(dataset.getId(), dataset.getLatestVersion() - 1);
-    if (oldVersion != null) {
-      datasetVersionIndexDao.deleteImmediatly(oldVersion.toString());
-    }
-
-    // Reindex latest version
-    DatasetVersion latestVersion = datasetVersionRepository.findById(dataset.getLatestVersionId()).get();
-    if (immediate) {
-      datasetVersionIndexDao.createImmediately(latestVersion.getVersionId().toString(), latestVersion);
-    } else {
-      datasetVersionIndexDao.create(latestVersion.getVersionId().toString(), latestVersion);
-    }
-
-    // Reindex latest public version if exists and not equal to latest version
-    if (dataset.getLatestPublicVersion() != null && dataset.getLatestPublicVersion() != latestVersion.getVersionNumber()) {
-      DatasetVersion latestPublicVersion = datasetVersionRepository.findById(dataset.getLatestPublicVersionId()).get();
-      if (immediate) {
-        datasetVersionIndexDao.createImmediately(latestPublicVersion.getVersionId().toString(), latestPublicVersion);
-      } else {
-        datasetVersionIndexDao.create(latestPublicVersion.getVersionId().toString(), latestPublicVersion);
-      }
-    }
-
-  }
 
 
   @Override
@@ -566,12 +526,12 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
           case COMPLETE: {
             file.setState(UploadState.ATTACHED);
             file.getVersions().add(resultedDataset);
-            fileDaoEs.createImmediately(file.getId().toString(), file);
+            indexingService.reindexFile(file, true);
             break;
           }
           case PUBLIC: {
             file.getVersions().add(resultedDataset);
-            fileDaoEs.createImmediately(file.getId().toString(), file);
+            indexingService.reindexFile(file, true);
             break;
           }
           default: {
@@ -592,7 +552,7 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
           case ATTACHED: {
             file.setState(UploadState.COMPLETE);
             file.getVersions().remove(resultedDataset);
-            fileDaoEs.createImmediately(file.getId().toString(), file);
+            indexingService.reindexFile(file, true);
             break;
           }
           case PUBLIC: {
@@ -600,7 +560,7 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
             if (file.getVersions().isEmpty()) {
               file.setState(UploadState.COMPLETE);
             }
-            fileDaoEs.createImmediately(file.getId().toString(), file);
+            indexingService.reindexFile(file, true);
             break;
           }
           default: {
@@ -618,7 +578,8 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
     } catch (Exception e) {
       throw new R2d2TechnicalException(e);
     }
-    reindex(resultedDataset);
+
+    indexingService.reindexDataset(resultedDataset.getId(), true);
 
     return resultedDataset;
   }

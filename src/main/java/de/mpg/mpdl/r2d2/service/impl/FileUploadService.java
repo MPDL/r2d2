@@ -34,6 +34,7 @@ import de.mpg.mpdl.r2d2.model.File.UploadState;
 import de.mpg.mpdl.r2d2.model.aa.R2D2Principal;
 import de.mpg.mpdl.r2d2.search.dao.FileDaoEs;
 import de.mpg.mpdl.r2d2.search.dao.GenericDaoEs;
+import de.mpg.mpdl.r2d2.search.service.impl.IndexingService;
 import de.mpg.mpdl.r2d2.service.FileService;
 import de.mpg.mpdl.r2d2.service.storage.SwiftObjectStoreRepository;
 import de.mpg.mpdl.r2d2.service.util.FileDownloadWrapper;
@@ -55,7 +56,7 @@ public class FileUploadService extends GenericServiceDbImpl<File> implements Fil
   SwiftObjectStoreRepository objectStoreRepository;
 
   @Autowired
-  FileDaoEs fileDaoEs;
+  private IndexingService indexingService;
 
   private File create(File object, R2D2Principal user) throws R2d2TechnicalException, ValidationException, AuthorizationException {
     try {
@@ -81,7 +82,7 @@ public class FileUploadService extends GenericServiceDbImpl<File> implements Fil
       try {
         fileRepository.deleteById(id);
         objectStoreRepository.deleteContainer(id.toString());
-        fileDaoEs.deleteImmediatly(id.toString());
+        indexingService.deleteFile(id, true);
       } catch (Exception e) {
         throw new R2d2TechnicalException(e);
       }
@@ -111,7 +112,7 @@ public class FileUploadService extends GenericServiceDbImpl<File> implements Fil
     file.setState(UploadState.COMPLETE);
     file.setStorageLocation(objectStoreRepository.getPublicURI(file2upload.getId().toString()));
     file.setSize(objectStoreRepository.getFileSize(file2upload.getId().toString()));
-    fileDaoEs.createImmediately(file.getId().toString(), file);
+    indexingService.reindexFile(file, true);
     return file;
   }
 
@@ -124,7 +125,7 @@ public class FileUploadService extends GenericServiceDbImpl<File> implements Fil
 
     File file = create(file2upload, user);
     objectStoreRepository.createContainer(file2upload.getId().toString());
-    fileDaoEs.createImmediately(file.getId().toString(), file);
+    indexingService.reindexFile(file, true);
 
     return file;
   }
@@ -159,13 +160,8 @@ public class FileUploadService extends GenericServiceDbImpl<File> implements Fil
     chunks.add(chunk);
     file.setState(UploadState.ONGOING);
 
-    fileDaoEs.createImmediately(file.getId().toString(), file);
+    indexingService.reindexFile(file, true);
     return chunk;
-  }
-
-  @Override
-  protected GenericDaoEs<File> getIndexDao() {
-    return fileDaoEs;
   }
 
 
@@ -185,7 +181,7 @@ public class FileUploadService extends GenericServiceDbImpl<File> implements Fil
       file.setState(UploadState.COMPLETE);
       file.setStorageLocation(objectStoreRepository.getPublicURI(file.getId().toString()));
       file.setSize(objectStoreRepository.getFileSize(file.getId().toString()));
-      fileDaoEs.updateImmediately(file.getId().toString(), file);
+      indexingService.reindexFile(file, true);
 
       return file;
     } else {

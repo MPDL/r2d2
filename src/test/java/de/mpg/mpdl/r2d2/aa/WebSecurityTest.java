@@ -11,7 +11,6 @@ import java.util.ArrayList;
 import java.util.Optional;
 import java.util.UUID;
 
-import de.mpg.mpdl.r2d2.rest.controller.dto.DtoMapper;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +33,7 @@ import de.mpg.mpdl.r2d2.service.DatasetVersionService;
 import de.mpg.mpdl.r2d2.service.FileService;
 import de.mpg.mpdl.r2d2.service.UserService;
 import de.mpg.mpdl.r2d2.service.impl.AdminService;
+import de.mpg.mpdl.r2d2.util.DtoMapper;
 
 /**
  * Test for the WebSecurity (CORS Configuration, AuthenticationFilters)

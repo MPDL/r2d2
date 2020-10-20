@@ -81,10 +81,10 @@ public class AuthorizationService {
 
   }
 
-  public QueryBuilder modifyQueryForAa(String serviceName, QueryBuilder query, Object... objects)
+  public QueryBuilder modifyQueryForAa(String serviceName, String serviceMethod, QueryBuilder query, Object... objects)
       throws AuthorizationException, R2d2TechnicalException {
 
-    QueryBuilder filterQuery = getAaFilterQuery(serviceName, objects);
+    QueryBuilder filterQuery = getAaFilterQuery(serviceName, serviceMethod, objects);
 
     if (filterQuery != null) {
       BoolQueryBuilder completeQuery = QueryBuilders.boolQuery();
@@ -100,12 +100,13 @@ public class AuthorizationService {
   }
 
 
-  private QueryBuilder getAaFilterQuery(String serviceName, Object... objects) throws AuthorizationException, R2d2TechnicalException {
+  private QueryBuilder getAaFilterQuery(String serviceName, String serviceMethod, Object... objects)
+      throws AuthorizationException, R2d2TechnicalException {
     Map<String, Map<String, Object>> serviceMap = (Map<String, Map<String, Object>>) aaMap.get(serviceName);
 
     List<String> order = (List<String>) serviceMap.get("technical").get("order");
     Map<String, String> indices = (Map<String, String>) serviceMap.get("technical").get("indices");
-    List<Map<String, Object>> allowedMap = (List<Map<String, Object>>) serviceMap.get("get");
+    List<Map<String, Object>> allowedMap = (List<Map<String, Object>>) serviceMap.get(serviceMethod);
 
 
     UserAccount userAccount;

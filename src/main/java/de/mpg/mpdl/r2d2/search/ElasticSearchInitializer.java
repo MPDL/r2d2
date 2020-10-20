@@ -61,7 +61,8 @@ public class ElasticSearchInitializer {
       String fileIndexSettings = StreamUtils.copyToString(datasets_index_settings.getInputStream(), Charset.forName("UTF-8"));
       String fileIndexMapping = StreamUtils.copyToString(datasets_index_mapping.getInputStream(), Charset.forName("UTF-8"));
 
-      esAdminController.createIndex(env.getProperty("index.dataset.name"), true, datasetIndexSettings, datasetIndexMapping);
+      esAdminController.createIndex(env.getProperty("index.dataset.public.name"), true, datasetIndexSettings, datasetIndexMapping);
+      esAdminController.createIndex(env.getProperty("index.dataset.latest.name"), true, datasetIndexSettings, datasetIndexMapping);
       esAdminController.createIndex(env.getProperty("index.file.name"), true, fileIndexSettings, null);
     } catch (Exception e) {
       LOGGER.error("Error while initialzing index", e);
