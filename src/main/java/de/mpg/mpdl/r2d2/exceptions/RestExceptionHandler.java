@@ -17,9 +17,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
@@ -44,6 +46,17 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
 
     return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
   }
+  
+  @Override
+	protected ResponseEntity<Object> handleMissingServletRequestParameter(MissingServletRequestParameterException ex,
+			HttpHeaders headers, HttpStatus status, WebRequest request) {
+	  Map<String, Object> body = new LinkedHashMap<>();
+	    body.put("time", LocalDateTime.now());
+	    body.put("status", status.value());
+	    body.put("message", ex.getMessage());
+	    // return super.handleMissingServletRequestParameter(ex, headers, status, request);
+	    return new ResponseEntity<Object>(details(ex, request), new HttpHeaders(), HttpStatus.BAD_REQUEST);
+	}
 
   @ExceptionHandler({Exception.class})
   public ResponseEntity<Object> handleAllExceptions(Exception ex, HttpServletRequest request) {
@@ -52,7 +65,7 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
   }
 
   @ExceptionHandler({RuntimeException.class})
-  public ResponseEntity<Object> handleRuntimeException(Exception ex, HttpServletRequest request) {
+  public ResponseEntity<Object> handleRuntimeException(RuntimeException ex, HttpServletRequest request) {
     LOGGER.error("PECH", ex);
     return new ResponseEntity<Object>(details(ex, request), new HttpHeaders(), HttpStatus.INTERNAL_SERVER_ERROR);
   }
@@ -65,5 +78,14 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
     errors.put("uri", req.getRequestURL());
     return errors;
   }
+  
+  private Map<String, Object> details(Exception ex, WebRequest req) {
+	    Map<String, Object> errors = new LinkedHashMap<>();
+	    errors.put("time", LocalDateTime.now());
+	    errors.put("cause", ex.getClass().getSimpleName());
+	    errors.put("message", ex.getMessage());
+	    errors.put("uri", ((ServletWebRequest)req).getRequest().getRequestURL());
+	    return errors;
+	  }
 
 }

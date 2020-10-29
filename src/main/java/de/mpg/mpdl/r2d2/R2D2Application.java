@@ -1,10 +1,12 @@
 package de.mpg.mpdl.r2d2;
 
+import java.time.Duration;
 import java.util.Locale;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
@@ -13,6 +15,7 @@ import org.springframework.context.support.ReloadableResourceBundleMessageSource
 import org.springframework.core.env.Environment;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.i18n.SessionLocaleResolver;
 
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -85,6 +88,12 @@ public class R2D2Application {
     SessionLocaleResolver localeResolver = new SessionLocaleResolver();
     localeResolver.setDefaultLocale(Locale.US);
     return localeResolver;
+  }
+
+  @Bean
+  public RestTemplate restTemplate(RestTemplateBuilder builder) {
+
+    return builder.setConnectTimeout(Duration.ofMillis(3000)).setReadTimeout(Duration.ofMillis(3000)).build();
   }
 
 }
