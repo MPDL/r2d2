@@ -57,37 +57,34 @@ public class VocabularyController {
     SearchHit[] hits = resp.getHits().getHits();
     List<Affiliation> list = Arrays.stream(hits).map(hit -> hit.getSourceAsMap()).map(map -> {
       Affiliation ou = new Affiliation();
-      ou.setDepartment((String) map.get("name"));
+      ou.setOrganization((String) map.get("name"));
       ou.setId((String) map.get("id"));
       return ou;
     }).collect(Collectors.toList());
 
     return new ResponseEntity(list, HttpStatus.OK);
   }
-  
+
   @GetMapping("/ous/{id}")
   public ResponseEntity<?> getOU(@PathVariable("id") String id) throws R2d2TechnicalException {
-	  SearchResponse resp = affiliationSearchService.ouDetails(id);
-	    SearchHit[] hits = resp.getHits().getHits();
-	    if (hits.length > 0) {
-	    	return new ResponseEntity(hits[0].getSourceAsMap(), HttpStatus.OK);
-	    }
-		return null;
+    SearchResponse resp = affiliationSearchService.ouDetails(id);
+    SearchHit[] hits = resp.getHits().getHits();
+    if (hits.length > 0) {
+      return new ResponseEntity(hits[0].getSourceAsMap(), HttpStatus.OK);
+    }
+    return null;
   }
 
-  @PostMapping("/ous_query")
+  @PostMapping("/ous")
   public ResponseEntity<?> ous(@RequestBody JsonNode query_params, @AuthenticationPrincipal R2D2Principal p)
       throws IOException, AuthorizationException, R2d2TechnicalException {
 
     String query = objectMapper.writeValueAsString(query_params);
     SearchSourceBuilder ssb = Utils.parseJsonToSearchSourceBuilder(query);
-    SearchResponse resp = affiliationSearchService.searchDetailed(ssb, -1);
+    SearchResponse resp = affiliationSearchService.searchDetailed(ssb, -1, p);
     SearchHit[] hits = resp.getHits().getHits();
-    List<Affiliation> list = Arrays.stream(hits).map(hit -> hit.getSourceAsMap()).map(map -> {
-      Affiliation ou = new Affiliation();
-      ou.setDepartment((String) map.get("name"));
-      ou.setId((String) map.get("id"));
-      return ou;
+    List<Object> list = Arrays.stream(hits).map(hit -> hit.getSourceAsMap()).map(map -> {
+      return objectMapper.valueToTree(map);
     }).collect(Collectors.toList());
 
     return new ResponseEntity(list, HttpStatus.OK);
