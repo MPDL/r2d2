@@ -75,6 +75,7 @@ public abstract class GenericSearchServiceImpl<E> implements GenericSearchServic
         qb = aaService.modifyQueryForAa(getAaKey(), getAaMethod(), qb, removeDatasetDuplicates(), null);
       }
       ssb.query(qb);
+      LOGGER.debug(ssb.toString());
       return getIndexDao().searchDetailed(ssb, scrollTime);
     }
     return null;

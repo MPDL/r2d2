@@ -86,9 +86,9 @@ public class AuthorizationService {
   }
 
   public QueryBuilder modifyQueryForAa(String serviceName, String serviceMethod, QueryBuilder query, boolean removeVersionDuplicates,
-      Object... objects) throws AuthorizationException, R2d2TechnicalException {
+      R2D2Principal principal, Object... objects) throws AuthorizationException, R2d2TechnicalException {
 
-    QueryBuilder filterQuery = getAaFilterQuery(serviceName, serviceMethod, objects);
+    QueryBuilder filterQuery = getAaFilterQuery(serviceName, serviceMethod, principal, objects);
 
     if (removeVersionDuplicates) {
 
@@ -97,7 +97,7 @@ public class AuthorizationService {
           "doc['" + DatasetVersionDaoImpl.INDEX_DATASET_LATEST_VERSION + "']==doc['" + DatasetVersionDaoImpl.INDEX_VERSION_NUMBER + "']"));
       QueryBuilder isPublicQuery = QueryBuilders.termQuery(DatasetVersionDaoImpl.INDEX_STATE, Dataset.State.PUBLIC.name());
 
-      if (filterQuery != null) {
+      if (filterQuery != null && principal != null && principal.getUserAccount() != null) {
         /*
          * (
             Latest Version
@@ -120,7 +120,7 @@ public class AuthorizationService {
       }
 
       //if AA query is empty, everything can be viewed (e.g. by admin). Thus, return all latest versions.
-      else {
+      else if (filterQuery == null) {
         filterQuery = isLatestVersionQuery;
       }
 
