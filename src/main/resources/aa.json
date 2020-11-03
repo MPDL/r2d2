@@ -94,8 +94,13 @@
 		
 	"de.mpg.mpdl.r2d2.service.impl.FileUploadService" : {
 		"technical" : {
-			"order" : ["user",  "file"]
-		}, 
+			"order" : ["user",  "file"],
+			"indices" : {
+				"file.creator.id" : "file.creator",
+				"file.state" : "state"
+			}
+		},
+		 
 		"upload" : [
 			{
 				"user" : {
