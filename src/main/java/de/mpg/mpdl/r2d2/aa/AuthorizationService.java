@@ -11,6 +11,7 @@ import java.util.Map.Entry;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.script.Script;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,9 +23,12 @@ import de.mpg.mpdl.r2d2.db.UserAccountRepository;
 import de.mpg.mpdl.r2d2.exceptions.AuthorizationException;
 import de.mpg.mpdl.r2d2.exceptions.R2d2ApplicationException;
 import de.mpg.mpdl.r2d2.exceptions.R2d2TechnicalException;
+import de.mpg.mpdl.r2d2.model.Dataset;
+import de.mpg.mpdl.r2d2.model.DatasetVersion;
 import de.mpg.mpdl.r2d2.model.aa.R2D2Principal;
 import de.mpg.mpdl.r2d2.model.aa.UserAccount;
 import de.mpg.mpdl.r2d2.model.aa.UserAccount.Role;
+import de.mpg.mpdl.r2d2.search.es.daoimpl.DatasetVersionDaoImpl;
 
 
 @Service
@@ -81,10 +85,46 @@ public class AuthorizationService {
 
   }
 
-  public QueryBuilder modifyQueryForAa(String serviceName, String serviceMethod, QueryBuilder query, Object... objects)
-      throws AuthorizationException, R2d2TechnicalException {
+  public QueryBuilder modifyQueryForAa(String serviceName, String serviceMethod, QueryBuilder query, boolean removeVersionDuplicates,
+      Object... objects) throws AuthorizationException, R2d2TechnicalException {
 
     QueryBuilder filterQuery = getAaFilterQuery(serviceName, serviceMethod, objects);
+
+    if (removeVersionDuplicates) {
+
+
+      QueryBuilder isLatestVersionQuery = QueryBuilders.scriptQuery(new Script(
+          "doc['" + DatasetVersionDaoImpl.INDEX_DATASET_LATEST_VERSION + "']==doc['" + DatasetVersionDaoImpl.INDEX_VERSION_NUMBER + "']"));
+      QueryBuilder isPublicQuery = QueryBuilders.termQuery(DatasetVersionDaoImpl.INDEX_STATE, Dataset.State.PUBLIC.name());
+
+      if (filterQuery != null) {
+        /*
+         * (
+            Latest Version
+            AND
+            (Owner OR Data Manager on dataset)
+            )
+            OR
+            (
+            state = public
+            AND NOT
+            (Owner OR Data Manager)
+            )
+         */
+
+
+        BoolQueryBuilder userQuery = QueryBuilders.boolQuery();
+        userQuery.should(QueryBuilders.boolQuery().must(isLatestVersionQuery).must(filterQuery))
+            .should(QueryBuilders.boolQuery().must(isPublicQuery).mustNot(filterQuery));
+        filterQuery = userQuery;
+      }
+
+      //if AA query is empty, everything can be viewed (e.g. by admin). Thus, return all latest versions.
+      else {
+        filterQuery = isLatestVersionQuery;
+      }
+
+    }
 
     if (filterQuery != null) {
       BoolQueryBuilder completeQuery = QueryBuilders.boolQuery();
