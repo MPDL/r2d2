@@ -3,9 +3,9 @@
 		"technical" : {
 			"order" : ["user", "datasetVersion"],
 			"indices" : {
-				"datasetVersion.dataset.creator.id" : "creator.id",
+				"datasetVersion.dataset.creator.id" : "dataset.creator",
 				"datasetVersion.state" : "state",
-				"datsetVersion.dataset.state" : "parent.state"
+				"datasetVersion.dataset.state" : "dataset.state"
 			}
 		}, 
 		"create" : [
