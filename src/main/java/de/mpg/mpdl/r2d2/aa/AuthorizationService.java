@@ -12,6 +12,7 @@ import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.script.Script;
+import org.joda.time.chrono.IslamicChronology;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -90,41 +91,55 @@ public class AuthorizationService {
 
     QueryBuilder filterQuery = getAaFilterQuery(serviceName, serviceMethod, principal, objects);
 
-    if (removeVersionDuplicates) {
-
-
-      QueryBuilder isLatestVersionQuery = QueryBuilders.scriptQuery(new Script(
-          "doc['" + DatasetVersionDaoImpl.INDEX_DATASET_LATEST_VERSION + "']==doc['" + DatasetVersionDaoImpl.INDEX_VERSION_NUMBER + "']"));
-      QueryBuilder isPublicQuery = QueryBuilders.termQuery(DatasetVersionDaoImpl.INDEX_STATE, Dataset.State.PUBLIC.name());
-
-      if (filterQuery != null && principal != null && principal.getUserAccount() != null) {
-        /*
-         * (
-            Latest Version
-            AND
-            (Owner OR Data Manager on dataset)
-            )
-            OR
-            (
-            state = public
-            AND NOT
-            (Owner OR Data Manager)
-            )
-         */
-
-
-        BoolQueryBuilder userQuery = QueryBuilders.boolQuery();
-        userQuery.should(QueryBuilders.boolQuery().must(isLatestVersionQuery).must(filterQuery))
-            .should(QueryBuilders.boolQuery().must(isPublicQuery).mustNot(filterQuery));
-        filterQuery = userQuery;
-      }
-
-      //if AA query is empty, everything can be viewed (e.g. by admin). Thus, return all latest versions.
-      else if (filterQuery == null) {
-        filterQuery = isLatestVersionQuery;
-      }
-
-    }
+    //    if (removeVersionDuplicates) {
+    //
+    //
+    //      QueryBuilder isLatestVersionQuery = QueryBuilders.scriptQuery(new Script(
+    //          "doc['" + DatasetVersionDaoImpl.INDEX_DATASET_LATEST_VERSION + "']==doc['" + DatasetVersionDaoImpl.INDEX_VERSION_NUMBER + "']"));
+    //      QueryBuilder isPublicQuery = QueryBuilders.termQuery(DatasetVersionDaoImpl.INDEX_STATE, Dataset.State.PUBLIC.name());
+    //
+    //      //Only remove duplicates when logged in. Otherwise,the query does not work, as it would only return latest versions of public datasets.
+    //      if (filterQuery != null && principal != null && principal.getUserAccount() != null) {
+    //        /*
+    //         * (
+    //            Latest Version
+    //            AND
+    //            (Owner OR Data Manager on dataset)
+    //            )
+    //            OR
+    //            (
+    //            state = public
+    //            AND NOT
+    //            (Owner OR Data Manager)
+    //            )
+    //         */
+    //
+    //
+    //        /*
+    //        BoolQueryBuilder userQuery = QueryBuilders.boolQuery();
+    //        userQuery.should(QueryBuilders.boolQuery().must(isLatestVersionQuery).must(filterQuery))
+    //            .should(QueryBuilders.boolQuery().must(isPublicQuery).mustNot(filterQuery));
+    //        filterQuery = userQuery; 
+    //        */
+    //        
+    //        /*
+    //         * NOT
+    //          (PUBLIC
+    //          AND NOT latest Version
+    //          AND OWNER)
+    //         */
+    //        BoolQueryBuilder userQuery = QueryBuilders.boolQuery();
+    //        userQuery.must(filterQuery).mustNot(QueryBuilders.boolQuery().mustNot(isLatestVersionQuery).must(filterQuery));
+    //        filterQuery = userQuery; 
+    //        
+    //      }
+    //
+    //      //if AA query is empty, everything can be viewed (e.g. by admin). Thus, return all latest versions.
+    //      else if (filterQuery == null) {
+    //        filterQuery = isLatestVersionQuery;
+    //      }
+    //
+    //    }
 
     if (filterQuery != null) {
       BoolQueryBuilder completeQuery = QueryBuilders.boolQuery();
@@ -148,7 +163,6 @@ public class AuthorizationService {
     Map<String, String> indices = (Map<String, String>) serviceMap.get("technical").get("indices");
     List<Map<String, Object>> allowedMap = (List<Map<String, Object>>) serviceMap.get(serviceMethod);
 
-
     UserAccount userAccount;
     try {
       userAccount = ((R2D2Principal) objects[order.indexOf("user")]).getUserAccount();
@@ -158,6 +172,28 @@ public class AuthorizationService {
     }
 
     BoolQueryBuilder bqb = QueryBuilders.boolQuery();
+
+    /*
+    as we have one index with all public items and latest versions, we have to filter out those public items, which 
+    are not the latest release and of which the authenticated user is allowed to see the latest version
+        AA Filter Query
+        AND NOT
+        (
+          dataset is NOT the lastest version
+          AND
+          user is allowed to see the latest private version (=owner or data manager or admin)
+        )
+    */
+
+    boolean filterDuplicates = (Boolean) serviceMap.get("technical").getOrDefault("filterIndexDatasetDuplicates", Boolean.FALSE);
+    BoolQueryBuilder filterDuplicatesQueryBuilder = QueryBuilders.boolQuery();
+    QueryBuilder isLatestVersionQuery = QueryBuilders.scriptQuery(new Script(
+        "doc['" + DatasetVersionDaoImpl.INDEX_DATASET_LATEST_VERSION + "']==doc['" + DatasetVersionDaoImpl.INDEX_VERSION_NUMBER + "']"));
+    filterDuplicatesQueryBuilder.mustNot(isLatestVersionQuery);
+    BoolQueryBuilder userQueryBuilder = new BoolQueryBuilder();
+    filterDuplicatesQueryBuilder.must(userQueryBuilder);
+
+
     if (allowedMap == null) {
       throw new AuthorizationException("No rules for service " + serviceName + ", method " + "get");
     }
@@ -172,6 +208,8 @@ public class AuthorizationService {
       BoolQueryBuilder subQb = QueryBuilders.boolQuery();
       boolean userMatch = false;
 
+      BoolQueryBuilder subUserQueryBuilder = QueryBuilders.boolQuery();
+
       // Everybody is allowed to see everything
       rulesLoop: for (Entry<String, Object> rule : rules.entrySet()) {
         switch (rule.getKey()) {
@@ -184,8 +222,11 @@ public class AuthorizationService {
               if (userMap.containsKey("field_user_id_match")) {
                 String value = (String) userMap.get("field_user_id_match");
 
-                subQb.must(QueryBuilders.termQuery(indices.get(value), userAccount.getId().toString()));
+                QueryBuilder userQuery = QueryBuilders.termQuery(indices.get(value), userAccount.getId().toString());
+                subQb.must(userQuery);
                 userMatch = true;
+                subUserQueryBuilder.must(userQuery);
+
 
               }
 
@@ -217,7 +258,11 @@ public class AuthorizationService {
 
                 if (grantQueryBuilder.hasClauses()) {
                   subQb.must(grantQueryBuilder);
+                  subUserQueryBuilder.must(grantQueryBuilder);
+
                 }
+
+
 
               }
 
@@ -237,8 +282,10 @@ public class AuthorizationService {
             if (!userMatch) {
               //reset queryBuilder
               subQb = QueryBuilders.boolQuery();
+              subUserQueryBuilder = QueryBuilders.boolQuery();
               break rulesLoop;
             }
+
 
 
             break;
@@ -272,18 +319,23 @@ public class AuthorizationService {
               }
             }
 
-
             break;
           }
         }
       }
 
+
+
+      if (subUserQueryBuilder.hasClauses()) {
+        userQueryBuilder.should(subUserQueryBuilder);
+      }
+
       if (subQb.hasClauses()) {
         bqb.should(subQb);
-      }
-      // User matches and no more rules -> User can see everything
-      else if (userMatch) {
-        return null;
+      } else if (userMatch) {
+        // User matches and no more rules -> User can see everything (=ADMIN!)
+        // If we have to filter duplicates, only return latest releases in this case
+        return filterDuplicates ? isLatestVersionQuery : null;
       }
 
     }
@@ -291,6 +343,9 @@ public class AuthorizationService {
 
 
     if (bqb.hasClauses()) {
+      if (filterDuplicates && userQueryBuilder.hasClauses()) {
+        bqb.mustNot(filterDuplicatesQueryBuilder);
+      }
       return bqb;
     }
     throw new AuthorizationException("This search requires a login");

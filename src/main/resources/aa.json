@@ -6,7 +6,8 @@
 				"datasetVersion.dataset.creator.id" : "dataset.creator",
 				"datasetVersion.state" : "state",
 				"datasetVersion.dataset.state" : "dataset.state"
-			}
+			},
+			"filterIndexDatasetDuplicates" : true
 		}, 
 		"create" : [
 			{
@@ -37,7 +38,8 @@
 			{
 				"user" : {
 					"role" : "ADMIN"
-				}
+				},
+				"datasetVersion.state" : ["PUBLIC"]
 			},
 			{
 				"datasetVersion.state" : ["PUBLIC"]
