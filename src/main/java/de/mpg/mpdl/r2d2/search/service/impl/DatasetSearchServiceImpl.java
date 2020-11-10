@@ -37,9 +37,5 @@ public class DatasetSearchServiceImpl extends GenericSearchServiceImpl<DatasetVe
     return "get";
   }
 
-  @Override
-  protected boolean removeDatasetDuplicates() {
-    return true;
-  }
 
 }

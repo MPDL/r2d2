@@ -86,7 +86,7 @@ public class AuthorizationService {
 
   }
 
-  public QueryBuilder modifyQueryForAa(String serviceName, String serviceMethod, QueryBuilder query, boolean removeVersionDuplicates,
+  public QueryBuilder modifyQueryForAa(String serviceName, String serviceMethod, QueryBuilder query,
       R2D2Principal principal, Object... objects) throws AuthorizationException, R2d2TechnicalException {
 
     QueryBuilder filterQuery = getAaFilterQuery(serviceName, serviceMethod, principal, objects);

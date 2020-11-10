@@ -70,9 +70,9 @@ public abstract class GenericSearchServiceImpl<E> implements GenericSearchServic
     if (getIndexDao() != null) {
       QueryBuilder qb = ssb.query();
       if (principal != null) {
-        qb = aaService.modifyQueryForAa(getAaKey(), getAaMethod(), qb, removeDatasetDuplicates(), principal);
+        qb = aaService.modifyQueryForAa(getAaKey(), getAaMethod(), qb, principal);
       } else {
-        qb = aaService.modifyQueryForAa(getAaKey(), getAaMethod(), qb, removeDatasetDuplicates(), null);
+        qb = aaService.modifyQueryForAa(getAaKey(), getAaMethod(), qb, null);
       }
       ssb.query(qb);
       LOGGER.debug(ssb.toString());
@@ -135,9 +135,6 @@ public abstract class GenericSearchServiceImpl<E> implements GenericSearchServic
 
   protected abstract String getAaMethod();
 
-  protected boolean removeDatasetDuplicates() {
-    return false;
-  }
 
 
 }
