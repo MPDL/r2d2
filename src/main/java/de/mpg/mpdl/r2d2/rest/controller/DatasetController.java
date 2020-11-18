@@ -50,6 +50,7 @@ import de.mpg.mpdl.r2d2.rest.controller.dto.FileDto;
 import de.mpg.mpdl.r2d2.rest.controller.dto.SetFilesDto;
 import de.mpg.mpdl.r2d2.search.model.DatasetVersionIto;
 import de.mpg.mpdl.r2d2.search.model.SearchQuery;
+import de.mpg.mpdl.r2d2.search.model.SearchRecord;
 import de.mpg.mpdl.r2d2.search.model.SearchResult;
 import de.mpg.mpdl.r2d2.search.service.DatasetSearchService;
 import de.mpg.mpdl.r2d2.service.DatasetVersionService;
@@ -144,16 +145,26 @@ public class DatasetController {
   }
 
   @GetMapping("/{id}/files")
-  public ResponseEntity<List<FileDto>> listFilesOfDataset(@PathVariable("id") String id,
+  public ResponseEntity<SearchResult<FileDto>> listFilesOfDataset(@PathVariable("id") String id,
       @RequestParam(name = "v", required = false) Integer versionNumber, @AuthenticationPrincipal R2D2Principal p, Pageable pageable)
       throws AuthorizationException, R2d2TechnicalException, NotFoundException {
     VersionId versionId = new VersionId(UUID.fromString(id), versionNumber);
     Page<File> files = datasetVersionService.listFiles(versionId, pageable, p);
     List<FileDto> dtos = files.stream().map(f -> dtoMapper.convertToFileDto(f)).collect(Collectors.toList());
+
+    SearchResult<FileDto> searchRes = new SearchResult<FileDto>();
+    searchRes.setHits(dtos.stream().map(dto -> {
+      SearchRecord<FileDto> sr = new SearchRecord<FileDto>();
+      sr.setSource(dto);
+      sr.setId(dto.getId().toString());
+      return sr;
+    }).collect(Collectors.toList()));
+    
+    searchRes.setTotal((int) files.getTotalElements());
     HttpHeaders headers = new HttpHeaders();
     headers.add("Total-Number-of-Elements", Long.toString(files.getTotalElements()));
     headers.add("Elements-on-this-Page", Integer.toString(files.getNumberOfElements()));
-    return new ResponseEntity<List<FileDto>>(dtos, headers, HttpStatus.OK);
+    return new ResponseEntity<>(searchRes, headers, HttpStatus.OK);
   }
 
 
