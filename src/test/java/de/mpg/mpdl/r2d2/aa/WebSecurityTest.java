@@ -1,9 +1,7 @@
 package de.mpg.mpdl.r2d2.aa;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -22,6 +20,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.web.client.RestTemplate;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
@@ -29,14 +28,14 @@ import com.auth0.jwt.algorithms.Algorithm;
 import de.mpg.mpdl.r2d2.db.UserAccountRepository;
 import de.mpg.mpdl.r2d2.model.aa.R2D2Principal;
 import de.mpg.mpdl.r2d2.model.aa.UserAccount;
+import de.mpg.mpdl.r2d2.rest.controller.DatasetController;
+import de.mpg.mpdl.r2d2.search.service.DatasetSearchService;
 import de.mpg.mpdl.r2d2.service.DatasetVersionService;
 import de.mpg.mpdl.r2d2.service.FileService;
-import de.mpg.mpdl.r2d2.service.UserService;
-import de.mpg.mpdl.r2d2.service.impl.AdminService;
 import de.mpg.mpdl.r2d2.util.DtoMapper;
 
 /**
- * Test for the WebSecurity (CORS Configuration, AuthenticationFilters)
+ * Test for the WebSecurity (CORS Configuration, AuthenticationFilters) using the DatasetController.
  * 
  * Note: This is a WebMvcTest. All Components, Services and Repositories are mocked. => The request
  * responses of the tests differ from real responses. Only WebSecurity and the Authorization and
@@ -45,7 +44,7 @@ import de.mpg.mpdl.r2d2.util.DtoMapper;
  * @author helk
  *
  */
-@WebMvcTest
+@WebMvcTest(DatasetController.class)
 public class WebSecurityTest {
 
   @MockBean
@@ -58,13 +57,13 @@ public class WebSecurityTest {
   private DatasetVersionService datasetVersionService;
 
   @MockBean
-  private UserService userService;
-
-  @MockBean
-  private AdminService adminService;
-
-  @MockBean
   private FileService stagingFileService;
+
+  @MockBean
+  private DatasetSearchService datasetSearchService;
+
+  @MockBean
+  private RestTemplate restTemplate;
 
   @MockBean
   private DtoMapper dtoMapper;

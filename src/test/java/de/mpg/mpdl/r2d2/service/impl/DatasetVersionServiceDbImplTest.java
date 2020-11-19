@@ -3,16 +3,11 @@ package de.mpg.mpdl.r2d2.service.impl;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.ArrayList;
-import java.util.Optional;
 import java.util.UUID;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.InOrder;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Mockito;
+import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
@@ -29,7 +24,7 @@ import de.mpg.mpdl.r2d2.model.DatasetVersionMetadata;
 import de.mpg.mpdl.r2d2.model.Person;
 import de.mpg.mpdl.r2d2.model.aa.R2D2Principal;
 import de.mpg.mpdl.r2d2.model.aa.UserAccount;
-import de.mpg.mpdl.r2d2.search.dao.DatasetVersionDaoEs;
+import de.mpg.mpdl.r2d2.search.service.impl.IndexingService;
 import de.mpg.mpdl.r2d2.service.storage.SwiftObjectStoreRepository;
 import de.mpg.mpdl.r2d2.util.DtoMapper;
 
@@ -49,7 +44,7 @@ public class DatasetVersionServiceDbImplTest {
   private FileRepository fileRepository;
 
   @Mock
-  private DatasetVersionDaoEs datasetVersionIndexDao;
+  private IndexingService indexingService;
 
   @Mock
   private SwiftObjectStoreRepository objectStoreRepository;
@@ -84,15 +79,13 @@ public class DatasetVersionServiceDbImplTest {
     UUID datasetId = UUID.randomUUID();
     savedDatasetVersion.getDataset().setId(datasetId);
     savedDatasetVersion.setVersionNumber(1);
-    String savedDatasetVersionId = savedDatasetVersion.getVersionId().toString();
     Mockito.when(this.datasetVersionRepository.saveAndFlush(Mockito.any())).thenReturn(savedDatasetVersion);
-    Mockito.when(this.datasetVersionRepository.findById(Mockito.any())).thenReturn(Optional.of(savedDatasetVersion));
 
     //When
     this.datasetVersionServiceDbImpl.create(datasetVersion, r2d2Principal);
 
     //Then
-    InOrder inOrder = Mockito.inOrder(aaService, datasetVersionRepository, datasetVersionIndexDao);
+    InOrder inOrder = Mockito.inOrder(aaService, datasetVersionRepository, indexingService);
 
     ArgumentCaptor<Object> objectArguments = ArgumentCaptor.forClass(Object.class);
     ArgumentCaptor<DatasetVersion> datasetVersionArgument = ArgumentCaptor.forClass(DatasetVersion.class);
@@ -106,8 +99,7 @@ public class DatasetVersionServiceDbImplTest {
     inOrder.verify(datasetVersionRepository).saveAndFlush(datasetVersionArgument.capture());
     assertThat(datasetVersionArgument.getValue()).extracting("metadata").isEqualTo(datasetVersionMetadata);
 
-    inOrder.verify(datasetVersionIndexDao).createImmediately(Mockito.eq(savedDatasetVersionId),
-        Mockito.eq(mapper.convertToDatasetVersionIto(savedDatasetVersion)));
+    inOrder.verify(indexingService).reindexDataset(Mockito.eq(savedDatasetVersion.getId()), Mockito.eq(true));
   }
 
 }

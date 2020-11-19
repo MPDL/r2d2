@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 
 import de.mpg.mpdl.r2d2.db.DatasetVersionRepository;
 import de.mpg.mpdl.r2d2.db.UserAccountRepository;
@@ -36,7 +37,9 @@ public class DatasetVersionServiceDbImplIT extends BaseIntegrationTest {
   @Autowired
   private DatasetVersionRepository datasetVersionRepository;
 
+  //TODO: Use LatestDatasetVersionDaoImpl instead of PublicDatasetVersionDaoImpl !?
   @Autowired
+  @Qualifier("PublicDatasetVersionDaoImpl")
   private DatasetVersionDaoEs datasetVersionIndexDao;
 
   @Autowired

@@ -3,9 +3,6 @@ package de.mpg.mpdl.r2d2.rest.controller;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import de.mpg.mpdl.r2d2.service.FileService;
-import de.mpg.mpdl.r2d2.util.DtoMapper;
-
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,10 +11,14 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.web.client.RestTemplate;
 
 import de.mpg.mpdl.r2d2.aa.UserDetailsServiceImpl;
 import de.mpg.mpdl.r2d2.db.UserAccountRepository;
+import de.mpg.mpdl.r2d2.search.service.DatasetSearchService;
 import de.mpg.mpdl.r2d2.service.DatasetVersionService;
+import de.mpg.mpdl.r2d2.service.FileService;
+import de.mpg.mpdl.r2d2.util.DtoMapper;
 
 /**
  * Testing Rest API delegates to the service methods
@@ -36,6 +37,12 @@ public class DatasetControllerTest {
 
   @MockBean
   private DatasetVersionService datasetVersionService;
+
+  @MockBean
+  private DatasetSearchService datasetSearchService;
+
+  @MockBean
+  private RestTemplate restTemplate;
 
   @MockBean
   private FileService fileService;
