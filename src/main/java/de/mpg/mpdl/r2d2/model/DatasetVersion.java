@@ -1,28 +1,10 @@
 package de.mpg.mpdl.r2d2.model;
 
 import java.time.OffsetDateTime;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.IdClass;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToMany;
-import javax.persistence.ManyToOne;
-import javax.persistence.MapsId;
-import javax.persistence.Transient;
+import javax.persistence.*;
 
-import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 import org.hibernate.annotations.Type;
@@ -40,10 +22,15 @@ public class DatasetVersion extends BaseDateDb {
   @Column(nullable = false)
   public int versionNumber = 1;
 
+  // newest Version = latestVersion in Dataset
+
+  //How to handle Versioning comment?
+
   @Enumerated(EnumType.STRING)
   @Column(nullable = false)
   private Dataset.State state = State.PRIVATE;
 
+  // modificationDate is in BaseDateDb
 
   @Column(columnDefinition = "TIMESTAMP WITH TIME ZONE")
   private OffsetDateTime publicationDate;

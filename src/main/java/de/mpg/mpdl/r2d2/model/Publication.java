@@ -10,12 +10,16 @@ public class Publication {
 
   private String title;
 
+  //Identifier = URL
   private URL url;
 
+  //Use different type (instead of String) for type?
   private String type;
 
+  //Remove identifier or rename URL in identifier? (identifier = URL)
   private String identifier;
 
+  //Remove identifierType?
   private String identifierType;
 
   public String getTitle() {

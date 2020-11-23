@@ -8,9 +8,11 @@ public class Person {
 
   private String familyName;
 
+  //Rename to orcidId?
   // ORCID (The id part of the ORCID-URI)
   private String nameIdentifier;
 
+  // Affiliation contains department/group
   private List<Affiliation> affiliations;
 
   public String getGivenName() {
