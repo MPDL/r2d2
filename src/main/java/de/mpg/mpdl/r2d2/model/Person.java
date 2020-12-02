@@ -8,9 +8,8 @@ public class Person {
 
   private String familyName;
 
-  //Rename to orcidId?
   // ORCID (The id part of the ORCID-URI)
-  private String nameIdentifier;
+  private String orcid;
 
   // Affiliation contains department/group
   private List<Affiliation> affiliations;
@@ -31,12 +30,12 @@ public class Person {
     this.familyName = familyName;
   }
 
-  public String getNameIdentifier() {
-    return nameIdentifier;
+  public String getOrcid() {
+    return orcid;
   }
 
-  public void setNameIdentifier(String nameIdentifier) {
-    this.nameIdentifier = nameIdentifier;
+  public void setOrcid(String orcid) {
+    this.orcid = orcid;
   }
 
   public List<Affiliation> getAffiliations() {

@@ -13,14 +13,8 @@ public class Publication {
   //Identifier = URL
   private URL url;
 
-  //Use different type (instead of String) for type?
+  //type of the publication
   private String type;
-
-  //Remove identifier or rename URL in identifier? (identifier = URL)
-  private String identifier;
-
-  //Remove identifierType?
-  private String identifierType;
 
   public String getTitle() {
     return title;
@@ -44,22 +38,6 @@ public class Publication {
 
   public void setType(String type) {
     this.type = type;
-  }
-
-  public String getIdentifier() {
-    return identifier;
-  }
-
-  public void setIdentifier(String identifier) {
-    this.identifier = identifier;
-  }
-
-  public String getIdentifierType() {
-    return identifierType;
-  }
-
-  public void setIdentifierType(String identifierType) {
-    this.identifierType = identifierType;
   }
 
 }

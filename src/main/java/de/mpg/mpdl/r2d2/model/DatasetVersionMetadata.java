@@ -23,14 +23,15 @@ public class DatasetVersionMetadata {
 
   private List<String> keywords;
 
-  //Use different type (URL?) for DOI?
+  // the DOI without the prefix and not as URL
   private String doi;
 
-  //Only one License possible! -> Change in MD_Schmea.xlsx?
-  //Which type for license?
-  private String license;
+  private License license;
 
-  // publicationDate (=Date of Publication)  is in DatasetVersion
+  // creationDate (created) is in BaseDateDb
+  // modificationDate (modified) is in BaseDateDb
+  // publicationDate (issued) is in DatasetVersion
+  // (withdrawn) is modificationDate of a DatasetVersion with state WITHDRAWN
 
   private List<Publication> correspondingPapers = new ArrayList<>();
 
@@ -42,12 +43,9 @@ public class DatasetVersionMetadata {
 
   private Geolocation geolocation;
 
-  //Where is the citation created?
   // citeAs gets automatically created/composed
 
   // state is in DatasetVersion
-
-  //How to handle dates: creation-, update-, issued-, withdrawn-date? All handled via modification date?
 
   public String getTitle() {
     return title;
@@ -97,11 +95,11 @@ public class DatasetVersionMetadata {
     this.keywords = keywords;
   }
 
-  public String getLicense() {
+  public License getLicense() {
     return license;
   }
 
-  public void setLicense(String license) {
+  public void setLicense(License license) {
     this.license = license;
   }
 
