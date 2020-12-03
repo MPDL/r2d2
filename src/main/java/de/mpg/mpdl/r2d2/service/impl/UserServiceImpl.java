@@ -1,6 +1,5 @@
 package de.mpg.mpdl.r2d2.service.impl;
 
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Optional;
 import java.util.UUID;
@@ -12,14 +11,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import de.mpg.mpdl.r2d2.db.LocalUserAccountRepository;
 import de.mpg.mpdl.r2d2.db.ConfirmationTokenRepository;
+import de.mpg.mpdl.r2d2.db.LocalUserAccountRepository;
 import de.mpg.mpdl.r2d2.db.UserAccountRepository;
-import de.mpg.mpdl.r2d2.exceptions.R2d2ApplicationException;
 import de.mpg.mpdl.r2d2.model.Person;
 import de.mpg.mpdl.r2d2.model.aa.LocalUserAccount;
 import de.mpg.mpdl.r2d2.model.aa.UserAccount;
-import de.mpg.mpdl.r2d2.model.aa.UserAccountRO;
 import de.mpg.mpdl.r2d2.model.aa.UserAccount.Role;
 import de.mpg.mpdl.r2d2.registration.ConfirmationToken;
 import de.mpg.mpdl.r2d2.registration.RegistrationRequest;
@@ -126,7 +123,7 @@ public class UserServiceImpl implements UserService {
       person.setAffiliations(request.getAffiliations());
     }
     if (request.getIdentifier() != null) {
-      person.setNameIdentifier(request.getIdentifier());
+      person.setOrcid(request.getIdentifier());
     }
     account.setPerson(person);
     account.setCreationDate(Utils.generateCurrentDateTimeForDatabase());
