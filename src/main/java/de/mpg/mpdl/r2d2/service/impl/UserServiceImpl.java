@@ -122,8 +122,8 @@ public class UserServiceImpl implements UserService {
     if (request.getAffiliations() != null) {
       person.setAffiliations(request.getAffiliations());
     }
-    if (request.getIdentifier() != null) {
-      person.setOrcid(request.getIdentifier());
+    if (request.getOrcid() != null) {
+      person.setOrcid(request.getOrcid());
     }
     account.setPerson(person);
     account.setCreationDate(Utils.generateCurrentDateTimeForDatabase());

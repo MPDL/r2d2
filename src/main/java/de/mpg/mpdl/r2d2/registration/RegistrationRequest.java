@@ -5,7 +5,6 @@ import java.util.List;
 import javax.validation.GroupSequence;
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 import de.mpg.mpdl.r2d2.model.Affiliation;
@@ -34,7 +33,7 @@ public class RegistrationRequest {
   @Valid
   private List<Affiliation> affiliations;
 
-  private String identifier;
+  private String orcid;
 
   public String getFirst() {
     return first;
@@ -84,12 +83,12 @@ public class RegistrationRequest {
     this.affiliations = affiliations;
   }
 
-  public String getIdentifier() {
-    return identifier;
+  public String getOrcid() {
+    return orcid;
   }
 
-  public void setIdentifier(String identifier) {
-    this.identifier = identifier;
+  public void setOrcid(String orcid) {
+    this.orcid = orcid;
   }
 
 }
