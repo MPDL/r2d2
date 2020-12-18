@@ -13,9 +13,6 @@ public class Publication {
   //Identifier = URL
   private URL url;
 
-  //type of the publication
-  private String type;
-
   public String getTitle() {
     return title;
   }
@@ -30,14 +27,6 @@ public class Publication {
 
   public void setUrl(URL url) {
     this.url = url;
-  }
-
-  public String getType() {
-    return type;
-  }
-
-  public void setType(String type) {
-    this.type = type;
   }
 
 }

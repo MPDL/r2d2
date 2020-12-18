@@ -43,7 +43,7 @@ public class DatasetVersionMetadata {
 
   private Geolocation geolocation;
 
-  // citeAs gets automatically created/composed
+  // 'Cite this Dataset as' gets automatically created/composed
 
   // state is in DatasetVersion
 
