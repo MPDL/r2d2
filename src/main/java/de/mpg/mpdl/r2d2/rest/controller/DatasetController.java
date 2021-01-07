@@ -159,7 +159,7 @@ public class DatasetController {
       sr.setId(dto.getId().toString());
       return sr;
     }).collect(Collectors.toList()));
-    
+
     searchRes.setTotal((int) files.getTotalElements());
     HttpHeaders headers = new HttpHeaders();
     headers.add("Total-Number-of-Elements", Long.toString(files.getTotalElements()));
