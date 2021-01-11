@@ -19,7 +19,7 @@
 		<java.version>11</java.version>
 		<elasticsearch.version>7.6.1</elasticsearch.version>
 		<jclouds.version>2.2.1</jclouds.version>
-		<org.mapstruct.version>1.3.1.Final</org.mapstruct.version>
+		<org.mapstruct.version>1.4.1.Final</org.mapstruct.version>
 		<!-- Required for automatically compiling mapstruct in eclipse -->
 		<m2e.apt.activation>jdt_apt</m2e.apt.activation>
 	</properties>
