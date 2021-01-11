@@ -8,7 +8,9 @@ public class License {
 
   private URL url;
 
-  //license text!?
+  //TODO: license text!?
+
+  //TODO: Add license as type to the MD_schema file
 
   public String getName() {
     return name;
