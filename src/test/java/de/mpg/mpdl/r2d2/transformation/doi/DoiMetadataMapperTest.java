@@ -1,17 +1,18 @@
 package de.mpg.mpdl.r2d2.transformation.doi;
 
 import de.mpg.mpdl.r2d2.model.DatasetVersion;
+import de.mpg.mpdl.r2d2.model.DatasetVersionMetadata;
 import de.mpg.mpdl.r2d2.model.Person;
 import de.mpg.mpdl.r2d2.transformation.doi.model.DoiIdentifier;
 import de.mpg.mpdl.r2d2.transformation.doi.model.DoiMetadata;
 import de.mpg.mpdl.r2d2.transformation.doi.model.DoiResourceType;
-import de.mpg.mpdl.r2d2.util.testdata.DatasetVersionBuilder;
 import de.mpg.mpdl.r2d2.util.testdata.PersonBuilder;
 import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;
 
 import java.time.OffsetDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.Arrays;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
@@ -27,8 +28,9 @@ public class DoiMetadataMapperTest {
     Person author1 = new PersonBuilder().setName("G1", "F1").create();
     Person author2 = new PersonBuilder().setName("G2", "F2").create();
     OffsetDateTime publicationDate = OffsetDateTime.now().truncatedTo(ChronoUnit.MICROS);
-    DatasetVersion datasetVersion =
-        new DatasetVersionBuilder().setMetadata(title, author1, author2).setPublicationDate(publicationDate).create();
+
+    DatasetVersionMetadata metadata = DatasetVersionMetadata.builder().title(title).authors(Arrays.asList(author1, author2)).build();
+    DatasetVersion datasetVersion = DatasetVersion.builder().metadata(metadata).publicationDate(publicationDate).build();
 
     //When
     DoiMetadata doiMetadata = doiMetadataMapper.convertToDoiMetadata(datasetVersion);
@@ -45,7 +47,7 @@ public class DoiMetadataMapperTest {
   @Test
   public void testConvertEmptyDatasetVersionToDoiMetadata() {
     //Given
-    DatasetVersion datasetVersion = new DatasetVersionBuilder().create();
+    DatasetVersion datasetVersion = DatasetVersion.builder().build();
 
     //When
     DoiMetadata doiMetadata = doiMetadataMapper.convertToDoiMetadata(datasetVersion);
