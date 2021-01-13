@@ -1,11 +1,18 @@
 package de.mpg.mpdl.r2d2.model;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
+
 import java.util.ArrayList;
 import java.util.List;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
-
+@SuperBuilder(toBuilder = true)
+@NoArgsConstructor
+@AllArgsConstructor
 @JsonInclude(Include.NON_EMPTY)
 public class DatasetVersionMetadata {
 
@@ -13,6 +20,7 @@ public class DatasetVersionMetadata {
 
   // creator is in BaseDB
 
+  @Builder.Default
   private List<Person> authors = new ArrayList<>();
 
   private String doi;
@@ -27,6 +35,7 @@ public class DatasetVersionMetadata {
 
   private String language;
 
+  @Builder.Default
   private List<Publication> correspondingPapers = new ArrayList<>();
 
   // doi is in DatasetVersion
