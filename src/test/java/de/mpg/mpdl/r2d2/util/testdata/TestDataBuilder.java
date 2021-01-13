@@ -1,21 +1,16 @@
 package de.mpg.mpdl.r2d2.util.testdata;
 
-import java.util.Collection;
-
 import org.springframework.beans.factory.annotation.Lookup;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Component;
+
+import java.util.Collection;
 
 @Component
 public class TestDataBuilder {
 
   @Lookup
   public DatasetBuilder newDataset() {
-    return null;
-  }
-
-  @Lookup
-  public DatasetVersionBuilder newDatasetVersion() {
     return null;
   }
 
