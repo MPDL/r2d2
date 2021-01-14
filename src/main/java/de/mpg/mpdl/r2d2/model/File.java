@@ -3,26 +3,13 @@ package de.mpg.mpdl.r2d2.model;
 import java.util.HashSet;
 import java.util.Set;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.ManyToMany;
+import javax.persistence.*;
 
 import org.hibernate.annotations.Type;
 
+// Item = File
 @Entity
 public class File extends BaseDb {
-
-  public enum UploadState {
-    INITIATED,
-    ONGOING,
-    COMPLETE,
-    ATTACHED,
-    PUBLIC
-  }
 
   @Enumerated(EnumType.STRING)
   private UploadState state = UploadState.INITIATED;
@@ -47,6 +34,8 @@ public class File extends BaseDb {
   public String getFilename() {
     return filename;
   }
+
+  //Date uploaded = creationDate in BaseDateDb!?
 
   public void setFilename(String filename) {
     this.filename = filename;
@@ -106,6 +95,14 @@ public class File extends BaseDb {
 
   public void setVersions(Set<DatasetVersion> versions) {
     this.versions = versions;
+  }
+
+  public enum UploadState {
+    INITIATED,
+    ONGOING,
+    COMPLETE,
+    ATTACHED,
+    PUBLIC
   }
 
 }

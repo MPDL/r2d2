@@ -1,7 +1,9 @@
 package de.mpg.mpdl.r2d2.model;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -11,11 +13,9 @@ public class DatasetVersionMetadata {
 
   private String title;
 
-  // creator is in BaseDB
+  // creator is in BaseDateDB
 
   private List<Person> authors = new ArrayList<>();
-
-  private String doi;
 
   private String description;
 
@@ -23,15 +23,29 @@ public class DatasetVersionMetadata {
 
   private List<String> keywords;
 
-  private String license;
+  // the DOI without the prefix and not as URL
+  private String doi;
 
-  private String language;
+  private License license;
+
+  // creationDate (created) is in BaseDateDb
+  // modificationDate (modified) is in BaseDateDb
+  // publicationDate (issued) is in DatasetVersion
+  // (withdrawn) is modificationDate of a DatasetVersion with state WITHDRAWN
 
   private List<Publication> correspondingPapers = new ArrayList<>();
 
-  // doi is in DatasetVersion
+  private String language;
 
-  // citeAs gets automatically created/composed
+  private Set<StudyType> studyTypes = new HashSet<>();
+
+  private List<Project> funding = new ArrayList<>();
+
+  private Geolocation geolocation;
+
+  // 'Cite this Dataset as' gets automatically created/composed
+
+  // state is in DatasetVersion
 
   public String getTitle() {
     return title;
@@ -81,11 +95,11 @@ public class DatasetVersionMetadata {
     this.keywords = keywords;
   }
 
-  public String getLicense() {
+  public License getLicense() {
     return license;
   }
 
-  public void setLicense(String license) {
+  public void setLicense(License license) {
     this.license = license;
   }
 
@@ -103,6 +117,38 @@ public class DatasetVersionMetadata {
 
   public void setCorrespondingPapers(List<Publication> correspondingPapers) {
     this.correspondingPapers = correspondingPapers;
+  }
+
+  public Set<StudyType> getStudyTypes() {
+    return studyTypes;
+  }
+
+  public void setStudyTypes(Set<StudyType> studyTypes) {
+    this.studyTypes = studyTypes;
+  }
+
+  public List<Project> getFunding() {
+    return funding;
+  }
+
+  public void setFunding(List<Project> funding) {
+    this.funding = funding;
+  }
+
+  public Geolocation getGeolocation() {
+    return geolocation;
+  }
+
+  public void setGeolocation(Geolocation geolocation) {
+    this.geolocation = geolocation;
+  }
+
+  public enum StudyType {
+    OBSERVATIONAL,
+    EXPERIMENTAL,
+    SIMULATION, //simulation/modelling
+    SURVEY,
+    OTHER
   }
 
 }
