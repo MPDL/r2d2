@@ -1,12 +1,16 @@
 package de.mpg.mpdl.r2d2.db;
 
-import de.mpg.mpdl.r2d2.model.Dataset;
-import de.mpg.mpdl.r2d2.model.DatasetVersion;
+import de.mpg.mpdl.r2d2.model.*;
 import de.mpg.mpdl.r2d2.util.BaseIntegrationTest;
 import de.mpg.mpdl.r2d2.util.testdata.EntityManagerWrapper;
 import de.mpg.mpdl.r2d2.util.testdata.TestDataFactory;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import java.util.Arrays;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -17,6 +21,9 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  */
 public class DatasetVersionRepositoryIT extends BaseIntegrationTest {
+
+  @PersistenceContext
+  private EntityManager entityManager;
 
   @Autowired
   private EntityManagerWrapper entityManagerWrapper;
@@ -44,6 +51,38 @@ public class DatasetVersionRepositoryIT extends BaseIntegrationTest {
 
     //Then
     assertThat(latestDatasetVersion.getVersionNumber()).isEqualTo(latestVersionNumber);
+  }
+
+  @Test
+  public void testSaveDatasetVersionWithMetadata() {
+    //Given
+    String title = "Title";
+    String description = "Description";
+    double latitude = 1.2;
+
+    Geolocation geolocation = Geolocation.builder().latitude(latitude).build();
+
+    DatasetVersionMetadata metadata = DatasetVersionMetadata.builder().title(title).authors(Arrays.asList(Person.builder().build()))
+        .description(description).geolocation(geolocation).build();
+    DatasetVersion datasetVersion = DatasetVersion.builder().metadata(metadata).build();
+
+    //When
+    datasetVersionRepository.save(datasetVersion);
+
+    //Then
+    List<DatasetVersion> datasetVersions =
+        entityManager.createQuery("Select datasetVersion from " + DatasetVersion.class.getSimpleName() + " datasetVersion").getResultList();
+    //TODO: Use EntityManager or Repository at this level?
+    //    List<DatasetVersion> datasetVersions = datasetVersionRepository.findAll();
+
+    assertThat(datasetVersions).hasSize(1);
+
+    DatasetVersionMetadata returnedMetadata = datasetVersions.stream().findFirst().get().getMetadata();
+    assertThat(returnedMetadata).isNotNull();
+    assertThat(returnedMetadata).extracting("title").isEqualTo(title);
+    assertThat(returnedMetadata).extracting("authors").isNotNull();
+    assertThat(returnedMetadata).extracting("description").isEqualTo(description);
+    assertThat(returnedMetadata).extracting("geolocation").extracting("latitude").isEqualTo(latitude);
   }
 
 }

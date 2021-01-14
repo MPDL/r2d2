@@ -26,8 +26,6 @@ public class DatasetVersionMetadata {
   @Builder.Default
   private List<Person> authors = new ArrayList<>();
 
-  private String doi;
-
   private String description;
 
   private List<String> genres;
