@@ -1,18 +1,17 @@
 package de.mpg.mpdl.r2d2.model.aa;
 
-import java.io.Serializable;
-import java.util.UUID;
-
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.OneToOne;
-import javax.persistence.PrimaryKeyJoinColumn;
-
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.NoArgsConstructor;
 import org.hibernate.annotations.GenericGenerator;
 
+import javax.persistence.*;
+import java.util.UUID;
+
+@Builder(toBuilder = true)
+@NoArgsConstructor
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Entity
 public class LocalUserAccount {
 

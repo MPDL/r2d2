@@ -1,19 +1,15 @@
 package de.mpg.mpdl.r2d2.model.aa;
 
-import java.util.ArrayList;
-import java.util.List;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+
 import java.util.UUID;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
 
-import org.hibernate.annotations.Type;
-
-import de.mpg.mpdl.r2d2.model.BaseDb;
-
-
+@Builder(toBuilder = true)
+//@NoArgsConstructor is already defined
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class UserAccountRO {
 
 

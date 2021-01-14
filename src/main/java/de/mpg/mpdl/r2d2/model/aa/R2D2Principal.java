@@ -1,9 +1,9 @@
 package de.mpg.mpdl.r2d2.model.aa;
 
-import java.util.Collection;
-
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.User;
+
+import java.util.Collection;
 
 /**
  * Wrapper object for UserAccount to support authorization mechanisms. Can be extended at a later
@@ -12,6 +12,7 @@ import org.springframework.security.core.userdetails.User;
  * @author haarlae1
  *
  */
+//No Lombok @Builder, because User has its own Builder but no default constructor!
 public class R2D2Principal extends User {
 
   public R2D2Principal(String username, String password, Collection<? extends GrantedAuthority> authorities) {

@@ -1,7 +1,15 @@
 package de.mpg.mpdl.r2d2.model;
 
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.NoArgsConstructor;
+
 import javax.validation.constraints.NotBlank;
 
+@Builder(toBuilder = true)
+@NoArgsConstructor
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class Affiliation {
 
   //grid ID

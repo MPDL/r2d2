@@ -1,7 +1,16 @@
 package de.mpg.mpdl.r2d2.model;
 
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.NoArgsConstructor;
+
+import java.util.ArrayList;
 import java.util.List;
 
+@Builder(toBuilder = true)
+@NoArgsConstructor
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class Person {
 
   private String givenName;
@@ -11,7 +20,8 @@ public class Person {
   // ORCID (The id part of the ORCID-URI)
   private String nameIdentifier;
 
-  private List<Affiliation> affiliations;
+  @Builder.Default
+  private List<Affiliation> affiliations = new ArrayList<>();
 
   public String getGivenName() {
     return givenName;

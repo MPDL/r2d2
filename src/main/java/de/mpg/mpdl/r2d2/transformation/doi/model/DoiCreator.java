@@ -1,7 +1,15 @@
 package de.mpg.mpdl.r2d2.transformation.doi.model;
 
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.NoArgsConstructor;
+
 import javax.xml.bind.annotation.XmlType;
 
+@Builder(toBuilder = true)
+@NoArgsConstructor
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 @XmlType(propOrder = {"creatorName", "givenName", "familyName"})
 public class DoiCreator {
 

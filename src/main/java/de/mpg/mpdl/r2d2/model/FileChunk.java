@@ -1,5 +1,13 @@
 package de.mpg.mpdl.r2d2.model;
 
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.NoArgsConstructor;
+
+@Builder(toBuilder = true)
+@NoArgsConstructor
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class FileChunk {
 
   private int number;
@@ -15,6 +23,7 @@ public class FileChunk {
     COMPLETE
   }
 
+  @Builder.Default
   private Progress progress = Progress.IN_PROGRESS;
 
   public int getNumber() {

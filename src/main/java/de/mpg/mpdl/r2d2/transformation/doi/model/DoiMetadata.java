@@ -1,11 +1,22 @@
 package de.mpg.mpdl.r2d2.transformation.doi.model;
 
-import javax.xml.bind.annotation.*;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.NoArgsConstructor;
+
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElementWrapper;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlType;
 import java.util.List;
 
 /**
  * DOI-Metadata representation of the Dataset-Metadata.
  */
+@Builder(toBuilder = true)
+@NoArgsConstructor
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 @XmlRootElement(name = "resource")
 @XmlType(propOrder = {"identifier", "creators", "titles", "publisher", "publicationYear", "resourceType"})
 public class DoiMetadata {
@@ -15,6 +26,7 @@ public class DoiMetadata {
 
   //TODO: Add remaining attributes
 
+  @Builder.Default
   //DOI / Identifier
   private DoiIdentifier identifier = new DoiIdentifier();
 
@@ -24,12 +36,14 @@ public class DoiMetadata {
   //Creators = authors
   private List<DoiCreator> creators;
 
+  @Builder.Default
   //Publisher
   private String publisher = PUBLISHER_MPG;
 
   //Publication year =? DatasetVersion.publicationDate
   private int publicationYear;
 
+  @Builder.Default
   //Resource Type
   private DoiResourceType resourceType = new DoiResourceType();
 

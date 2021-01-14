@@ -6,6 +6,7 @@ import com.vladmihalcea.hibernate.type.array.StringArrayType;
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
 import com.vladmihalcea.hibernate.type.json.JsonStringType;
 import de.mpg.mpdl.r2d2.model.aa.UserAccount;
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
@@ -28,7 +29,7 @@ import java.time.OffsetDateTime;
 
 @SuperBuilder(toBuilder = true)
 @NoArgsConstructor
-@AllArgsConstructor
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class BaseDateDb {
 
   public final static String[] userIgnoreJsonProperties =

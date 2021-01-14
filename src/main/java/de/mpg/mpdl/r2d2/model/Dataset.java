@@ -1,21 +1,22 @@
 package de.mpg.mpdl.r2d2.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import de.mpg.mpdl.r2d2.model.aa.UserAccountRO;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
+import org.hibernate.annotations.Type;
+
+import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.Transient;
-
-import org.hibernate.annotations.Type;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-
-import de.mpg.mpdl.r2d2.model.aa.UserAccountRO;
-
+@SuperBuilder(toBuilder = true)
+@NoArgsConstructor
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Entity
 @JsonPropertyOrder(value = {"id", "state"})
 public class Dataset extends BaseDb {
@@ -27,18 +28,21 @@ public class Dataset extends BaseDb {
     WITHDRAWN
   }
 
+  @Builder.Default
   @Enumerated(EnumType.STRING)
   private Dataset.State state = State.PRIVATE;
 
+  @Builder.Default
   //@Type(type = "jsonb")
   //@Column(columnDefinition = "jsonb")
   private Integer latestVersion = 1;
 
+  @Builder.Default
   //@Type(type = "jsonb")
   //@Column(columnDefinition = "jsonb")
   private Integer latestPublicVersion = null;
 
-
+  @Builder.Default
   @Type(type = "jsonb")
   @Column(columnDefinition = "jsonb")
   private List<UserAccountRO> datamanager = new ArrayList<UserAccountRO>();

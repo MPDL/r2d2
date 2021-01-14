@@ -2,17 +2,17 @@ package de.mpg.mpdl.r2d2.model;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.NoArgsConstructor;
-import lombok.experimental.SuperBuilder;
 
 import java.util.ArrayList;
 import java.util.List;
 
-@SuperBuilder(toBuilder = true)
+@Builder(toBuilder = true)
 @NoArgsConstructor
-@AllArgsConstructor
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 @JsonInclude(Include.NON_EMPTY)
 public class DatasetVersionMetadata {
 
