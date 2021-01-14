@@ -10,7 +10,6 @@ import de.mpg.mpdl.r2d2.model.DatasetVersion;
 import de.mpg.mpdl.r2d2.model.DatasetVersionMetadata;
 import de.mpg.mpdl.r2d2.model.aa.R2D2Principal;
 import de.mpg.mpdl.r2d2.model.aa.UserAccount;
-import de.mpg.mpdl.r2d2.model.aa.UserAccount.Role;
 import de.mpg.mpdl.r2d2.search.dao.DatasetVersionDaoEs;
 import de.mpg.mpdl.r2d2.util.BaseIntegrationTest;
 import de.mpg.mpdl.r2d2.util.testdata.TestDataBuilder;
@@ -18,6 +17,9 @@ import de.mpg.mpdl.r2d2.util.testdata.TestDataFactory;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.security.core.GrantedAuthority;
+
+import java.util.ArrayList;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -55,9 +57,9 @@ public class DatasetVersionServiceDbImplIT extends BaseIntegrationTest {
     DatasetVersion datasetVersion =
         TestDataFactory.newDatasetVersionWithCreationAndModificationDate().toBuilder().metadata(metadata).build();
 
-    UserAccount userAccount = testDataBuilder.newUserAccount().setPerson("FamilyName", "GivenName").setCreatorAndModifier()
-        .setcurrentCreationAndModificationDate().setRole(Role.USER).persist();
-    R2D2Principal r2d2Principal = testDataBuilder.newR2D2Principal("username", "pw").setUserAccount(userAccount).create();
+    UserAccount userAccount = TestDataFactory.newUser();
+    R2D2Principal r2d2Principal = new R2D2Principal("username", "pw", new ArrayList<GrantedAuthority>());
+    r2d2Principal.setUserAccount(userAccount);
 
     //When
     DatasetVersion createdDatasetVersion = this.datasetVersionServiceDbImpl.create(datasetVersion, r2d2Principal);

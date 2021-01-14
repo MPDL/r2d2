@@ -1,17 +1,5 @@
 package de.mpg.mpdl.r2d2.service.impl;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-import java.util.ArrayList;
-import java.util.UUID;
-
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.*;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.GrantedAuthority;
-
 import de.mpg.mpdl.r2d2.aa.AuthorizationService;
 import de.mpg.mpdl.r2d2.db.DatasetVersionRepository;
 import de.mpg.mpdl.r2d2.db.FileRepository;
@@ -19,6 +7,7 @@ import de.mpg.mpdl.r2d2.exceptions.AuthorizationException;
 import de.mpg.mpdl.r2d2.exceptions.InvalidStateException;
 import de.mpg.mpdl.r2d2.exceptions.R2d2TechnicalException;
 import de.mpg.mpdl.r2d2.exceptions.ValidationException;
+import de.mpg.mpdl.r2d2.model.Dataset;
 import de.mpg.mpdl.r2d2.model.DatasetVersion;
 import de.mpg.mpdl.r2d2.model.DatasetVersionMetadata;
 import de.mpg.mpdl.r2d2.model.Person;
@@ -27,6 +16,17 @@ import de.mpg.mpdl.r2d2.model.aa.UserAccount;
 import de.mpg.mpdl.r2d2.search.service.impl.IndexingService;
 import de.mpg.mpdl.r2d2.service.storage.SwiftObjectStoreRepository;
 import de.mpg.mpdl.r2d2.util.DtoMapper;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.*;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.GrantedAuthority;
+
+import java.util.ArrayList;
+import java.util.UUID;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Test class for DatasetVersionServiceDbImpl.
@@ -62,23 +62,16 @@ public class DatasetVersionServiceDbImplTest {
   public void testCreateMethodDelegationAndControlFlow()
       throws ValidationException, AuthorizationException, R2d2TechnicalException, InvalidStateException {
     //Given
-    DatasetVersion datasetVersion = new DatasetVersion();
-    DatasetVersionMetadata datasetVersionMetadata = new DatasetVersionMetadata();
-    datasetVersionMetadata.setTitle("datasetTitle");
-    datasetVersion.setMetadata(datasetVersionMetadata);
+    DatasetVersionMetadata datasetVersionMetadata = DatasetVersionMetadata.builder().title("datasetTitle").build();
+    DatasetVersion datasetVersion = DatasetVersion.builder().metadata(datasetVersionMetadata).build();
 
+    UserAccount userAccount =
+        UserAccount.builder().person(Person.builder().givenName("GivenName").familyName("FamilyName").build()).build();
     R2D2Principal r2d2Principal = new R2D2Principal("username", "pw", new ArrayList<GrantedAuthority>());
-    UserAccount userAccount = new UserAccount();
-    Person person = new Person();
-    person.setFamilyName("FamilyName");
-    person.setGivenName("GivenName");
-    userAccount.setPerson(person);
     r2d2Principal.setUserAccount(userAccount);
 
-    DatasetVersion savedDatasetVersion = new DatasetVersion();
-    UUID datasetId = UUID.randomUUID();
-    savedDatasetVersion.getDataset().setId(datasetId);
-    savedDatasetVersion.setVersionNumber(1);
+    DatasetVersion savedDatasetVersion =
+        DatasetVersion.builder().dataset(Dataset.builder().id(UUID.randomUUID()).build()).versionNumber(1).build();
     Mockito.when(this.datasetVersionRepository.saveAndFlush(Mockito.any())).thenReturn(savedDatasetVersion);
 
     //When
