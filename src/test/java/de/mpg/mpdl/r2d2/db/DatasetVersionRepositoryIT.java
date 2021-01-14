@@ -4,7 +4,6 @@ import de.mpg.mpdl.r2d2.model.Dataset;
 import de.mpg.mpdl.r2d2.model.DatasetVersion;
 import de.mpg.mpdl.r2d2.util.BaseIntegrationTest;
 import de.mpg.mpdl.r2d2.util.testdata.EntityManagerWrapper;
-import de.mpg.mpdl.r2d2.util.testdata.TestDataBuilder;
 import de.mpg.mpdl.r2d2.util.testdata.TestDataFactory;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,9 +20,6 @@ public class DatasetVersionRepositoryIT extends BaseIntegrationTest {
 
   @Autowired
   private EntityManagerWrapper entityManagerWrapper;
-
-  @Autowired
-  private TestDataBuilder testDataBuilder;
 
   @Autowired
   private DatasetVersionRepository datasetVersionRepository;

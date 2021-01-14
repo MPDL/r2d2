@@ -12,7 +12,6 @@ import de.mpg.mpdl.r2d2.model.aa.R2D2Principal;
 import de.mpg.mpdl.r2d2.model.aa.UserAccount;
 import de.mpg.mpdl.r2d2.search.dao.DatasetVersionDaoEs;
 import de.mpg.mpdl.r2d2.util.BaseIntegrationTest;
-import de.mpg.mpdl.r2d2.util.testdata.TestDataBuilder;
 import de.mpg.mpdl.r2d2.util.testdata.TestDataFactory;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,9 +29,6 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  */
 public class DatasetVersionServiceDbImplIT extends BaseIntegrationTest {
-
-  @Autowired
-  private TestDataBuilder testDataBuilder;
 
   @Autowired
   private UserAccountRepository userAccountRepository;
