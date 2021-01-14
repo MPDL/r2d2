@@ -18,8 +18,9 @@ public class Person {
   private String familyName;
 
   // ORCID (The id part of the ORCID-URI)
-  private String nameIdentifier;
+  private String orcid;
 
+  // Affiliation contains department/group
   @Builder.Default
   private List<Affiliation> affiliations = new ArrayList<>();
 
@@ -39,12 +40,12 @@ public class Person {
     this.familyName = familyName;
   }
 
-  public String getNameIdentifier() {
-    return nameIdentifier;
+  public String getOrcid() {
+    return orcid;
   }
 
-  public void setNameIdentifier(String nameIdentifier) {
-    this.nameIdentifier = nameIdentifier;
+  public void setOrcid(String orcid) {
+    this.orcid = orcid;
   }
 
   public List<Affiliation> getAffiliations() {

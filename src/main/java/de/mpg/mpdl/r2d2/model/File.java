@@ -11,21 +11,13 @@ import javax.persistence.*;
 import java.util.HashSet;
 import java.util.Set;
 
+// Item = File
 @SuperBuilder(toBuilder = true)
 @NoArgsConstructor
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Entity
 public class File extends BaseDb {
 
-  public enum UploadState {
-    INITIATED,
-    ONGOING,
-    COMPLETE,
-    ATTACHED,
-    PUBLIC
-  }
-
-  @Builder.Default
   @Enumerated(EnumType.STRING)
   private UploadState state = UploadState.INITIATED;
 
@@ -51,6 +43,8 @@ public class File extends BaseDb {
   public String getFilename() {
     return filename;
   }
+
+  //Date uploaded = creationDate in BaseDateDb!?
 
   public void setFilename(String filename) {
     this.filename = filename;
@@ -110,6 +104,14 @@ public class File extends BaseDb {
 
   public void setVersions(Set<DatasetVersion> versions) {
     this.versions = versions;
+  }
+
+  public enum UploadState {
+    INITIATED,
+    ONGOING,
+    COMPLETE,
+    ATTACHED,
+    PUBLIC
   }
 
 }

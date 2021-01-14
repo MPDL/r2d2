@@ -27,14 +27,20 @@ public class DatasetVersion extends BaseDateDb {
   @Column(nullable = false)
   public int versionNumber = 1;
 
+  // newest Version = latestVersion in Dataset
+
   @Builder.Default
   @Enumerated(EnumType.STRING)
   @Column(nullable = false)
   private Dataset.State state = State.PRIVATE;
 
+  // modificationDate is in BaseDateDb
+  // creationDate is in BaseDateDb
 
   @Column(columnDefinition = "TIMESTAMP WITH TIME ZONE")
   private OffsetDateTime publicationDate;
+
+  private String publicationComment;
 
   @Builder.Default
   @Type(type = "jsonb")
@@ -79,6 +85,14 @@ public class DatasetVersion extends BaseDateDb {
 
   public void setPublicationDate(OffsetDateTime publicationDate) {
     this.publicationDate = publicationDate;
+  }
+
+  public String getPublicationComment() {
+    return publicationComment;
+  }
+
+  public void setPublicationComment(String publicationComment) {
+    this.publicationComment = publicationComment;
   }
 
   public DatasetVersionMetadata getMetadata() {
