@@ -55,9 +55,6 @@ public class DatasetVersionServiceDbImplTest {
   @InjectMocks
   private DatasetVersionServiceDbImpl datasetVersionServiceDbImpl = new DatasetVersionServiceDbImpl();
 
-  @Autowired
-  private DtoMapper mapper;
-
   @Test
   public void testCreateMethodDelegationAndControlFlow()
       throws ValidationException, AuthorizationException, R2d2TechnicalException, InvalidStateException {

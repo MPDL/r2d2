@@ -19,6 +19,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.core.GrantedAuthority;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -58,20 +59,19 @@ public class DatasetVersionServiceDbImplIT extends BaseIntegrationTest {
     r2d2Principal.setUserAccount(userAccount);
 
     //When
-    DatasetVersion createdDatasetVersion = this.datasetVersionServiceDbImpl.create(datasetVersion, r2d2Principal);
+    DatasetVersion returnedDatasetVersion = this.datasetVersionServiceDbImpl.create(datasetVersion, r2d2Principal);
 
     //Then
-    //TODO: Assert the DatasetVersion returned by the method under test
-
-    DatasetVersion returnedDatasetVersion = this.datasetVersionRepository.findLatestVersion(createdDatasetVersion.getId());
+    DatasetVersion datasetVersionFromDB = this.datasetVersionRepository.findLatestVersion(returnedDatasetVersion.getId());
     //QUESTION: Why getVersionID != getID for datasetVersion?
-    DatasetVersion returnedDatasetVersionFromIndex = this.datasetVersionIndexDao.get(createdDatasetVersion.getVersionId().toString());
+    DatasetVersion datasetVersionFromIndex = this.datasetVersionIndexDao.get(returnedDatasetVersion.getVersionId().toString());
     //FIXME: Maybe use the service or DB-access/SQL/Search-Index directly for verification and don't use the repositories!?
 
-    assertThat(returnedDatasetVersion).isNotNull().extracting("metadata").extracting("title").isEqualTo(datasetTitle);
-    assertThat(returnedDatasetVersion).extracting("versionNumber").isEqualTo(1);
-    assertThat(returnedDatasetVersionFromIndex).isNotNull().extracting("metadata").extracting("title").isEqualTo(datasetTitle);
-    assertThat(returnedDatasetVersionFromIndex).extracting("versionNumber").isEqualTo(1);
+    List<DatasetVersion> createdDatasetVersions = List.of(returnedDatasetVersion, datasetVersionFromDB, datasetVersionFromIndex);
+
+    assertThat(createdDatasetVersions).doesNotContainNull();
+    assertThat(createdDatasetVersions).extracting("metadata").extracting("title").containsOnly(datasetTitle);
+    assertThat(createdDatasetVersions).extracting("versionNumber").containsOnly(1);
   }
 
 }
