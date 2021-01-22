@@ -9,6 +9,8 @@ import java.util.ArrayList;
 import java.util.Optional;
 import java.util.UUID;
 
+  import de.mpg.mpdl.r2d2.util.testdata.builder.R2D2PrincipalBuilder;
+import de.mpg.mpdl.r2d2.util.testdata.builder.UserAccountBuilder;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -138,10 +140,8 @@ public class WebSecurityTest {
     String testPW = "testPW";
     String encryptedPW = passwordEncoder.encode(testPW);
 
-    R2D2Principal userDetails = new R2D2Principal(testUsername, encryptedPW, new ArrayList<GrantedAuthority>());
-    UserAccount userAccount = new UserAccount();
-    userAccount.setId(UUID.randomUUID());
-    userDetails.setUserAccount(userAccount);
+    R2D2Principal userDetails = R2D2PrincipalBuilder.aR2D2Principal(testUsername, encryptedPW, new ArrayList<GrantedAuthority>())
+        .userAccount(UserAccountBuilder.anUserAccount().id(UUID.randomUUID()).build()).build();
 
     Mockito.when(this.userDetailsServiceImpl.loadUserByUsername(Mockito.any())).thenReturn(userDetails);
 

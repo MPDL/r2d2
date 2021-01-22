@@ -14,6 +14,7 @@ import de.mpg.mpdl.r2d2.search.dao.DatasetVersionDaoEs;
 import de.mpg.mpdl.r2d2.util.BaseIntegrationTest;
 import de.mpg.mpdl.r2d2.util.testdata.TestDataFactory;
 import de.mpg.mpdl.r2d2.util.testdata.builder.DatasetVersionMetadataBuilder;
+import de.mpg.mpdl.r2d2.util.testdata.builder.R2D2PrincipalBuilder;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -55,8 +56,8 @@ public class DatasetVersionServiceDbImplIT extends BaseIntegrationTest {
     DatasetVersion datasetVersion = TestDataFactory.aDatasetVersionWithCreationAndModificationDate().metadata(metadata).build();
 
     UserAccount userAccount = TestDataFactory.aUser().build();
-    R2D2Principal r2d2Principal = new R2D2Principal("username", "pw", new ArrayList<GrantedAuthority>());
-    r2d2Principal.setUserAccount(userAccount);
+    R2D2Principal r2d2Principal =
+        R2D2PrincipalBuilder.aR2D2Principal("username", "pw", new ArrayList<GrantedAuthority>()).userAccount(userAccount).build();
 
     //When
     DatasetVersion returnedDatasetVersion = this.datasetVersionServiceDbImpl.create(datasetVersion, r2d2Principal);

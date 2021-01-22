@@ -65,8 +65,8 @@ public class DatasetVersionServiceDbImplTest {
 
     UserAccount userAccount =
         UserAccountBuilder.anUserAccount().person(PersonBuilder.aPerson().givenName("GivenName").familyName("FamilyName").build()).build();
-    R2D2Principal r2d2Principal = new R2D2Principal("username", "pw", new ArrayList<GrantedAuthority>());
-    r2d2Principal.setUserAccount(userAccount);
+    R2D2Principal r2d2Principal =
+        R2D2PrincipalBuilder.aR2D2Principal("username", "pw", new ArrayList<GrantedAuthority>()).userAccount(userAccount).build();
 
     DatasetVersion savedDatasetVersion =
         DatasetVersionBuilder.aDatasetVersion().dataset(DatasetBuilder.aDataset().id(UUID.randomUUID()).build()).versionNumber(1).build();
