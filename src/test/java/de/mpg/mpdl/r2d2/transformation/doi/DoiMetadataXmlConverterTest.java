@@ -3,6 +3,9 @@ package de.mpg.mpdl.r2d2.transformation.doi;
 import de.mpg.mpdl.r2d2.transformation.doi.model.DoiCreator;
 import de.mpg.mpdl.r2d2.transformation.doi.model.DoiMetadata;
 import de.mpg.mpdl.r2d2.transformation.doi.model.DoiTitle;
+import de.mpg.mpdl.r2d2.util.testdata.builder.DoiCreatorBuilder;
+import de.mpg.mpdl.r2d2.util.testdata.builder.DoiMetadataBuilder;
+import de.mpg.mpdl.r2d2.util.testdata.builder.DoiTitleBuilder;
 import org.junit.jupiter.api.Test;
 import org.xml.sax.SAXException;
 
@@ -18,9 +21,11 @@ public class DoiMetadataXmlConverterTest {
   @Test
   public void testConvertToXML() throws JAXBException, SAXException {
     //Given
-    DoiMetadata doiMetadata = DoiMetadata.builder().titles(Arrays.asList(DoiTitle.builder().title("TestTitle").build()))
-        .creators(Arrays.asList(DoiCreator.builder().creatorName("Creator Name").givenName("Given Name").familyName("Family Name").build()))
-        .publicationYear(2020).build();
+    DoiMetadata doiMetadata =
+        DoiMetadataBuilder.aDoiMetadata().titles(Arrays.asList(DoiTitleBuilder.aDoiTitle().title("TestTitle").build()))
+            .creators(Arrays.asList(
+                DoiCreatorBuilder.aDoiCreator().creatorName("Creator Name").givenName("Given Name").familyName("Family Name").build()))
+            .publicationYear(2020).build();
 
     //When
     String metadataXml = doiMetadataXmlConverter.convertToXML(doiMetadata);

@@ -16,6 +16,7 @@ import de.mpg.mpdl.r2d2.model.aa.UserAccount;
 import de.mpg.mpdl.r2d2.search.service.impl.IndexingService;
 import de.mpg.mpdl.r2d2.service.storage.SwiftObjectStoreRepository;
 import de.mpg.mpdl.r2d2.util.DtoMapper;
+import de.mpg.mpdl.r2d2.util.testdata.builder.*;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
@@ -59,16 +60,16 @@ public class DatasetVersionServiceDbImplTest {
   public void testCreateMethodDelegationAndControlFlow()
       throws ValidationException, AuthorizationException, R2d2TechnicalException, InvalidStateException {
     //Given
-    DatasetVersionMetadata datasetVersionMetadata = DatasetVersionMetadata.builder().title("datasetTitle").build();
-    DatasetVersion datasetVersion = DatasetVersion.builder().metadata(datasetVersionMetadata).build();
+    DatasetVersionMetadata datasetVersionMetadata = DatasetVersionMetadataBuilder.aDatasetVersionMetadata().title("datasetTitle").build();
+    DatasetVersion datasetVersion = DatasetVersionBuilder.aDatasetVersion().metadata(datasetVersionMetadata).build();
 
     UserAccount userAccount =
-        UserAccount.builder().person(Person.builder().givenName("GivenName").familyName("FamilyName").build()).build();
+        UserAccountBuilder.anUserAccount().person(PersonBuilder.aPerson().givenName("GivenName").familyName("FamilyName").build()).build();
     R2D2Principal r2d2Principal = new R2D2Principal("username", "pw", new ArrayList<GrantedAuthority>());
     r2d2Principal.setUserAccount(userAccount);
 
     DatasetVersion savedDatasetVersion =
-        DatasetVersion.builder().dataset(Dataset.builder().id(UUID.randomUUID()).build()).versionNumber(1).build();
+        DatasetVersionBuilder.aDatasetVersion().dataset(DatasetBuilder.aDataset().id(UUID.randomUUID()).build()).versionNumber(1).build();
     Mockito.when(this.datasetVersionRepository.saveAndFlush(Mockito.any())).thenReturn(savedDatasetVersion);
 
     //When

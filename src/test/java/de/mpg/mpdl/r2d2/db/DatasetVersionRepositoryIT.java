@@ -4,6 +4,10 @@ import de.mpg.mpdl.r2d2.model.*;
 import de.mpg.mpdl.r2d2.util.BaseIntegrationTest;
 import de.mpg.mpdl.r2d2.util.testdata.EntityManagerWrapper;
 import de.mpg.mpdl.r2d2.util.testdata.TestDataFactory;
+import de.mpg.mpdl.r2d2.util.testdata.builder.DatasetVersionBuilder;
+import de.mpg.mpdl.r2d2.util.testdata.builder.DatasetVersionMetadataBuilder;
+import de.mpg.mpdl.r2d2.util.testdata.builder.GeolocationBuilder;
+import de.mpg.mpdl.r2d2.util.testdata.builder.PersonBuilder;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -36,11 +40,10 @@ public class DatasetVersionRepositoryIT extends BaseIntegrationTest {
     //Given
     int latestVersionNumber = 2;
 
-    Dataset dataset = TestDataFactory.newDatasetWithCreationAndModificationDate();
-    DatasetVersion datasetVersion1 =
-        TestDataFactory.newDatasetVersionWithCreationAndModificationDate().toBuilder().dataset(dataset).build();
-    DatasetVersion datasetVersion2 = TestDataFactory.newDatasetVersionWithCreationAndModificationDate().toBuilder().dataset(dataset)
-        .versionNumber(latestVersionNumber).build();
+    Dataset dataset = TestDataFactory.aDatasetWithCreationAndModificationDate().build();
+    DatasetVersion datasetVersion1 = TestDataFactory.aDatasetVersionWithCreationAndModificationDate().dataset(dataset).build();
+    DatasetVersion datasetVersion2 =
+        TestDataFactory.aDatasetVersionWithCreationAndModificationDate().dataset(dataset).versionNumber(latestVersionNumber).build();
 
     entityManagerWrapper.persist(dataset);
     entityManagerWrapper.merge(datasetVersion1);
@@ -60,11 +63,11 @@ public class DatasetVersionRepositoryIT extends BaseIntegrationTest {
     String description = "Description";
     double latitude = 1.2;
 
-    Geolocation geolocation = Geolocation.builder().latitude(latitude).build();
+    Geolocation geolocation = GeolocationBuilder.aGeolocation().latitude(latitude).build();
 
-    DatasetVersionMetadata metadata = DatasetVersionMetadata.builder().title(title).authors(Arrays.asList(Person.builder().build()))
-        .description(description).geolocation(geolocation).build();
-    DatasetVersion datasetVersion = DatasetVersion.builder().metadata(metadata).build();
+    DatasetVersionMetadata metadata = DatasetVersionMetadataBuilder.aDatasetVersionMetadata().title(title)
+        .authors(Arrays.asList(PersonBuilder.aPerson().build())).description(description).geolocation(geolocation).build();
+    DatasetVersion datasetVersion = DatasetVersionBuilder.aDatasetVersion().metadata(metadata).build();
 
     //When
     datasetVersionRepository.save(datasetVersion);

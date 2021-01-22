@@ -6,6 +6,9 @@ import de.mpg.mpdl.r2d2.model.Person;
 import de.mpg.mpdl.r2d2.transformation.doi.model.DoiIdentifier;
 import de.mpg.mpdl.r2d2.transformation.doi.model.DoiMetadata;
 import de.mpg.mpdl.r2d2.transformation.doi.model.DoiResourceType;
+import de.mpg.mpdl.r2d2.util.testdata.builder.DatasetVersionBuilder;
+import de.mpg.mpdl.r2d2.util.testdata.builder.DatasetVersionMetadataBuilder;
+import de.mpg.mpdl.r2d2.util.testdata.builder.PersonBuilder;
 import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;
 
@@ -24,12 +27,13 @@ public class DoiMetadataMapperTest {
   public void testConvertToDoiMetadata() {
     //Given
     String title = "Title";
-    Person author1 = Person.builder().givenName("G1").familyName("F1").build();
-    Person author2 = Person.builder().givenName("G2").familyName("F2").build();
+    Person author1 = PersonBuilder.aPerson().givenName("G1").familyName("F1").build();
+    Person author2 = PersonBuilder.aPerson().givenName("G2").familyName("F2").build();
     OffsetDateTime publicationDate = OffsetDateTime.now().truncatedTo(ChronoUnit.MICROS);
 
-    DatasetVersionMetadata metadata = DatasetVersionMetadata.builder().title(title).authors(Arrays.asList(author1, author2)).build();
-    DatasetVersion datasetVersion = DatasetVersion.builder().metadata(metadata).publicationDate(publicationDate).build();
+    DatasetVersionMetadata metadata =
+        DatasetVersionMetadataBuilder.aDatasetVersionMetadata().title(title).authors(Arrays.asList(author1, author2)).build();
+    DatasetVersion datasetVersion = DatasetVersionBuilder.aDatasetVersion().metadata(metadata).publicationDate(publicationDate).build();
 
     //When
     DoiMetadata doiMetadata = doiMetadataMapper.convertToDoiMetadata(datasetVersion);
@@ -46,7 +50,7 @@ public class DoiMetadataMapperTest {
   @Test
   public void testConvertEmptyDatasetVersionToDoiMetadata() {
     //Given
-    DatasetVersion datasetVersion = DatasetVersion.builder().build();
+    DatasetVersion datasetVersion = DatasetVersionBuilder.aDatasetVersion().build();
 
     //When
     DoiMetadata doiMetadata = doiMetadataMapper.convertToDoiMetadata(datasetVersion);

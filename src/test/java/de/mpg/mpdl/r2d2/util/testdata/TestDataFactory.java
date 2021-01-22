@@ -5,6 +5,10 @@ import de.mpg.mpdl.r2d2.model.DatasetVersion;
 import de.mpg.mpdl.r2d2.model.Person;
 import de.mpg.mpdl.r2d2.model.aa.UserAccount;
 import de.mpg.mpdl.r2d2.util.Utils;
+import de.mpg.mpdl.r2d2.util.testdata.builder.DatasetBuilder;
+import de.mpg.mpdl.r2d2.util.testdata.builder.DatasetVersionBuilder;
+import de.mpg.mpdl.r2d2.util.testdata.builder.PersonBuilder;
+import de.mpg.mpdl.r2d2.util.testdata.builder.UserAccountBuilder;
 
 import java.util.Arrays;
 
@@ -18,41 +22,31 @@ public class TestDataFactory {
 
   //TODO: Create a Factory-Class for each model class?
 
-  public static Dataset newDatasetWithCreationAndModificationDate() {
-    Dataset dataset = new Dataset();
+  public static DatasetBuilder aDatasetWithCreationAndModificationDate() {
+    DatasetBuilder datasetBuilder = DatasetBuilder.aDataset().creationDate(Utils.generateCurrentDateTimeForDatabase())
+        .modificationDate(Utils.generateCurrentDateTimeForDatabase());
 
-    dataset.setCreationDate(Utils.generateCurrentDateTimeForDatabase());
-    dataset.setModificationDate(Utils.generateCurrentDateTimeForDatabase());
-
-    return dataset;
+    return datasetBuilder;
   }
 
-  public static DatasetVersion newDatasetVersionWithCreationAndModificationDate() {
-    DatasetVersion datasetVersion = new DatasetVersion();
+  public static DatasetVersionBuilder aDatasetVersionWithCreationAndModificationDate() {
+    DatasetVersionBuilder datasetVersionBuilder = DatasetVersionBuilder.aDatasetVersion()
+        .creationDate(Utils.generateCurrentDateTimeForDatabase()).modificationDate(Utils.generateCurrentDateTimeForDatabase());
 
-    datasetVersion.setCreationDate(Utils.generateCurrentDateTimeForDatabase());
-    datasetVersion.setModificationDate(Utils.generateCurrentDateTimeForDatabase());
-    //versionNumber, state, dataset are set per default
-
-    return datasetVersion;
+    return datasetVersionBuilder;
   }
 
-  public static UserAccount newUser() {
-    UserAccount userAccount = new UserAccount();
+  public static UserAccountBuilder aUser() {
+    Person person1 = PersonBuilder.aPerson().givenName("usersGivenName").familyName("usersFamilyName")
+        //nameIdentifier, affiliations NOT defined
+        .build();
 
-    userAccount.setCreationDate(Utils.generateCurrentDateTimeForDatabase());
-    userAccount.setModificationDate(Utils.generateCurrentDateTimeForDatabase());
-    //id, creator, modifier NOT defined
+    UserAccountBuilder userAccountBuilder = UserAccountBuilder.anUserAccount().creationDate(Utils.generateCurrentDateTimeForDatabase())
+        .modificationDate(Utils.generateCurrentDateTimeForDatabase())
+        //id, creator, modifier NOT defined
+        .email("test@email.org").person(person1).roles(Arrays.asList(UserAccount.Role.USER));
 
-    userAccount.setEmail("test@email.org");
-    Person person = new Person();
-    person.setGivenName("usersGivenName");
-    person.setFamilyName("usersFamilyName");
-    //nameIdentifier, affiliations NOT defined
-    userAccount.setPerson(person);
-    userAccount.setRoles(Arrays.asList(UserAccount.Role.USER));
-
-    return userAccount;
+    return userAccountBuilder;
   }
 
 }
