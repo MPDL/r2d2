@@ -1,17 +1,9 @@
 package de.mpg.mpdl.r2d2.model;
 
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.NoArgsConstructor;
-
 import java.util.ArrayList;
 import java.util.List;
 
 
-@Builder(toBuilder = true)
-@NoArgsConstructor
-@AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class FileUploadStatus {
 
 
@@ -19,7 +11,6 @@ public class FileUploadStatus {
 
   private int totalNumberOfChunks;
 
-  @Builder.Default
   private List<FileChunk> chunks = new ArrayList<>();
 
   public String getCurrentChecksum() {

@@ -1,16 +1,8 @@
 package de.mpg.mpdl.r2d2.model;
 
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.NoArgsConstructor;
-
 import java.util.ArrayList;
 import java.util.List;
 
-@Builder(toBuilder = true)
-@NoArgsConstructor
-@AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class Person {
 
   private String givenName;
@@ -21,7 +13,6 @@ public class Person {
   private String orcid;
 
   // Affiliation contains department/group
-  @Builder.Default
   private List<Affiliation> affiliations = new ArrayList<>();
 
   public String getGivenName() {

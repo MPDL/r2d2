@@ -7,15 +7,7 @@ import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.NoArgsConstructor;
 
-
-@Builder(toBuilder = true)
-@NoArgsConstructor
-@AllArgsConstructor(access = AccessLevel.PRIVATE)
 @JsonInclude(Include.NON_EMPTY)
 public class DatasetVersionMetadata {
 
@@ -23,7 +15,6 @@ public class DatasetVersionMetadata {
 
   // creator is in BaseDateDB
 
-  @Builder.Default
   private List<Person> authors = new ArrayList<>();
 
   private String description;
@@ -42,7 +33,6 @@ public class DatasetVersionMetadata {
   // publicationDate (issued) is in DatasetVersion
   // (withdrawn) is modificationDate of a DatasetVersion with state WITHDRAWN
 
-  @Builder.Default
   private List<Publication> correspondingPapers = new ArrayList<>();
 
   private String language;

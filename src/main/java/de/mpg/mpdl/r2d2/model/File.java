@@ -1,32 +1,29 @@
 package de.mpg.mpdl.r2d2.model;
 
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.NoArgsConstructor;
-import lombok.experimental.SuperBuilder;
-import org.hibernate.annotations.Type;
-
-import javax.persistence.*;
 import java.util.HashSet;
 import java.util.Set;
 
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
+import javax.persistence.ManyToMany;
+
+import org.hibernate.annotations.Type;
+
 // Item = File
-@SuperBuilder(toBuilder = true)
-@NoArgsConstructor
-@AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Entity
 public class File extends BaseDb {
 
   @Enumerated(EnumType.STRING)
   private UploadState state = UploadState.INITIATED;
 
-  @Builder.Default
   @Type(type = "jsonb")
   @Column(columnDefinition = "jsonb")
   private FileUploadStatus stateInfo = new FileUploadStatus();
 
-  @Builder.Default
   @ManyToMany(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
   private Set<DatasetVersion> versions = new HashSet();
 

@@ -1,15 +1,11 @@
 package de.mpg.mpdl.r2d2.model;
 
-import lombok.Builder;
-
-import javax.persistence.Embeddable;
 import java.io.Serializable;
 import java.util.Objects;
 import java.util.UUID;
 
-@Builder(toBuilder = true)
-//@NoArgsConstructor is already defined
-//@AllArgsConstructor is already defined
+import javax.persistence.Embeddable;
+
 @Embeddable
 public class VersionId implements Serializable {
 

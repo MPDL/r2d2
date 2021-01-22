@@ -1,16 +1,10 @@
 package de.mpg.mpdl.r2d2.search.model;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.NoArgsConstructor;
-
 import java.util.List;
 
-@Builder(toBuilder = true)
-@NoArgsConstructor
-@AllArgsConstructor(access = AccessLevel.PRIVATE)
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonNaming;
+
 public class SearchResult<T> {
 
   private int total;

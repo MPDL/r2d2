@@ -1,35 +1,47 @@
 package de.mpg.mpdl.r2d2.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import de.mpg.mpdl.r2d2.model.Dataset.State;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.NoArgsConstructor;
-import lombok.experimental.SuperBuilder;
+import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
+
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.IdClass;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToMany;
+import javax.persistence.ManyToOne;
+import javax.persistence.MapsId;
+import javax.persistence.Transient;
+
+import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 import org.hibernate.annotations.Type;
 
-import javax.persistence.*;
-import java.time.OffsetDateTime;
-import java.util.UUID;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
-@SuperBuilder(toBuilder = true)
-@NoArgsConstructor
-@AllArgsConstructor(access = AccessLevel.PRIVATE)
+import de.mpg.mpdl.r2d2.model.Dataset.State;
+
 @Entity
 @IdClass(VersionId.class)
 public class DatasetVersion extends BaseDateDb {
 
-  @Builder.Default
+
   @Id
   @Column(nullable = false)
   public int versionNumber = 1;
 
   // newest Version = latestVersion in Dataset
 
-  @Builder.Default
   @Enumerated(EnumType.STRING)
   @Column(nullable = false)
   private Dataset.State state = State.PRIVATE;
@@ -42,12 +54,10 @@ public class DatasetVersion extends BaseDateDb {
 
   private String publicationComment;
 
-  @Builder.Default
   @Type(type = "jsonb")
   @Column(columnDefinition = "jsonb")
   private DatasetVersionMetadata metadata = new DatasetVersionMetadata();
 
-  @Builder.Default
   @Id
   @MapsId("id")
   @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})

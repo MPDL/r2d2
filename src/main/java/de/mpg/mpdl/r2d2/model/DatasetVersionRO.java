@@ -1,14 +1,7 @@
 package de.mpg.mpdl.r2d2.model;
 
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-
 import java.util.UUID;
 
-@Builder(toBuilder = true)
-//@NoArgsConstructor is already defined
-@AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class DatasetVersionRO {
 
   private UUID id;
