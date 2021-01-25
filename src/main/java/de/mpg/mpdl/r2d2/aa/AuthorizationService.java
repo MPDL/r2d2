@@ -90,57 +90,7 @@ public class AuthorizationService {
       Object... objects) throws AuthorizationException, R2d2TechnicalException {
 
     QueryBuilder filterQuery = getAaFilterQuery(serviceName, serviceMethod, principal, objects);
-
-    //    if (removeVersionDuplicates) {
-    //
-    //
-    //      QueryBuilder isLatestVersionQuery = QueryBuilders.scriptQuery(new Script(
-    //          "doc['" + DatasetVersionDaoImpl.INDEX_DATASET_LATEST_VERSION + "']==doc['" + DatasetVersionDaoImpl.INDEX_VERSION_NUMBER + "']"));
-    //      QueryBuilder isPublicQuery = QueryBuilders.termQuery(DatasetVersionDaoImpl.INDEX_STATE, Dataset.State.PUBLIC.name());
-    //
-    //      //Only remove duplicates when logged in. Otherwise,the query does not work, as it would only return latest versions of public datasets.
-    //      if (filterQuery != null && principal != null && principal.getUserAccount() != null) {
-    //        /*
-    //         * (
-    //            Latest Version
-    //            AND
-    //            (Owner OR Data Manager on dataset)
-    //            )
-    //            OR
-    //            (
-    //            state = public
-    //            AND NOT
-    //            (Owner OR Data Manager)
-    //            )
-    //         */
-    //
-    //
-    //        /*
-    //        BoolQueryBuilder userQuery = QueryBuilders.boolQuery();
-    //        userQuery.should(QueryBuilders.boolQuery().must(isLatestVersionQuery).must(filterQuery))
-    //            .should(QueryBuilders.boolQuery().must(isPublicQuery).mustNot(filterQuery));
-    //        filterQuery = userQuery; 
-    //        */
-    //        
-    //        /*
-    //         * NOT
-    //          (PUBLIC
-    //          AND NOT latest Version
-    //          AND OWNER)
-    //         */
-    //        BoolQueryBuilder userQuery = QueryBuilders.boolQuery();
-    //        userQuery.must(filterQuery).mustNot(QueryBuilders.boolQuery().mustNot(isLatestVersionQuery).must(filterQuery));
-    //        filterQuery = userQuery; 
-    //        
-    //      }
-    //
-    //      //if AA query is empty, everything can be viewed (e.g. by admin). Thus, return all latest versions.
-    //      else if (filterQuery == null) {
-    //        filterQuery = isLatestVersionQuery;
-    //      }
-    //
-    //    }
-
+    
     if (filterQuery != null) {
       BoolQueryBuilder completeQuery = QueryBuilders.boolQuery();
       if (query != null) {
