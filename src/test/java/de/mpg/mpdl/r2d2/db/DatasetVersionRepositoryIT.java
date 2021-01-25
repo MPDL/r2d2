@@ -82,10 +82,10 @@ public class DatasetVersionRepositoryIT extends BaseIntegrationTest {
 
     DatasetVersionMetadata returnedMetadata = datasetVersions.stream().findFirst().get().getMetadata();
     assertThat(returnedMetadata).isNotNull();
-    assertThat(returnedMetadata).extracting("title").isEqualTo(title);
-    assertThat(returnedMetadata).extracting("authors").isNotNull();
-    assertThat(returnedMetadata).extracting("description").isEqualTo(description);
-    assertThat(returnedMetadata).extracting("geolocation").extracting("latitude").isEqualTo(latitude);
+    assertThat(returnedMetadata.getTitle()).isEqualTo(title);
+    assertThat(returnedMetadata.getAuthors()).isNotNull();
+    assertThat(returnedMetadata.getDescription()).isEqualTo(description);
+    assertThat(returnedMetadata.getGeolocation().getLatitude()).isEqualTo(latitude);
   }
 
 }

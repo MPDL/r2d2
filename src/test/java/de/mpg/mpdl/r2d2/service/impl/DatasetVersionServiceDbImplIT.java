@@ -34,7 +34,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class DatasetVersionServiceDbImplIT extends BaseIntegrationTest {
 
   @Autowired
-  private UserAccountRepository userAccountRepository;
+  private DatasetVersionServiceDbImpl datasetVersionServiceDbImpl;
 
   @Autowired
   private DatasetVersionRepository datasetVersionRepository;
@@ -43,9 +43,6 @@ public class DatasetVersionServiceDbImplIT extends BaseIntegrationTest {
   @Autowired
   @Qualifier("PublicDatasetVersionDaoImpl")
   private DatasetVersionDaoEs datasetVersionIndexDao;
-
-  @Autowired
-  private DatasetVersionServiceDbImpl datasetVersionServiceDbImpl;
 
   @Test
   public void testCreateDatasetVersion() throws ValidationException, AuthorizationException, R2d2TechnicalException, InvalidStateException {
@@ -71,8 +68,9 @@ public class DatasetVersionServiceDbImplIT extends BaseIntegrationTest {
     List<DatasetVersion> createdDatasetVersions = List.of(returnedDatasetVersion, datasetVersionFromDB, datasetVersionFromIndex);
 
     assertThat(createdDatasetVersions).doesNotContainNull();
-    assertThat(createdDatasetVersions).extracting("metadata").extracting("title").containsOnly(datasetTitle);
-    assertThat(createdDatasetVersions).extracting("versionNumber").containsOnly(1);
+    assertThat(createdDatasetVersions).extracting(DatasetVersion::getMetadata).extracting(DatasetVersionMetadata::getTitle)
+        .containsOnly(datasetTitle);
+    assertThat(createdDatasetVersions).extracting(DatasetVersion::getVersionNumber).containsOnly(1);
   }
 
 }

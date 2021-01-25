@@ -3,9 +3,7 @@ package de.mpg.mpdl.r2d2.transformation.doi;
 import de.mpg.mpdl.r2d2.model.DatasetVersion;
 import de.mpg.mpdl.r2d2.model.DatasetVersionMetadata;
 import de.mpg.mpdl.r2d2.model.Person;
-import de.mpg.mpdl.r2d2.transformation.doi.model.DoiIdentifier;
-import de.mpg.mpdl.r2d2.transformation.doi.model.DoiMetadata;
-import de.mpg.mpdl.r2d2.transformation.doi.model.DoiResourceType;
+import de.mpg.mpdl.r2d2.transformation.doi.model.*;
 import de.mpg.mpdl.r2d2.util.testdata.builder.DatasetVersionBuilder;
 import de.mpg.mpdl.r2d2.util.testdata.builder.DatasetVersionMetadataBuilder;
 import de.mpg.mpdl.r2d2.util.testdata.builder.PersonBuilder;
@@ -40,10 +38,10 @@ public class DoiMetadataMapperTest {
 
     //Then
     assertThat(doiMetadata).isNotNull();
-    assertThat(doiMetadata.getTitles()).extracting("title").containsExactly(title);
-    assertThat(doiMetadata.getCreators()).extracting("creatorName", "GivenName", "FamilyName").containsExactly(
-        tuple(author1.getFamilyName() + ", " + author1.getGivenName(), author1.getGivenName(), author1.getFamilyName()),
-        tuple(author2.getFamilyName() + ", " + author2.getGivenName(), author2.getGivenName(), author2.getFamilyName()));
+    assertThat(doiMetadata.getTitles()).extracting(DoiTitle::getTitle).containsExactly(title);
+    assertThat(doiMetadata.getCreators()).extracting(DoiCreator::getCreatorName, DoiCreator::getGivenName, DoiCreator::getFamilyName)
+        .containsExactly(tuple(author1.getFamilyName() + ", " + author1.getGivenName(), author1.getGivenName(), author1.getFamilyName()),
+            tuple(author2.getFamilyName() + ", " + author2.getGivenName(), author2.getGivenName(), author2.getFamilyName()));
     assertThat(doiMetadata.getPublicationYear()).isEqualTo(publicationDate.getYear());
   }
 
@@ -61,9 +59,9 @@ public class DoiMetadataMapperTest {
     assertThat(doiMetadata.getCreators()).isEmpty();
     assertThat(doiMetadata.getPublicationYear()).isEqualTo(0);
     //Check default values
-    assertThat(doiMetadata.getIdentifier()).extracting("identifierType").isEqualTo(DoiIdentifier.IDENTIFIER_TYPE_DOI);
+    assertThat(doiMetadata.getIdentifier().getIdentifierType()).isEqualTo(DoiIdentifier.IDENTIFIER_TYPE_DOI);
     assertThat(doiMetadata.getPublisher()).isEqualTo(DoiMetadata.PUBLISHER_MPG);
-    assertThat(doiMetadata.getResourceType()).extracting("resourceTypeGeneral").isEqualTo(DoiResourceType.RESOURCE_TYPE_GENERAL_DATASET);
+    assertThat(doiMetadata.getResourceType().getResourceTypeGeneral()).isEqualTo(DoiResourceType.RESOURCE_TYPE_GENERAL_DATASET);
   }
 
 }

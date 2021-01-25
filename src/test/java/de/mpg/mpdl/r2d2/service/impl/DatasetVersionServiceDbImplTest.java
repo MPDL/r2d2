@@ -88,7 +88,7 @@ public class DatasetVersionServiceDbImplTest {
     assertThat(objectArguments.getAllValues()).last().isInstanceOf(DatasetVersion.class);
 
     inOrder.verify(datasetVersionRepository).saveAndFlush(datasetVersionArgument.capture());
-    assertThat(datasetVersionArgument.getValue()).extracting("metadata").isEqualTo(datasetVersionMetadata);
+    assertThat(datasetVersionArgument.getValue()).extracting(DatasetVersion::getMetadata).isEqualTo(datasetVersionMetadata);
 
     inOrder.verify(indexingService).reindexDataset(Mockito.eq(savedDatasetVersion.getId()), Mockito.eq(true));
   }
