@@ -36,7 +36,7 @@ public class TestDataFactory {
     return datasetVersionBuilder;
   }
 
-  public static UserAccountBuilder aUser() {
+  public static UserAccountBuilder anUser() {
     Person person1 = PersonBuilder.aPerson().givenName("usersGivenName").familyName("usersFamilyName")
         //nameIdentifier, affiliations NOT defined
         .build();
