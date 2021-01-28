@@ -9,7 +9,8 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import de.mpg.mpdl.r2d2.service.storage.SwiftObjectStoreRepository;
 
 @ExtendWith({SpringExtension.class, DeleteDatabaseExtension.class, DeleteSearchIndexExtension.class})
-@SpringBootTest
+//Deactivate DummyDataInitializer default data initialization by setting init.data.creation=false
+@SpringBootTest(properties = {"init.data.creation=false"})
 @ContextConfiguration(initializers = {DataBaseLauncher.Initializer.class, SearchEngineLauncher.Initializer.class})
 public abstract class BaseIntegrationTest {
 
@@ -18,6 +19,8 @@ public abstract class BaseIntegrationTest {
   // The container can then be used by all inheriting test classes.
   // At the end of the test suite the Ryuk container that is started by Testcontainers core will take care of stopping the singleton container.
   // see: https://www.testcontainers.org/test_framework_integration/manual_lifecycle_control/
+
+  //TODO: Overwrite application.properties defining access to external Services
 
   //TODO: Enhance/Adapt the mocking of the cloud storage access
 
