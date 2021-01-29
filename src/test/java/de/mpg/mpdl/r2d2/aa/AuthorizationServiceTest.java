@@ -34,7 +34,7 @@ class AuthorizationServiceTest {
   @InjectMocks
   private final AuthorizationService authorizationService = new AuthorizationService(r2D2Application.jsonObjectMapper());
 
-  //TODO: UserAccountRepository is never used in AuthorizationService => Remove it from AuthorizationService and this Test
+  //TODO: UserAccountRepository is never used in AuthorizationService => Remove it from AuthorizationService and this Test (Remove @InjectMocks)
   @Mock
   private UserAccountRepository userAccountRepository;
 
@@ -50,9 +50,8 @@ class AuthorizationServiceTest {
     DatasetVersion datasetVersion = DatasetVersionBuilder.aDatasetVersion().build();
 
     //When
-    ThrowingCallable checkAuthorizationCode = () ->
-      this.authorizationService.checkAuthorization(DatasetVersionServiceDbImpl.class.getCanonicalName(), method, r2D2Principal,
-          datasetVersion);
+    ThrowingCallable checkAuthorizationCode = () -> this.authorizationService
+        .checkAuthorization(DatasetVersionServiceDbImpl.class.getCanonicalName(), method, r2D2Principal, datasetVersion);
 
     //Then
     assertThatCode(checkAuthorizationCode).doesNotThrowAnyException();
@@ -70,9 +69,8 @@ class AuthorizationServiceTest {
     DatasetVersion datasetVersion = DatasetVersionBuilder.aDatasetVersion().build();
 
     //When
-    ThrowingCallable checkAuthorizationCode = () ->
-      this.authorizationService.checkAuthorization(DatasetVersionServiceDbImpl.class.getCanonicalName(), method, r2D2Principal,
-          datasetVersion);
+    ThrowingCallable checkAuthorizationCode = () -> this.authorizationService
+        .checkAuthorization(DatasetVersionServiceDbImpl.class.getCanonicalName(), method, r2D2Principal, datasetVersion);
 
     //Then
     assertThatCode(checkAuthorizationCode).isInstanceOf(AuthorizationException.class).hasMessage("User is not owner of object.");
@@ -84,7 +82,8 @@ class AuthorizationServiceTest {
     //Given
     String method = "update";
 
-    UserAccount userAccount = UserAccountBuilder.anUserAccount().roles(Collections.singletonList(UserAccount.Role.USER)).id(UUID.randomUUID()).build();
+    UserAccount userAccount =
+        UserAccountBuilder.anUserAccount().roles(Collections.singletonList(UserAccount.Role.USER)).id(UUID.randomUUID()).build();
     R2D2Principal r2D2Principal = R2D2PrincipalBuilder.aR2D2Principal("userName", "pw", new ArrayList<>()).userAccount(userAccount).build();
 
     //TODO: Why must user be creator of the Dataset and not the DatasetVersion in this case?
@@ -92,9 +91,8 @@ class AuthorizationServiceTest {
     DatasetVersion datasetVersion = DatasetVersionBuilder.aDatasetVersion().dataset(dataset).build();
 
     //When
-    ThrowingCallable checkAuthorizationCode = () ->
-        this.authorizationService.checkAuthorization(DatasetVersionServiceDbImpl.class.getCanonicalName(), method, r2D2Principal,
-          datasetVersion);
+    ThrowingCallable checkAuthorizationCode = () -> this.authorizationService
+        .checkAuthorization(DatasetVersionServiceDbImpl.class.getCanonicalName(), method, r2D2Principal, datasetVersion);
 
     //Then
     assertThatCode(checkAuthorizationCode).doesNotThrowAnyException();
@@ -106,15 +104,15 @@ class AuthorizationServiceTest {
     //Given
     String method = "update";
 
-    UserAccount userAccount = UserAccountBuilder.anUserAccount().roles(Collections.singletonList(UserAccount.Role.ADMIN)).id(UUID.randomUUID()).build();
+    UserAccount userAccount =
+        UserAccountBuilder.anUserAccount().roles(Collections.singletonList(UserAccount.Role.ADMIN)).id(UUID.randomUUID()).build();
     R2D2Principal r2D2Principal = R2D2PrincipalBuilder.aR2D2Principal("userName", "pw", new ArrayList<>()).userAccount(userAccount).build();
 
     DatasetVersion datasetVersion = DatasetVersionBuilder.aDatasetVersion().build();
 
     //When
-    ThrowingCallable checkAuthorizationCode = () ->
-      this.authorizationService.checkAuthorization(DatasetVersionServiceDbImpl.class.getCanonicalName(), method, r2D2Principal,
-          datasetVersion);
+    ThrowingCallable checkAuthorizationCode = () -> this.authorizationService
+        .checkAuthorization(DatasetVersionServiceDbImpl.class.getCanonicalName(), method, r2D2Principal, datasetVersion);
 
     //Then
     assertThatCode(checkAuthorizationCode).doesNotThrowAnyException();
