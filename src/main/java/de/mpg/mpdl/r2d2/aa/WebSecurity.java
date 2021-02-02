@@ -13,6 +13,8 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import de.mpg.mpdl.r2d2.db.UserAccountRepository;
 
 @EnableWebSecurity
@@ -22,16 +24,19 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
   private BCryptPasswordEncoder bCryptPasswordEncoder;
 
   private UserAccountRepository userAccountRepository;
+  private ObjectMapper objectMapper;
 
-  public WebSecurity(UserDetailsServiceImpl userDetailsService, BCryptPasswordEncoder bCryptPasswordEncoder, UserAccountRepository uar) {
+  public WebSecurity(UserDetailsServiceImpl userDetailsService, BCryptPasswordEncoder bCryptPasswordEncoder, UserAccountRepository uar,
+      ObjectMapper om) {
     this.userDetailsService = userDetailsService;
     this.bCryptPasswordEncoder = bCryptPasswordEncoder;
     this.userAccountRepository = uar;
+    this.objectMapper = om;
   }
 
   @Override
   protected void configure(HttpSecurity http) throws Exception {
-    http.cors().and().csrf().disable().addFilter(new JWTLoginFilter(authenticationManager()))
+    http.cors().and().csrf().disable().addFilter(new JWTLoginFilter(authenticationManager(), objectMapper))
         .addFilter(new JWTAuthenticationFilter(authenticationManager(), userAccountRepository))
         .addFilterBefore(new ExceptionFilter(), JWTAuthenticationFilter.class)
         // this disables session creation on Spring Security

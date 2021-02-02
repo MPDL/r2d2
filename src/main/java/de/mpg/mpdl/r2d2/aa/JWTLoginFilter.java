@@ -9,6 +9,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -39,12 +40,13 @@ public class JWTLoginFilter extends UsernamePasswordAuthenticationFilter {
   public static final String TOKEN_PREFIX = "Bearer ";
   public static final String HEADER_STRING = "Authorization";
 
-
+  private ObjectMapper mapper;
 
   private AuthenticationManager authenticationManager;
 
-  public JWTLoginFilter(AuthenticationManager authenticationManager) {
+  public JWTLoginFilter(AuthenticationManager authenticationManager, ObjectMapper mapper) {
     this.authenticationManager = authenticationManager;
+    this.mapper = mapper;
   }
 
   @Override
@@ -64,9 +66,18 @@ public class JWTLoginFilter extends UsernamePasswordAuthenticationFilter {
       throws IOException, ServletException {
 
     UserAccount ua = ((R2D2Principal) auth.getPrincipal()).getUserAccount();
+
+    //Set token in response header
     String token = JWT.create().withSubject(((User) auth.getPrincipal()).getUsername()).withClaim("user_id", ua.getId().toString())
         .withExpiresAt(new Date(System.currentTimeMillis() + EXPIRATION_TIME)).sign(Algorithm.HMAC512(SECRET.getBytes()));
     res.addHeader(HEADER_STRING, TOKEN_PREFIX + token);
+
+
+    //Set user json in response body
+    res.setContentType("application/json");
+    res.setCharacterEncoding("UTF-8");
+    res.getWriter().write(mapper.writeValueAsString(ua));
+
   }
 
 }

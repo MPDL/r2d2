@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.Optional;
 import java.util.UUID;
 
-  import de.mpg.mpdl.r2d2.util.testdata.builder.R2D2PrincipalBuilder;
+import de.mpg.mpdl.r2d2.util.testdata.builder.R2D2PrincipalBuilder;
 import de.mpg.mpdl.r2d2.util.testdata.builder.UserAccountBuilder;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;

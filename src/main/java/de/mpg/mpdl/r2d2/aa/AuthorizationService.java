@@ -90,7 +90,7 @@ public class AuthorizationService {
       Object... objects) throws AuthorizationException, R2d2TechnicalException {
 
     QueryBuilder filterQuery = getAaFilterQuery(serviceName, serviceMethod, principal, objects);
-    
+
     if (filterQuery != null) {
       BoolQueryBuilder completeQuery = QueryBuilders.boolQuery();
       if (query != null) {
