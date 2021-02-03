@@ -1,5 +1,7 @@
 package de.mpg.mpdl.r2d2.util;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -9,6 +11,8 @@ import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequest;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestHighLevelClient;
+import org.elasticsearch.client.core.CountRequest;
+import org.elasticsearch.client.core.CountResponse;
 import org.elasticsearch.client.indices.CreateIndexRequest;
 import org.elasticsearch.client.indices.GetIndexRequest;
 import org.elasticsearch.client.indices.GetIndexResponse;
@@ -23,21 +27,48 @@ public class DeleteSearchIndexExtension implements AfterEachCallback {
 
   @Override
   public void afterEach(ExtensionContext context) throws Exception {
-
     RestHighLevelClient elasticSearchClient =
         new RestHighLevelClient(RestClient.builder(HttpHost.create(SearchEngineLauncher.ELASTIC_SEARCH_CONTAINER.getHttpHostAddress())));
 
     //TODO: Maybe read settings and mappings from the resource files, instead of getting them from the already created indices!?
+    GetIndexResponse allIndicesResponse = elasticSearchClient.indices().get(new GetIndexRequest("_all"), RequestOptions.DEFAULT);
 
-    GetIndexResponse getIndexResponse = elasticSearchClient.indices().get(new GetIndexRequest("_all"), RequestOptions.DEFAULT);
+    List<String> indicesToRecreate = this.getIndicesNotEmpty(elasticSearchClient, allIndicesResponse);
+    this.deleteIndices(elasticSearchClient, indicesToRecreate);
+    this.reCreateIndices(elasticSearchClient, allIndicesResponse, indicesToRecreate);
+
+    elasticSearchClient.close();
+  }
+
+  private List<String> getIndicesNotEmpty(RestHighLevelClient elasticSearchClient, GetIndexResponse getIndexResponse) throws IOException {
     String[] indices = getIndexResponse.getIndices();
-    Map<String, List<AliasMetaData>> aliases = getIndexResponse.getAliases();
-    Map<String, MappingMetaData> mappings = getIndexResponse.getMappings();
-    Map<String, Settings> settings = getIndexResponse.getSettings();
-
-    elasticSearchClient.indices().delete(new DeleteIndexRequest("_all"), RequestOptions.DEFAULT);
+    List<String> indicesNotEmpty = new ArrayList<>();
 
     for (String index : indices) {
+      CountRequest countRequest = new CountRequest(index);
+      CountResponse countResponse = elasticSearchClient.count(countRequest, RequestOptions.DEFAULT);
+      if (countResponse.getCount() > 0) {
+        indicesNotEmpty.add(index);
+      }
+    }
+
+    return indicesNotEmpty;
+  }
+
+  private void deleteIndices(RestHighLevelClient elasticSearchClient, List<String> indicesToDelete) throws IOException {
+    for (String index : indicesToDelete) {
+      elasticSearchClient.indices().delete(new DeleteIndexRequest(index), RequestOptions.DEFAULT);
+    }
+  }
+
+  private void reCreateIndices(RestHighLevelClient elasticSearchClient, GetIndexResponse allIndicesResponse, List<String> indicesToRecreate)
+      throws IOException {
+    Map<String, List<AliasMetaData>> aliases = allIndicesResponse.getAliases();
+    Map<String, MappingMetaData> mappings = allIndicesResponse.getMappings();
+    Map<String, Settings> settings = allIndicesResponse.getSettings();
+    //Map<String, Settings> settings = getIndexResponse.getDefaultSettings();
+
+    for (String index : indicesToRecreate) {
       List<AliasMetaData> indexAliases = aliases.get(index);
       MappingMetaData indexMappingMetaData = mappings.get(index);
       Settings indexSettings = settings.get(index);
@@ -59,9 +90,6 @@ public class DeleteSearchIndexExtension implements AfterEachCallback {
 
       elasticSearchClient.indices().create(createIndexRequest, RequestOptions.DEFAULT);
     }
-
-    elasticSearchClient.close();
-
   }
 
 }
