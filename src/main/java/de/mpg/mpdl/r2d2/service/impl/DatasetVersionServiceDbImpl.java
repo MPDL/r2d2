@@ -466,6 +466,9 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
       throws R2d2TechnicalException, OptimisticLockingException, ValidationException, NotFoundException, InvalidStateException,
       AuthorizationException {
     DatasetVersion latestVersion = datasetVersionRepository.findLatestVersion(id);
+    
+    em.detach(latestVersion);
+
     List<UUID> currentFileIds = fileRepository.findAllIdsForVersion(latestVersion.getVersionId());
 
     List<UUID> filesToRemove = new ArrayList<UUID>(currentFileIds);
@@ -494,6 +497,7 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
       InvalidStateException, AuthorizationException {
 
     DatasetVersion latestVersion = datasetVersionRepository.findLatestVersion(id);
+
     DatasetVersion resultedDataset = null;
 
     checkAa("update", user, latestVersion);
