@@ -135,6 +135,7 @@ public class AuthorizationService {
         )
     */
 
+    /*
     boolean filterDuplicates = (Boolean) serviceMap.get("technical").getOrDefault("filterIndexDatasetDuplicates", Boolean.FALSE);
     BoolQueryBuilder filterDuplicatesQueryBuilder = QueryBuilders.boolQuery();
     QueryBuilder isLatestVersionQuery = QueryBuilders.scriptQuery(new Script(
@@ -142,7 +143,7 @@ public class AuthorizationService {
     filterDuplicatesQueryBuilder.mustNot(isLatestVersionQuery);
     BoolQueryBuilder userQueryBuilder = new BoolQueryBuilder();
     filterDuplicatesQueryBuilder.must(userQueryBuilder);
-
+    */
 
     if (allowedMap == null) {
       throw new AuthorizationException("No rules for service " + serviceName + ", method " + "get");
@@ -158,7 +159,7 @@ public class AuthorizationService {
       BoolQueryBuilder subQb = QueryBuilders.boolQuery();
       boolean userMatch = false;
 
-      BoolQueryBuilder subUserQueryBuilder = QueryBuilders.boolQuery();
+      //BoolQueryBuilder subUserQueryBuilder = QueryBuilders.boolQuery();
 
       // Everybody is allowed to see everything
       rulesLoop: for (Entry<String, Object> rule : rules.entrySet()) {
@@ -175,7 +176,7 @@ public class AuthorizationService {
                 QueryBuilder userQuery = QueryBuilders.termQuery(indices.get(value), userAccount.getId().toString());
                 subQb.must(userQuery);
                 userMatch = true;
-                subUserQueryBuilder.must(userQuery);
+                //subUserQueryBuilder.must(userQuery);
 
 
               }
@@ -208,7 +209,7 @@ public class AuthorizationService {
 
                 if (grantQueryBuilder.hasClauses()) {
                   subQb.must(grantQueryBuilder);
-                  subUserQueryBuilder.must(grantQueryBuilder);
+                  //subUserQueryBuilder.must(grantQueryBuilder);
 
                 }
 
@@ -232,7 +233,7 @@ public class AuthorizationService {
             if (!userMatch) {
               //reset queryBuilder
               subQb = QueryBuilders.boolQuery();
-              subUserQueryBuilder = QueryBuilders.boolQuery();
+              //subUserQueryBuilder = QueryBuilders.boolQuery();
               break rulesLoop;
             }
 
@@ -276,16 +277,18 @@ public class AuthorizationService {
 
 
 
+      /*
       if (subUserQueryBuilder.hasClauses()) {
         userQueryBuilder.should(subUserQueryBuilder);
       }
-
+      */
       if (subQb.hasClauses()) {
         bqb.should(subQb);
       } else if (userMatch) {
         // User matches and no more rules -> User can see everything (=ADMIN!)
         // If we have to filter duplicates, only return latest releases in this case
-        return filterDuplicates ? isLatestVersionQuery : null;
+        //return filterDuplicates ? isLatestVersionQuery : null;
+        return null;
       }
 
     }
@@ -293,9 +296,11 @@ public class AuthorizationService {
 
 
     if (bqb.hasClauses()) {
+      /*
       if (filterDuplicates && userQueryBuilder.hasClauses()) {
         bqb.mustNot(filterDuplicatesQueryBuilder);
       }
+      */
       return bqb;
     }
     throw new AuthorizationException("This search requires a login");

@@ -70,7 +70,10 @@ public abstract class GenericSearchServiceImpl<E> implements GenericSearchServic
     if (getIndexDao() != null) {
       QueryBuilder qb = ssb.query();
       if (principal != null) {
+        //filter out datasets that are not allowed to see for the user
         qb = aaService.modifyQueryForAa(getAaKey(), getAaMethod(), qb, principal);
+
+
       } else {
         qb = aaService.modifyQueryForAa(getAaKey(), getAaMethod(), qb, null);
       }

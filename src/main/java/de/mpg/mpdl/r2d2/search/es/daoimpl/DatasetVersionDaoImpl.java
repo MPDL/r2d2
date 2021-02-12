@@ -17,6 +17,8 @@ public abstract class DatasetVersionDaoImpl extends ElasticSearchGenericDAOImpl<
   public static final String INDEX_DATASET_LATEST_VERSION = "dataset.latestVersion";
   public static final String INDEX_VERSION_NUMBER = "versionNumber";
   public static final String INDEX_STATE = "state";
+  public static final String INDEX_DATASET_CREATOR_ID = "dataset.creator";
+  public static final String INDEX_DATASET_DATAMANAGER_ID = "dataset.datamanager.id";
 
 
   private static final Class<DatasetVersionIto> typeParameterClass = DatasetVersionIto.class;
