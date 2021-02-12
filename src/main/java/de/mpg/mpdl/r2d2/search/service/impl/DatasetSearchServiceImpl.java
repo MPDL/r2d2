@@ -68,10 +68,16 @@ public class DatasetSearchServiceImpl extends GenericSearchServiceImpl<DatasetVe
         } else if (Role.USER.equals(role)) {
           BoolQueryBuilder userQuery = QueryBuilders.boolQuery();
 
-          userQuery.should(
+
+
+          BoolQueryBuilder roleQuery = QueryBuilders.boolQuery();
+          roleQuery.should(
               QueryBuilders.termQuery(DatasetVersionDaoImpl.INDEX_DATASET_CREATOR_ID, principal.getUserAccount().getId().toString()));
-          userQuery.should(
+          roleQuery.should(
               QueryBuilders.termQuery(DatasetVersionDaoImpl.INDEX_DATASET_DATAMANAGER_ID, principal.getUserAccount().getId().toString()));
+
+
+          userQuery.must(roleQuery);
           userQuery.must(isLatestVersionQuery);
 
           myDatasetQuery = userQuery;
@@ -82,7 +88,7 @@ public class DatasetSearchServiceImpl extends GenericSearchServiceImpl<DatasetVe
 
       BoolQueryBuilder filterQuery = QueryBuilders.boolQuery();
       filterQuery.must(ssb.query());
-      filterQuery.must(myDatasetQuery);
+      filterQuery.filter(myDatasetQuery);
       ssb.query(filterQuery);
 
 
