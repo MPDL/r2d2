@@ -51,59 +51,53 @@ public class DummyDataInitializer {
   @Autowired
   private DtoMapper mapper;
 
+  private UserAccount createUser(String name, UserAccount creator, Role role) {
+
+    UserAccount user = new UserAccount();
+    user.setEmail(name + "@mpdl.mpg.de");
+    user.setActive(true);
+    Person person = new Person();
+    person.setGivenName("Test");
+    person.setFamilyName(name);
+    user.setPerson(person);
+    user.setId(UUID.randomUUID());
+    if (creator != null) {
+      user.setCreator(creator);
+      user.setModifier(creator);
+    } else {
+      user.setCreator(user);
+      user.setModifier(user);
+    }
+    // user3.setCreationDate(currentDateTime);
+    // user3.setModificationDate(currentDateTime);
+    user.getRoles().add(role);
+
+
+    user = userRepository.save(user);
+
+    LocalUserAccount internaluser3 = new LocalUserAccount();
+    internaluser3.setUser(user);
+    internaluser3.setUsername(name + "@mpdl.mpg.de");
+    internaluser3.setPassword(passwordEncoder.encode("test"));
+
+    internalUserRepository.save(internaluser3);
+    return user;
+  }
+
   @PostConstruct
   public void initialize() throws R2d2TechnicalException {
 
     OffsetDateTime currentDateTime = Utils.generateCurrentDateTimeForDatabase();
 
-    UserAccount user = new UserAccount();
-    user.setEmail("testuser@mpdl.mpg.de");
-    user.setActive(true);
-    Person person = new Person();
-    person.setGivenName("Test");
-    person.setFamilyName("Admin");
-    user.setPerson(person);
-    user.setId(UUID.fromString("2d0dd850-eabb-43fe-8b8f-1a1b54018738"));
-    user.setCreator(user);
-    user.setModifier(user);
-    // user.setCreationDate(currentDateTime);
-    // user.setModificationDate(currentDateTime);
-    user.getRoles().add(Role.ADMIN);
+    UserAccount user = createUser("testuser", null, Role.ADMIN);
 
 
-    user = userRepository.save(user);
-
-    LocalUserAccount internalUser = new LocalUserAccount();
-    internalUser.setUser(user);
-    internalUser.setUsername("testuser@mpdl.mpg.de");
-    internalUser.setPassword(passwordEncoder.encode("test"));
-
-    internalUserRepository.save(internalUser);
+    UserAccount user2 = createUser("testuser2", user, Role.USER);
+    UserAccount user3 = createUser("testuser3", user, Role.USER);
+    UserAccount user4 = createUser("testuser4", user, Role.USER);
+    UserAccount user5 = createUser("testuser5", user, Role.USER);
 
 
-    UserAccount user2 = new UserAccount();
-    user2.setEmail("testuser2@mpdl.mpg.de");
-    user2.setActive(true);
-    Person person2 = new Person();
-    person2.setGivenName("Test");
-    person2.setFamilyName("User");
-    user2.setPerson(person2);
-    user2.setId(UUID.fromString("2d0dd850-eabb-43fe-8b8f-1a1b54018739"));
-    user2.setCreator(user);
-    user2.setModifier(user);
-    // user2.setCreationDate(currentDateTime);
-    // user2.setModificationDate(currentDateTime);
-    user2.getRoles().add(Role.USER);
-
-
-    user2 = userRepository.save(user2);
-
-    LocalUserAccount internalUser2 = new LocalUserAccount();
-    internalUser2.setUser(user2);
-    internalUser2.setUsername("testuser2@mpdl.mpg.de");
-    internalUser2.setPassword(passwordEncoder.encode("test"));
-
-    internalUserRepository.save(internalUser2);
 
     DatasetVersion dv = new DatasetVersion();
     //dv.setId(UUID.fromString("a6124f2a-9a06-489d-a7e2-40b583ebbd23"));

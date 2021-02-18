@@ -38,8 +38,7 @@
 			{
 				"user" : {
 					"role" : "ADMIN"
-				},
-				"datasetVersion.state" : ["PUBLIC"]
+				}
 			},
 			{
 				"datasetVersion.state" : ["PUBLIC"]
@@ -51,6 +50,7 @@
 				"datasetVersion.state" : ["PRIVATE"]
 			}
 		],
+		
 		"publish" : [
 			{
 				"user" : {
@@ -98,7 +98,7 @@
 		"technical" : {
 			"order" : ["user",  "file"],
 			"indices" : {
-				"file.creator.id" : "file.creator",
+				"file.creator.id" : "creator",
 				"file.state" : "state"
 			}
 		},

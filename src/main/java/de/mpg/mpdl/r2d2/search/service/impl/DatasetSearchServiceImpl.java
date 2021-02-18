@@ -81,6 +81,7 @@ public class DatasetSearchServiceImpl extends GenericSearchServiceImpl<DatasetVe
           userQuery.must(isLatestVersionQuery);
 
           myDatasetQuery = userQuery;
+          break;
 
         }
 
