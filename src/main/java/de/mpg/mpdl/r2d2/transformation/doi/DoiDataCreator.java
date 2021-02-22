@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 
 import javax.xml.bind.JAXBException;
 import java.util.Base64;
+import java.util.UUID;
 
 @Component
 public class DoiDataCreator {
@@ -31,11 +32,9 @@ public class DoiDataCreator {
   public DoiData createDoiDataForDraftDoiCreation(DatasetVersion datasetVersion) throws R2d2TechnicalException {
     String doiMetadataXmlBase64Encoded = this.transformToDoiMetadataXmlBase64Encoded(datasetVersion);
 
-    //TODO: Set the url of the Dataset
-    //TODO: Set correct prefix in application.r2d2.properties
     DoiAttributes doiAttributes = new DoiAttributes();
     doiAttributes.setPrefix(env.getProperty("datacite.doi.prefix"));
-    doiAttributes.setUrl("Url");
+    doiAttributes.setUrl(this.getDatasetURL(datasetVersion.getId()));
     doiAttributes.setXml(doiMetadataXmlBase64Encoded);
 
     DoiData doiData = new DoiData();
@@ -48,10 +47,9 @@ public class DoiDataCreator {
   public DoiData createDoiDataForDoiPublication(DatasetVersion datasetVersion) throws R2d2TechnicalException {
     String doiMetadataXmlBase64Encoded = this.transformToDoiMetadataXmlBase64Encoded(datasetVersion);
 
-    //TODO: Set the url of the Dataset
     DoiAttributes doiAttributes = new DoiAttributes();
     doiAttributes.setEvent(DoiEvent.PUBLISH);
-    doiAttributes.setUrl("Url");
+    doiAttributes.setUrl(this.getDatasetURL(datasetVersion.getId()));
     doiAttributes.setXml(doiMetadataXmlBase64Encoded);
 
     DoiData doiData = new DoiData();
@@ -73,6 +71,14 @@ public class DoiDataCreator {
     String doiMetadataXmlBase64Encoded = Base64.getEncoder().encodeToString(doiMetadataXml.getBytes());
 
     return doiMetadataXmlBase64Encoded;
+  }
+
+  //TODO: Move/Refactor getting the URL of a Dataset
+  private String getDatasetURL(UUID dataSetID){
+    String r2d2URL = this.env.getProperty("r2d2.url");
+
+    String datasetURL = r2d2URL + "/datasets" + "/" + dataSetID;
+    return datasetURL;
   }
 
 }
