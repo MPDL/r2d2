@@ -7,7 +7,6 @@ import de.mpg.mpdl.r2d2.transformation.doi.model.DoiAttributes.DoiEvent;
 import de.mpg.mpdl.r2d2.transformation.doi.model.DoiData;
 import de.mpg.mpdl.r2d2.transformation.doi.model.DoiData.DoiType;
 import de.mpg.mpdl.r2d2.transformation.doi.model.DoiMetadata;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
@@ -17,14 +16,17 @@ import java.util.Base64;
 @Component
 public class DoiDataCreator {
 
-  @Autowired
   private DoiMetadataMapper doiMetadataMapper;
 
-  @Autowired
   private DoiMetadataXmlConverter doiMetadataXmlConverter;
 
-  @Autowired
   private Environment env;
+
+  public DoiDataCreator(DoiMetadataMapper doiMetadataMapper, DoiMetadataXmlConverter doiMetadataXmlConverter, Environment env){
+    this.doiMetadataMapper = doiMetadataMapper;
+    this.doiMetadataXmlConverter = doiMetadataXmlConverter;
+    this.env = env;
+  }
 
   public DoiData createDoiDataForDraftDoiCreation(DatasetVersion datasetVersion) throws R2d2TechnicalException {
     String doiMetadataXmlBase64Encoded = this.transformToDoiMetadataXmlBase64Encoded(datasetVersion);

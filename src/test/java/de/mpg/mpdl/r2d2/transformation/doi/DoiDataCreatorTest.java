@@ -1,21 +1,31 @@
 package de.mpg.mpdl.r2d2.transformation.doi;
 
 import de.mpg.mpdl.r2d2.exceptions.R2d2TechnicalException;
-import de.mpg.mpdl.r2d2.model.Dataset;
 import de.mpg.mpdl.r2d2.model.DatasetVersion;
 import de.mpg.mpdl.r2d2.transformation.doi.model.DoiData;
-import de.mpg.mpdl.r2d2.util.BaseIntegrationTest;
-import de.mpg.mpdl.r2d2.util.testdata.builder.DatasetBuilder;
 import de.mpg.mpdl.r2d2.util.testdata.builder.DatasetVersionBuilder;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.junit.jupiter.api.TestInstance;
+import org.mapstruct.factory.Mappers;
+import org.springframework.mock.env.MockEnvironment;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class DoiDataCreatorIT extends BaseIntegrationTest {
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+public class DoiDataCreatorTest {
 
-  @Autowired
   private DoiDataCreator doiDataCreator;
+
+  @BeforeAll
+  void setupDoiDataCreator(){
+    DoiMetadataMapper doiMetadataMapper = Mappers.getMapper(DoiMetadataMapper.class);
+    DoiMetadataXmlConverter doiMetadataXmlConverter = new DoiMetadataXmlConverter();
+    MockEnvironment env = new MockEnvironment();
+    env.setProperty("datacite.doi.prefix", "Prefix");
+
+    doiDataCreator = new DoiDataCreator(doiMetadataMapper, doiMetadataXmlConverter, env);
+  }
 
   @Test
   void testCreateDoiDataForDraftDoiCreation() throws R2d2TechnicalException {
