@@ -23,7 +23,7 @@ public class DatasetVersionMetadata {
 
   private List<String> keywords;
 
-  // the DOI without the prefix and not as URL
+  // the DOI consisting of: prefix/suffix
   private String doi;
 
   private License license;
