@@ -26,7 +26,7 @@ public class DoiDataCreatorTest {
   private String prefix = "Test-Prefix";
 
   @BeforeAll
-  void setupDoiDataCreator(){
+  void setupDoiDataCreator() {
     DoiMetadataMapper doiMetadataMapper = Mappers.getMapper(DoiMetadataMapper.class);
     DoiMetadataXmlConverter doiMetadataXmlConverter = new DoiMetadataXmlConverter();
     MockEnvironment env = new MockEnvironment();
@@ -49,8 +49,6 @@ public class DoiDataCreatorTest {
     assertThat(doiData).extracting(DoiData::getAttributes).isNotNull();
     assertThat(doiData.getAttributes()).extracting(DoiAttributes::getPrefix).isEqualTo(this.prefix);
     assertThat(doiData.getAttributes().getUrl()).endsWith(uuid.toString());
-    //Check metadataXML is Base64 encoded:
-    assertThatCode(() -> Base64.getDecoder().decode(doiData.getAttributes().getXml())).doesNotThrowAnyException();
   }
 
   @Test

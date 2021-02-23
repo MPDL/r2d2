@@ -23,19 +23,16 @@ public class DoiDataCreator {
 
   private Environment env;
 
-  public DoiDataCreator(DoiMetadataMapper doiMetadataMapper, DoiMetadataXmlConverter doiMetadataXmlConverter, Environment env){
+  public DoiDataCreator(DoiMetadataMapper doiMetadataMapper, DoiMetadataXmlConverter doiMetadataXmlConverter, Environment env) {
     this.doiMetadataMapper = doiMetadataMapper;
     this.doiMetadataXmlConverter = doiMetadataXmlConverter;
     this.env = env;
   }
 
   public DoiData createDoiDataForDraftDoiCreation(DatasetVersion datasetVersion) throws R2d2TechnicalException {
-    String doiMetadataXmlBase64Encoded = this.transformToDoiMetadataXmlBase64Encoded(datasetVersion);
-
     DoiAttributes doiAttributes = new DoiAttributes();
     doiAttributes.setPrefix(env.getProperty("datacite.doi.prefix"));
     doiAttributes.setUrl(this.getDatasetURL(datasetVersion.getId()));
-    doiAttributes.setXml(doiMetadataXmlBase64Encoded);
 
     DoiData doiData = new DoiData();
     doiData.setType(DoiType.DOIS);
@@ -74,7 +71,7 @@ public class DoiDataCreator {
   }
 
   //TODO: Move/Refactor getting the URL of a Dataset
-  private String getDatasetURL(UUID dataSetID){
+  private String getDatasetURL(UUID dataSetID) {
     String r2d2URL = this.env.getProperty("r2d2.url");
 
     String datasetURL = r2d2URL + "/datasets" + "/" + dataSetID;
