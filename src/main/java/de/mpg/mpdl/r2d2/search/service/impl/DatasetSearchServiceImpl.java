@@ -49,10 +49,8 @@ public class DatasetSearchServiceImpl extends GenericSearchServiceImpl<DatasetVe
     return "get";
   }
 
-  @Override
-  public SearchResponse searchDetailed(SearchSourceBuilder ssb, long scrollTime, R2D2Principal principal)
-      throws R2d2TechnicalException, AuthorizationException {
 
+  public QueryBuilder modifyQueryOnlyMine(QueryBuilder qb, R2D2Principal principal) {
     //Only return "my datasets" when logged in
     if (principal != null && principal.getUserAccount() != null) {
 
@@ -96,22 +94,18 @@ public class DatasetSearchServiceImpl extends GenericSearchServiceImpl<DatasetVe
         myDatasetQuery = userQuery;
       }
 
-
       BoolQueryBuilder filterQuery = QueryBuilders.boolQuery();
-      if (ssb.query() != null) {
-        filterQuery.must(ssb.query());
+      if (qb != null) {
+        filterQuery.must(qb);
       }
       filterQuery.filter(myDatasetQuery);
-      ssb.query(filterQuery);
 
-
+      qb = filterQuery;
 
     }
 
-    return super.searchDetailed(ssb, scrollTime, principal);
-
+    return qb;
   }
-
 
 
 }

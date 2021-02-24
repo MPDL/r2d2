@@ -12,12 +12,13 @@ import de.mpg.mpdl.r2d2.search.model.SearchResult;
 public interface GenericSearchService<E> {
 
 
-  public SearchResult<E> search(SearchQuery sq, R2D2Principal principal) throws R2d2TechnicalException, AuthorizationException;
-
-  public SearchResponse searchDetailed(SearchSourceBuilder ssb, long scrollTime, R2D2Principal principal)
+  public SearchResult<E> search(SearchQuery sq, boolean mineOnly, R2D2Principal principal)
       throws R2d2TechnicalException, AuthorizationException;
 
-  public SearchResponse searchDetailed(SearchSourceBuilder ssb, R2D2Principal principal)
+  public SearchResponse searchDetailed(SearchSourceBuilder ssb, long scrollTime, boolean mineOnly, R2D2Principal principal)
+      throws R2d2TechnicalException, AuthorizationException;
+
+  public SearchResponse searchDetailed(SearchSourceBuilder ssb, boolean mineOnly, R2D2Principal principal)
       throws R2d2TechnicalException, AuthorizationException;
 
 }

@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import de.mpg.mpdl.r2d2.exceptions.AuthorizationException;
 import de.mpg.mpdl.r2d2.exceptions.R2d2TechnicalException;
+import de.mpg.mpdl.r2d2.model.VersionId;
 import de.mpg.mpdl.r2d2.model.aa.Grant;
 import de.mpg.mpdl.r2d2.model.aa.R2D2Principal;
 import de.mpg.mpdl.r2d2.model.aa.UserAccount.Role;
@@ -20,6 +21,8 @@ import de.mpg.mpdl.r2d2.search.es.daoimpl.DatasetVersionDaoImpl;
 import de.mpg.mpdl.r2d2.search.es.daoimpl.FileDaoImpl;
 import de.mpg.mpdl.r2d2.search.model.DatasetVersionIto;
 import de.mpg.mpdl.r2d2.search.model.FileIto;
+import de.mpg.mpdl.r2d2.search.model.SearchQuery;
+import de.mpg.mpdl.r2d2.search.model.SearchResult;
 import de.mpg.mpdl.r2d2.search.service.FileSearchService;
 
 @Service
@@ -48,9 +51,28 @@ public class FileSearchServiceImpl extends GenericSearchServiceImpl<FileIto> imp
     return "get";
   }
 
-  @Override
-  public SearchResponse searchDetailed(SearchSourceBuilder ssb, long scrollTime, R2D2Principal principal)
+  public SearchResult<FileIto> searchFilesForDataset(SearchQuery sq, VersionId datasetId, R2D2Principal principal)
       throws R2d2TechnicalException, AuthorizationException {
+
+    SearchSourceBuilder ssb = buildSearchSourceBuilderFromSearchQuery(sq);
+
+    BoolQueryBuilder bq = QueryBuilders.boolQuery();
+    if (ssb.query() != null) {
+      bq.must(ssb.query());
+    }
+
+    bq.filter(QueryBuilders.termQuery(FileDaoImpl.INDEX_FILE_DATASETS_VERSIONID, datasetId.getVersionId()));
+
+    ssb.query(bq);
+
+    SearchResponse resp = searchDetailed(ssb, false, principal);
+
+    return buildSearchRetrieveResponseFromElasticSearchResponse(resp);
+
+  }
+
+  @Override
+  protected QueryBuilder modifyQueryOnlyMine(QueryBuilder qb, R2D2Principal principal) {
 
     //Only return "my files" when logged in
     if (principal != null && principal.getUserAccount() != null) {
@@ -86,21 +108,22 @@ public class FileSearchServiceImpl extends GenericSearchServiceImpl<FileIto> imp
 
 
       BoolQueryBuilder filterQuery = QueryBuilders.boolQuery();
-      if (ssb.query() != null) {
-        filterQuery.must(ssb.query());
+      if (qb != null) {
+        filterQuery.must(qb);
       }
-      if (myDatasetQuery != null) {
-        filterQuery.filter(myDatasetQuery);
-      }
-      ssb.query(filterQuery);
+      filterQuery.filter(myDatasetQuery);
+
+      qb = filterQuery;
 
 
 
     }
 
-    return super.searchDetailed(ssb, scrollTime, principal);
+    return qb;
 
 
   }
+
+
 
 }

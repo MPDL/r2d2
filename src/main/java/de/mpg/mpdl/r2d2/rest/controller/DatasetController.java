@@ -49,10 +49,12 @@ import de.mpg.mpdl.r2d2.rest.controller.dto.DatasetVersionDto;
 import de.mpg.mpdl.r2d2.rest.controller.dto.FileDto;
 import de.mpg.mpdl.r2d2.rest.controller.dto.SetFilesDto;
 import de.mpg.mpdl.r2d2.search.model.DatasetVersionIto;
+import de.mpg.mpdl.r2d2.search.model.FileIto;
 import de.mpg.mpdl.r2d2.search.model.SearchQuery;
 import de.mpg.mpdl.r2d2.search.model.SearchRecord;
 import de.mpg.mpdl.r2d2.search.model.SearchResult;
 import de.mpg.mpdl.r2d2.search.service.DatasetSearchService;
+import de.mpg.mpdl.r2d2.search.service.FileSearchService;
 import de.mpg.mpdl.r2d2.service.DatasetVersionService;
 import de.mpg.mpdl.r2d2.service.FileService;
 import de.mpg.mpdl.r2d2.util.DtoMapper;
@@ -77,8 +79,10 @@ public class DatasetController {
   private DtoMapper dtoMapper;
 
   @Autowired
-
   private DatasetSearchService datasetSearchService;
+
+  @Autowired
+  private FileSearchService fileSearchService;
 
   @PostMapping(path = "")
   public ResponseEntity<DatasetVersionDto> createDataset(@RequestBody DatasetVersionDto givenDatasetVersion,
@@ -146,25 +150,30 @@ public class DatasetController {
 
   @GetMapping("/{id}/files")
   public ResponseEntity<SearchResult<FileDto>> listFilesOfDataset(@PathVariable("id") String id,
-      @RequestParam(name = "v", required = false) Integer versionNumber, @AuthenticationPrincipal R2D2Principal p, Pageable pageable)
+      @RequestParam(name = "v", required = false) Integer versionNumber, @RequestParam(name = "q", required = false) String query,
+      @RequestParam(name = "scroll", required = false) String scrollTimeValue, @RequestParam(name = "from", required = false) Integer from,
+      @RequestParam(name = "size", required = false) Integer size, @AuthenticationPrincipal R2D2Principal p)
       throws AuthorizationException, R2d2TechnicalException, NotFoundException {
+
     VersionId versionId = new VersionId(UUID.fromString(id), versionNumber);
-    Page<File> files = datasetVersionService.listFiles(versionId, pageable, p);
-    List<FileDto> dtos = files.stream().map(f -> dtoMapper.convertToFileDto(f)).collect(Collectors.toList());
+    if (versionNumber == null) {
+      //Get latest versionNumber
+      versionId = datasetVersionService.get(versionId, p).getVersionId();
+    }
 
-    SearchResult<FileDto> searchRes = new SearchResult<FileDto>();
-    searchRes.setHits(dtos.stream().map(dto -> {
-      SearchRecord<FileDto> sr = new SearchRecord<FileDto>();
-      sr.setSource(dto);
-      sr.setId(dto.getId().toString());
-      return sr;
-    }).collect(Collectors.toList()));
 
-    searchRes.setTotal((int) files.getTotalElements());
-    HttpHeaders headers = new HttpHeaders();
-    headers.add("Total-Number-of-Elements", Long.toString(files.getTotalElements()));
-    headers.add("Elements-on-this-Page", Integer.toString(files.getNumberOfElements()));
-    return new ResponseEntity<>(searchRes, headers, HttpStatus.OK);
+    SearchQuery sq = new SearchQuery();
+    sq.setQuery(query);
+    if (from != null) {
+      sq.setFrom(from);
+    }
+    if (size != null) {
+      sq.setSize(size);
+    }
+
+    SearchResult<FileIto> searchRes = fileSearchService.searchFilesForDataset(sq, versionId, p);
+
+    return new ResponseEntity<>(dtoMapper.convertToFileSearchResultDto(searchRes), HttpStatus.OK);
   }
 
 
@@ -262,7 +271,7 @@ public class DatasetController {
     SearchSourceBuilder ssb = Utils.parseJsonToSearchSourceBuilder(searchSourceText);
 
     // SearchResponse resp = datasetVersionService.searchDetailed(ssb, scrollTime, Utils.toCustomPrincipal(p));
-    SearchResponse resp = datasetSearchService.searchDetailed(ssb, scrollTime, p);
+    SearchResponse resp = datasetSearchService.searchDetailed(ssb, scrollTime, true, p);
 
 
     httpResponse.setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
@@ -293,7 +302,7 @@ public class DatasetController {
 
 
 
-    SearchResult<DatasetVersionIto> resp = datasetSearchService.search(sq, p);
+    SearchResult<DatasetVersionIto> resp = datasetSearchService.search(sq, true, p);
 
 
     return new ResponseEntity<SearchResult<DatasetVersionDto>>(dtoMapper.convertToSearchResultDto(resp), HttpStatus.OK);

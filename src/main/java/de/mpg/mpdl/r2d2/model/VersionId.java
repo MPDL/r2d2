@@ -5,6 +5,7 @@ import java.util.Objects;
 import java.util.UUID;
 
 import javax.persistence.Embeddable;
+import javax.persistence.Transient;
 
 @Embeddable
 public class VersionId implements Serializable {
@@ -43,6 +44,11 @@ public class VersionId implements Serializable {
 
   public void setVersionNumber(int versionNumber) {
     this.versionNumber = versionNumber;
+  }
+
+  @Transient
+  public String getVersionId() {
+    return toString();
   }
 
 

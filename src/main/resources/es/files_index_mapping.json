@@ -16,6 +16,10 @@
 				},
 				"versionNumber": {
 					"type": "long"
+				},
+				"versionId" :
+				{
+					"type" : "keyword"
 				}
 			}
 		},

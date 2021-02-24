@@ -17,6 +17,8 @@ public class FileDaoImpl extends ElasticSearchGenericDAOImpl<FileIto> implements
   public static final String INDEX_FILE_CREATOR_ID = "creator";
   public static final String INDEX_FILE_DATASET_CREATOR_ID = "internal.creator";
   public static final String INDEX_FILE_DATASET_ID = "internal.id";
+  public static final String INDEX_FILE_DATASETS_VERSIONID = "datasets.versionId";
+  public static final String INDEX_FILE_DATASETS_ID = "datasets.id";
 
   private static final Class<FileIto> typeParameterClass = FileIto.class;
 
