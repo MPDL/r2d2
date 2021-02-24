@@ -5,7 +5,8 @@
 			"indices" : {
 				"datasetVersion.dataset.creator.id" : "dataset.creator",
 				"datasetVersion.state" : "state",
-				"datasetVersion.dataset.state" : "dataset.state"
+				"datasetVersion.dataset.state" : "dataset.state",
+				"datasetVersion.dataset.id" : "id"
 			},
 			"filterIndexDatasetDuplicates" : true
 		}, 
@@ -31,6 +32,12 @@
 				"user" : {
 					"field_user_id_match" : "datasetVersion.dataset.creator.id"
 				}
+			},
+			{
+			"user" : {
+					"role" : "DATAMANAGER",
+					"field_grant_id_match" : "datasetVersion.dataset.id"
+				}
 			}
 		],
 		
@@ -46,9 +53,15 @@
 			{
 				"user" : {
 					"field_user_id_match" : "datasetVersion.dataset.creator.id"
-				},
-				"datasetVersion.state" : ["PRIVATE"]
+				}
+			},
+			{
+			"user" : {
+					"role" : "DATAMANAGER",
+					"field_grant_id_match" : "datasetVersion.dataset.id"
+				}
 			}
+			
 		],
 		
 		"publish" : [
@@ -62,34 +75,12 @@
 					"field_user_id_match" : "datasetVersion.dataset.creator.id"
 				},
 				"datasetVersion.state" : ["PRIVATE"]
-			}
-		],
-		"upload" : [
-			{
-				"user" : {
-					"role" : "ADMIN"
-				}
 			},
 			{
-				"user" : {
-					"field_user_id_match" : "datasetVersion.dataset.creator.id"
+			"user" : {
+					"role" : "DATAMANAGER",
+					"field_grant_id_match" : "datasetVersion.dataset.id"
 				}
-			}
-		],
-		"download" : [
-			{
-				"user" : {
-					"role" : "ADMIN"
-				}
-			},
-			{
-				"datasetVersion.state" : ["PUBLIC"]
-			},
-			{
-				"user" : {
-					"field_user_id_match" : "datasetVersion.dataset.creator.id"
-				},
-				"datasetVersion.state" : ["PRIVATE"]
 			}
 		]
 	},
@@ -100,7 +91,8 @@
 			"indices" : {
 				"file.creator.id" : "creator",
 				"file.state" : "state",
-				"file.dataset.creator.id" : "internal.creator"
+				"file.dataset.creator.id" : "internal.creator",
+				"file.dataset.id" : "internal.id"
 			}
 		},
 		 
@@ -133,6 +125,12 @@
 			{
 				"user" : {
 					"field_user_id_match" : "file.dataset.creator.id"
+				}
+			},
+			{
+			"user" : {
+					"role" : "DATAMANAGER",
+					"field_grant_id_match" : "file.dataset.id"
 				}
 			}
 			
