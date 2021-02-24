@@ -39,6 +39,7 @@ public class Dataset extends BaseDb {
   private Integer latestPublicVersion = null;
 
 
+  /*
   @Type(type = "jsonb")
   @Column(columnDefinition = "jsonb")
   private List<UserAccountRO> datamanager = new ArrayList<UserAccountRO>();
@@ -51,7 +52,7 @@ public class Dataset extends BaseDb {
   public void setDatamanager(List<UserAccountRO> datamanager) {
     this.datamanager = datamanager;
   }
-
+*/
   public Dataset.State getState() {
     return state;
   }

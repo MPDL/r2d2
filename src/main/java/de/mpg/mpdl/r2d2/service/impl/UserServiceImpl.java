@@ -15,6 +15,7 @@ import de.mpg.mpdl.r2d2.db.ConfirmationTokenRepository;
 import de.mpg.mpdl.r2d2.db.LocalUserAccountRepository;
 import de.mpg.mpdl.r2d2.db.UserAccountRepository;
 import de.mpg.mpdl.r2d2.model.Person;
+import de.mpg.mpdl.r2d2.model.aa.Grant;
 import de.mpg.mpdl.r2d2.model.aa.LocalUserAccount;
 import de.mpg.mpdl.r2d2.model.aa.UserAccount;
 import de.mpg.mpdl.r2d2.model.aa.UserAccount.Role;
@@ -128,7 +129,7 @@ public class UserServiceImpl implements UserService {
     account.setPerson(person);
     account.setCreationDate(Utils.generateCurrentDateTimeForDatabase());
     account.setModificationDate(Utils.generateCurrentDateTimeForDatabase());
-    account.getRoles().add(Role.USER);
+    account.getGrants().add(new Grant(Role.USER, null));
 
     account = accountRepository.save(account);
 

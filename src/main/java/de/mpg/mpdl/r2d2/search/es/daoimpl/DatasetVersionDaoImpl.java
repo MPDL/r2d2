@@ -13,7 +13,7 @@ import de.mpg.mpdl.r2d2.search.model.DatasetVersionIto;
 
 public abstract class DatasetVersionDaoImpl extends ElasticSearchGenericDAOImpl<DatasetVersionIto> implements DatasetVersionDaoEs {
 
-
+  public static final String INDEX_DATASET_ID = "id";
   public static final String INDEX_DATASET_LATEST_VERSION = "dataset.latestVersion";
   public static final String INDEX_VERSION_NUMBER = "versionNumber";
   public static final String INDEX_STATE = "state";

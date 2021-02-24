@@ -79,7 +79,7 @@ public class JWTAuthenticationFilter extends BasicAuthenticationFilter {
         p.setUserAccount(ua);
         // return new UsernamePasswordAuthenticationToken(p, null, new ArrayList<>());
         return new UsernamePasswordAuthenticationToken(p, null,
-            ua.getRoles().stream().map(role -> new SimpleGrantedAuthority("ROLE_" + role.name())).collect(Collectors.toList()));
+            ua.getGrants().stream().map(role -> new SimpleGrantedAuthority("ROLE_" + role.getRole().name())).collect(Collectors.toList()));
 
       }
       return null;
