@@ -56,6 +56,7 @@ public class DatasetSearchServiceImpl extends GenericSearchServiceImpl<DatasetVe
     //Only return "my datasets" when logged in
     if (principal != null && principal.getUserAccount() != null) {
 
+
       QueryBuilder myDatasetQuery = null;
 
 
@@ -97,7 +98,9 @@ public class DatasetSearchServiceImpl extends GenericSearchServiceImpl<DatasetVe
 
 
       BoolQueryBuilder filterQuery = QueryBuilders.boolQuery();
-      filterQuery.must(ssb.query());
+      if (ssb.query() != null) {
+        filterQuery.must(ssb.query());
+      }
       filterQuery.filter(myDatasetQuery);
       ssb.query(filterQuery);
 
@@ -108,6 +111,7 @@ public class DatasetSearchServiceImpl extends GenericSearchServiceImpl<DatasetVe
     return super.searchDetailed(ssb, scrollTime, principal);
 
   }
+
 
 
 }
