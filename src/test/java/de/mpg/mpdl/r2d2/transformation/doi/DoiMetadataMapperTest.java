@@ -28,9 +28,10 @@ public class DoiMetadataMapperTest {
     Person author1 = PersonBuilder.aPerson().givenName("G1").familyName("F1").build();
     Person author2 = PersonBuilder.aPerson().givenName("G2").familyName("F2").build();
     OffsetDateTime publicationDate = OffsetDateTime.now().truncatedTo(ChronoUnit.MICROS);
+    String doi = "Prefix/Suffix";
 
     DatasetVersionMetadata metadata =
-        DatasetVersionMetadataBuilder.aDatasetVersionMetadata().title(title).authors(Arrays.asList(author1, author2)).build();
+        DatasetVersionMetadataBuilder.aDatasetVersionMetadata().title(title).authors(Arrays.asList(author1, author2)).doi(doi).build();
     DatasetVersion datasetVersion = DatasetVersionBuilder.aDatasetVersion().metadata(metadata).publicationDate(publicationDate).build();
 
     //When
@@ -38,6 +39,7 @@ public class DoiMetadataMapperTest {
 
     //Then
     assertThat(doiMetadata).isNotNull();
+    assertThat(doiMetadata.getIdentifier()).extracting(DoiIdentifier::getIdentifier).isEqualTo(doi);
     assertThat(doiMetadata.getTitles()).extracting(DoiTitle::getTitle).containsExactly(title);
     assertThat(doiMetadata.getCreators()).extracting(DoiCreator::getCreatorName, DoiCreator::getGivenName, DoiCreator::getFamilyName)
         .containsExactly(tuple(author1.getFamilyName() + ", " + author1.getGivenName(), author1.getGivenName(), author1.getFamilyName()),
@@ -60,6 +62,8 @@ public class DoiMetadataMapperTest {
     assertThat(doiMetadata.getPublicationYear()).isEqualTo(0);
     //Check default values
     assertThat(doiMetadata.getIdentifier().getIdentifierType()).isEqualTo(DoiIdentifier.IDENTIFIER_TYPE_DOI);
+    assertThat(doiMetadata.getIdentifier())
+        .extracting(DoiIdentifier::getIdentifierType, DoiIdentifier::getIdentifier).containsExactly(DoiIdentifier.IDENTIFIER_TYPE_DOI, null);
     assertThat(doiMetadata.getPublisher()).isEqualTo(DoiMetadata.PUBLISHER_MPG);
     assertThat(doiMetadata.getResourceType().getResourceTypeGeneral()).isEqualTo(DoiResourceType.RESOURCE_TYPE_GENERAL_DATASET);
   }

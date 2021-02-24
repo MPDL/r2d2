@@ -19,8 +19,9 @@ public abstract class DoiMetadataMapper {
 
   @Mapping(source = "metadata.title", target = "titles", qualifiedByName = "tileToDoiTitleList")
   @Mapping(source = "metadata.authors", target = "creators")
+  @Mapping(source = "metadata.doi", target = "identifier.identifier")
   @Mapping(source = "publicationDate.year", target = "publicationYear")
-  //identifierType, publisher and resourceTypeGeneral are set with default values in DoiMetadata
+  //publisher and resourceTypeGeneral are set with default values in DoiMetadata
   public abstract DoiMetadata convertToDoiMetadata(DatasetVersion datasetVersion);
 
   @Named("tileToDoiTitleList")

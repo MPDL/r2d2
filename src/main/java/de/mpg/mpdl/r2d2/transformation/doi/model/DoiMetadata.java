@@ -15,7 +15,7 @@ public class DoiMetadata {
 
   //TODO: Add remaining attributes
 
-  //DOI / Identifier
+  //Identifier = doi
   private DoiIdentifier identifier = new DoiIdentifier();
 
   //Titles -> title
