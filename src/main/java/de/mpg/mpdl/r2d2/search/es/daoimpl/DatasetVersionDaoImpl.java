@@ -25,8 +25,7 @@ public abstract class DatasetVersionDaoImpl extends ElasticSearchGenericDAOImpl<
 
   private static final String JOIN_FIELD_NAME = "joinField";
 
-  private static final String[] SOURCE_EXCLUSIONS = new String[] {"joinField.name", "sort-metadata-creators-first",
-      "sort-metadata-creators-compound", "sort-metadata-dates-by-category", "sort-metadata-dates-by-category-year"};
+  private static final String[] SOURCE_EXCLUSIONS = new String[] {"internal"};
 
   public DatasetVersionDaoImpl(String indexName) {
     super(indexName, typeParameterClass);

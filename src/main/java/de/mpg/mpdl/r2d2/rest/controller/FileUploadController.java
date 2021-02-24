@@ -97,8 +97,9 @@ public class FileUploadController {
     }
 
     SearchResult<FileIto> resp = fileSearchService.search(sq, p);
+    SearchResult<FileDto> respDto = dtoMapper.convertToFileSearchResultDto(resp);
 
-    return new ResponseEntity<SearchResult<FileDto>>(dtoMapper.convertToFileSearchResultDto(resp), HttpStatus.OK);
+    return new ResponseEntity<SearchResult<FileDto>>(respDto, HttpStatus.OK);
   }
 
 

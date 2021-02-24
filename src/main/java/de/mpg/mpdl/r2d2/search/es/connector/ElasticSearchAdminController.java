@@ -51,8 +51,14 @@ public class ElasticSearchAdminController {
         if (exists) {
           GetAliasesRequest requestWithAlias = new GetAliasesRequest(indexName);
           GetAliasesResponse response = client.indices().getAlias(requestWithAlias, RequestOptions.DEFAULT);
-          String name = (String) response.getAliases().keySet().iterator().next();
-          deleteIndex(name);
+          if (response.getAliases().isEmpty()) {
+            deleteIndex(indexName);
+          } else {
+            String name = (String) response.getAliases().keySet().iterator().next();
+            deleteIndex(name);
+          }
+
+
         }
         String name4index = indexName + "_" + System.currentTimeMillis();
         CreateIndexRequest createIndexRequest = null;

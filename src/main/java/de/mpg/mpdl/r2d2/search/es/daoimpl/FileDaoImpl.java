@@ -13,7 +13,7 @@ public class FileDaoImpl extends ElasticSearchGenericDAOImpl<FileIto> implements
 
   private static final Class<FileIto> typeParameterClass = FileIto.class;
 
-  private static final String[] SOURCE_EXCLUSIONS = new String[] {};
+  private static final String[] SOURCE_EXCLUSIONS = new String[] {"internal"};
 
   @Autowired
   private Environment env;

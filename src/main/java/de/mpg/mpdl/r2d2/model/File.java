@@ -10,6 +10,7 @@ import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.ManyToMany;
+import javax.persistence.Transient;
 
 import org.hibernate.annotations.Type;
 
@@ -25,7 +26,7 @@ public class File extends BaseDb {
   private FileUploadStatus stateInfo = new FileUploadStatus();
 
   @ManyToMany(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
-  private Set<DatasetVersion> versions = new HashSet();
+  private Set<DatasetVersion> datasets = new HashSet();
 
   private String filename;
 
@@ -95,12 +96,20 @@ public class File extends BaseDb {
     this.stateInfo = stateInfo;
   }
 
-  public Set<DatasetVersion> getVersions() {
-    return versions;
+  public Set<DatasetVersion> getDatasets() {
+    return datasets;
   }
 
-  public void setVersions(Set<DatasetVersion> versions) {
-    this.versions = versions;
+  public void setDatasets(Set<DatasetVersion> versions) {
+    this.datasets = versions;
+  }
+
+  @Transient
+  public Dataset getDataset() {
+    if (this.datasets != null && this.datasets.size() > 0) {
+      return this.datasets.iterator().next().getDataset();
+    }
+    return null;
   }
 
   public enum UploadState {

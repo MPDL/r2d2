@@ -99,7 +99,8 @@
 			"order" : ["user",  "file"],
 			"indices" : {
 				"file.creator.id" : "creator",
-				"file.state" : "state"
+				"file.state" : "state",
+				"file.dataset.creator.id" : "internal.creator"
 			}
 		},
 		 
@@ -128,7 +129,13 @@
 				"user" : {
 					"field_user_id_match" : "file.creator.id"
 				}
+			},
+			{
+				"user" : {
+					"field_user_id_match" : "file.dataset.creator.id"
+				}
 			}
+			
 		]
 	}		
 		

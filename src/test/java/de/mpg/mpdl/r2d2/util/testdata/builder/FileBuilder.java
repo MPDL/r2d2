@@ -106,7 +106,7 @@ public final class FileBuilder {
     file.setId(id);
     file.setState(state);
     file.setStateInfo(stateInfo);
-    file.setVersions(versions);
+    file.setDatasets(versions);
     file.setFilename(filename);
     file.setStorageLocation(storageLocation);
     file.setChecksum(checksum);
