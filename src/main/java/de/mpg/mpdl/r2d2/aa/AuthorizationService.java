@@ -189,7 +189,7 @@ public class AuthorizationService {
                 for (Grant grant : userAccount.getGrants()) {
                   if (grant.getRole().name().equalsIgnoreCase((String) userMap.get("role"))) {
                     userMatch = true;
-                    
+
                     if (userMap.get("field_grant_id_match") != null) {
                       /*
                       if (grant.getDataset() != null && grant.getObjectRef().startsWith("ou_")) {
@@ -199,12 +199,12 @@ public class AuthorizationService {
                         searchAllChildOrganizations(ouIds.get(0), childList);
                         grantQueryBuilder.should(QueryBuilders.termsQuery(indices.get(userMap.get("field_grant_id_match")), ouIds));
                       } else {*/
-                        grantQueryBuilder
-                            .should(QueryBuilders.termsQuery(indices.get(userMap.get("field_grant_id_match")), grant.getDataset().toString()));
+                      grantQueryBuilder.should(
+                          QueryBuilders.termsQuery(indices.get(userMap.get("field_grant_id_match")), grant.getDataset().toString()));
                       //}
-                    
+
                     }
-                    
+
 
                   }
                 }
@@ -502,12 +502,12 @@ public class AuthorizationService {
       }
       */
 
-      
-      
+
+
       for (Grant grant : userAccount.getGrants()) {
         check = (role == null || role.equals(grant.getRole().name())) && (grantFieldMatch == null
             || (grant.getDataset() != null && grantFieldMatchValues.stream().anyMatch(id -> id.equals(grant.getDataset().toString()))));
-      
+
         if (check) {
           break;
         }
@@ -515,7 +515,7 @@ public class AuthorizationService {
       /*
       for (Role grant : userAccount.getRoles()) {
         check = (role == null || role.equalsIgnoreCase(grant.name()));
-
+      
         if (check) {
           break;
         }

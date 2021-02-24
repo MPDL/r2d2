@@ -90,8 +90,8 @@ public class DummyDataInitializer {
 
     OffsetDateTime currentDateTime = Utils.generateCurrentDateTimeForDatabase();
 
-    
-    
+
+
     UserAccount user = createUser("testuser", null, new Grant(Role.ADMIN, null));
 
 

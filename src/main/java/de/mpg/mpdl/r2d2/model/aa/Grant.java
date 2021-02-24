@@ -6,20 +6,20 @@ import java.util.UUID;
 import de.mpg.mpdl.r2d2.model.aa.UserAccount.Role;
 
 public class Grant {
-  
+
   public Grant(Role role, UUID dataset) {
     this.role = role;
     this.dataset = dataset;
   }
-  
+
   public Grant() {
-    
+
   }
 
   private Role role;
-  
+
   private UUID dataset;
-  
+
   public Role getRole() {
     return role;
   }

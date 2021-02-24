@@ -57,8 +57,8 @@ public class DatasetSearchServiceImpl extends GenericSearchServiceImpl<DatasetVe
     if (principal != null && principal.getUserAccount() != null) {
 
       QueryBuilder myDatasetQuery = null;
-      
-      
+
+
       BoolQueryBuilder roleQuery = QueryBuilders.boolQuery();
 
       QueryBuilder isLatestVersionQuery = QueryBuilders.scriptQuery(new Script(
@@ -69,34 +69,32 @@ public class DatasetSearchServiceImpl extends GenericSearchServiceImpl<DatasetVe
           myDatasetQuery = isLatestVersionQuery;
           break;
         } else if (Role.USER.equals(grant.getRole())) {
-         
+
 
           roleQuery.should(
               QueryBuilders.termQuery(DatasetVersionDaoImpl.INDEX_DATASET_CREATOR_ID, principal.getUserAccount().getId().toString()));
           /*
           roleQuery.should(
               QueryBuilders.termQuery(DatasetVersionDaoImpl.INDEX_DATASET_DATAMANAGER_ID, principal.getUserAccount().getId().toString()));
-
+          
            */
-          
 
-        }else if (Role.DATAMANAGER.equals(grant.getRole())) {
-          
-          roleQuery.should(
-              QueryBuilders.termQuery(DatasetVersionDaoImpl.INDEX_DATASET_ID, grant.getDataset().toString()));
-          
+
+        } else if (Role.DATAMANAGER.equals(grant.getRole())) {
+
+          roleQuery.should(QueryBuilders.termQuery(DatasetVersionDaoImpl.INDEX_DATASET_ID, grant.getDataset().toString()));
+
         }
 
       }
-      
-      if(roleQuery.hasClauses())
-      {
+
+      if (roleQuery.hasClauses()) {
         BoolQueryBuilder userQuery = QueryBuilders.boolQuery();
         userQuery.must(roleQuery);
         userQuery.must(isLatestVersionQuery);
         myDatasetQuery = userQuery;
       }
-      
+
 
       BoolQueryBuilder filterQuery = QueryBuilders.boolQuery();
       filterQuery.must(ssb.query());

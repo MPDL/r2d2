@@ -28,13 +28,14 @@ public class ExceptionFilter extends OncePerRequestFilter {
   ObjectMapper mapper = new ObjectMapper();
 
   private static Logger LOGGER = LoggerFactory.getLogger(DatasetVersionServiceDbImpl.class);
+
   @Override
   protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
       throws ServletException, IOException {
     try {
       filterChain.doFilter(request, response);
     } catch (Exception ex) {
-      
+
       LOGGER.error("Error with HTTP request", ex);
       Map<String, Object> errors = new LinkedHashMap<>();
       errors.put("time", LocalDateTime.now());
