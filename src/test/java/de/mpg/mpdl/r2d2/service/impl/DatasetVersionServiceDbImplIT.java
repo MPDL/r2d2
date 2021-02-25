@@ -65,16 +65,15 @@ public class DatasetVersionServiceDbImplIT extends BaseIntegrationTest {
 
     List<DatasetVersion> createdDatasetVersions = List.of(returnedDatasetVersion, datasetVersionFromDB);
 
-    assertThat(datasetVersionFromIndex).isNotNull();
     assertThat(createdDatasetVersions).doesNotContainNull();
-    
-    
     assertThat(createdDatasetVersions).extracting(DatasetVersion::getMetadata).extracting(DatasetVersionMetadata::getTitle)
         .containsOnly(datasetTitle);
-    
-    assertThat(datasetVersionFromIndex.getMetadata().getTitle()).isEqualTo(datasetTitle);
-    
     assertThat(createdDatasetVersions).extracting(DatasetVersion::getVersionNumber).containsOnly(1);
+
+    assertThat(datasetVersionFromIndex).isNotNull();
+    assertThat(datasetVersionFromIndex).extracting(DatasetVersionIto::getMetadata).extracting(DatasetVersionMetadata::getTitle)
+        .isEqualTo(datasetTitle);
+    assertThat(datasetVersionFromIndex).extracting(DatasetVersionIto::getVersionNumber).isEqualTo(1);
   }
 
   @Test
