@@ -27,7 +27,8 @@ public class UserAccount extends BaseDb {
 
   public enum Role {
     USER,
-    ADMIN
+    ADMIN,
+    DATAMANAGER
   }
 
   @Column(unique = true)
@@ -41,7 +42,7 @@ public class UserAccount extends BaseDb {
 
   @Type(type = "jsonb")
   @Column(columnDefinition = "jsonb")
-  private List<Role> roles = new ArrayList<Role>();
+  private List<Grant> grants = new ArrayList<Grant>();
 
   public String getEmail() {
     return email;
@@ -59,13 +60,7 @@ public class UserAccount extends BaseDb {
     this.person = p;
   }
 
-  public List<Role> getRoles() {
-    return roles;
-  }
 
-  public void setRoles(List<Role> roles) {
-    this.roles = roles;
-  }
 
   public boolean isActive() {
     return active;
@@ -73,6 +68,14 @@ public class UserAccount extends BaseDb {
 
   public void setActive(boolean active) {
     this.active = active;
+  }
+
+  public List<Grant> getGrants() {
+    return grants;
+  }
+
+  public void setGrants(List<Grant> grants) {
+    this.grants = grants;
   }
 
 }

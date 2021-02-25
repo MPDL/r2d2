@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 
 import de.mpg.mpdl.r2d2.exceptions.AuthorizationException;
 import de.mpg.mpdl.r2d2.exceptions.R2d2TechnicalException;
+import de.mpg.mpdl.r2d2.model.aa.Grant;
 import de.mpg.mpdl.r2d2.model.aa.R2D2Principal;
 import de.mpg.mpdl.r2d2.model.aa.UserAccount.Role;
 import de.mpg.mpdl.r2d2.rest.controller.dto.DatasetVersionDto;
@@ -48,56 +49,62 @@ public class DatasetSearchServiceImpl extends GenericSearchServiceImpl<DatasetVe
     return "get";
   }
 
-  @Override
-  public SearchResponse searchDetailed(SearchSourceBuilder ssb, long scrollTime, R2D2Principal principal)
-      throws R2d2TechnicalException, AuthorizationException {
 
+  public QueryBuilder modifyQueryOnlyMine(QueryBuilder qb, R2D2Principal principal) {
     //Only return "my datasets" when logged in
     if (principal != null && principal.getUserAccount() != null) {
+
 
       QueryBuilder myDatasetQuery = null;
 
 
+      BoolQueryBuilder roleQuery = QueryBuilders.boolQuery();
+
       QueryBuilder isLatestVersionQuery = QueryBuilders.scriptQuery(new Script(
           "doc['" + DatasetVersionDaoImpl.INDEX_DATASET_LATEST_VERSION + "']==doc['" + DatasetVersionDaoImpl.INDEX_VERSION_NUMBER + "']"));
 
-      for (Role role : principal.getUserAccount().getRoles()) {
-        if (Role.ADMIN.equals(role)) {
+      for (Grant grant : principal.getUserAccount().getGrants()) {
+        if (Role.ADMIN.equals(grant.getRole())) {
           myDatasetQuery = isLatestVersionQuery;
           break;
-        } else if (Role.USER.equals(role)) {
-          BoolQueryBuilder userQuery = QueryBuilders.boolQuery();
+        } else if (Role.USER.equals(grant.getRole())) {
 
 
-
-          BoolQueryBuilder roleQuery = QueryBuilders.boolQuery();
           roleQuery.should(
               QueryBuilders.termQuery(DatasetVersionDaoImpl.INDEX_DATASET_CREATOR_ID, principal.getUserAccount().getId().toString()));
+          /*
           roleQuery.should(
               QueryBuilders.termQuery(DatasetVersionDaoImpl.INDEX_DATASET_DATAMANAGER_ID, principal.getUserAccount().getId().toString()));
+          
+           */
 
 
-          userQuery.must(roleQuery);
-          userQuery.must(isLatestVersionQuery);
+        } else if (Role.DATAMANAGER.equals(grant.getRole())) {
 
-          myDatasetQuery = userQuery;
-          break;
+          roleQuery.should(QueryBuilders.termQuery(DatasetVersionDaoImpl.INDEX_DATASET_ID, grant.getDataset().toString()));
 
         }
 
       }
 
+      if (roleQuery.hasClauses()) {
+        BoolQueryBuilder userQuery = QueryBuilders.boolQuery();
+        userQuery.must(roleQuery);
+        userQuery.must(isLatestVersionQuery);
+        myDatasetQuery = userQuery;
+      }
+
       BoolQueryBuilder filterQuery = QueryBuilders.boolQuery();
-      filterQuery.must(ssb.query());
+      if (qb != null) {
+        filterQuery.must(qb);
+      }
       filterQuery.filter(myDatasetQuery);
-      ssb.query(filterQuery);
 
-
+      qb = filterQuery;
 
     }
 
-    return super.searchDetailed(ssb, scrollTime, principal);
-
+    return qb;
   }
 
 

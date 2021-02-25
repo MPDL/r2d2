@@ -13,7 +13,7 @@ import de.mpg.mpdl.r2d2.search.model.DatasetVersionIto;
 
 public abstract class DatasetVersionDaoImpl extends ElasticSearchGenericDAOImpl<DatasetVersionIto> implements DatasetVersionDaoEs {
 
-
+  public static final String INDEX_DATASET_ID = "id";
   public static final String INDEX_DATASET_LATEST_VERSION = "dataset.latestVersion";
   public static final String INDEX_VERSION_NUMBER = "versionNumber";
   public static final String INDEX_STATE = "state";
@@ -25,8 +25,7 @@ public abstract class DatasetVersionDaoImpl extends ElasticSearchGenericDAOImpl<
 
   private static final String JOIN_FIELD_NAME = "joinField";
 
-  private static final String[] SOURCE_EXCLUSIONS = new String[] {"joinField.name", "sort-metadata-creators-first",
-      "sort-metadata-creators-compound", "sort-metadata-dates-by-category", "sort-metadata-dates-by-category-year"};
+  private static final String[] SOURCE_EXCLUSIONS = new String[] {"internal"};
 
   public DatasetVersionDaoImpl(String indexName) {
     super(indexName, typeParameterClass);

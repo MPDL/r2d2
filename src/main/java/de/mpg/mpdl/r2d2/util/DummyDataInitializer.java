@@ -22,6 +22,7 @@ import de.mpg.mpdl.r2d2.model.DatasetVersion;
 import de.mpg.mpdl.r2d2.model.DatasetVersionRO;
 import de.mpg.mpdl.r2d2.model.Person;
 import de.mpg.mpdl.r2d2.model.Dataset.State;
+import de.mpg.mpdl.r2d2.model.aa.Grant;
 import de.mpg.mpdl.r2d2.model.aa.LocalUserAccount;
 import de.mpg.mpdl.r2d2.model.aa.UserAccount;
 import de.mpg.mpdl.r2d2.model.aa.UserAccount.Role;
@@ -51,7 +52,7 @@ public class DummyDataInitializer {
   @Autowired
   private DtoMapper mapper;
 
-  private UserAccount createUser(String name, UserAccount creator, Role role) {
+  private UserAccount createUser(String name, UserAccount creator, Grant role) {
 
     UserAccount user = new UserAccount();
     user.setEmail(name + "@mpdl.mpg.de");
@@ -70,7 +71,7 @@ public class DummyDataInitializer {
     }
     // user3.setCreationDate(currentDateTime);
     // user3.setModificationDate(currentDateTime);
-    user.getRoles().add(role);
+    user.getGrants().add(role);
 
 
     user = userRepository.save(user);
@@ -89,13 +90,15 @@ public class DummyDataInitializer {
 
     OffsetDateTime currentDateTime = Utils.generateCurrentDateTimeForDatabase();
 
-    UserAccount user = createUser("testuser", null, Role.ADMIN);
 
 
-    UserAccount user2 = createUser("testuser2", user, Role.USER);
-    UserAccount user3 = createUser("testuser3", user, Role.USER);
-    UserAccount user4 = createUser("testuser4", user, Role.USER);
-    UserAccount user5 = createUser("testuser5", user, Role.USER);
+    UserAccount user = createUser("testuser", null, new Grant(Role.ADMIN, null));
+
+
+    UserAccount user2 = createUser("testuser2", user, new Grant(Role.USER, null));
+    UserAccount user3 = createUser("testuser3", user, new Grant(Role.USER, null));
+    UserAccount user4 = createUser("testuser4", user, new Grant(Role.USER, null));
+    UserAccount user5 = createUser("testuser5", user, new Grant(Role.USER, null));
 
 
 
@@ -118,7 +121,7 @@ public class DummyDataInitializer {
     dataset.setModifier(user);
     // dataset.setCreationDate(currentDateTime);
     // dataset.setModificationDate(currentDateTime);
-    dataset.getDatamanager().add(new UserAccountRO(user));
+    //dataset.getDatamanager().add(new UserAccountRO(user));
     dataset.setLatestVersion(1);
     dv.setDataset(dataset);
 

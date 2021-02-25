@@ -3,6 +3,8 @@ package de.mpg.mpdl.r2d2.rest.controller;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import de.mpg.mpdl.r2d2.aa.WebSecurity;
+import de.mpg.mpdl.r2d2.search.service.FileSearchService;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,6 +48,9 @@ public class DatasetControllerTest {
 
   @MockBean
   private FileService fileService;
+
+  @MockBean
+  private FileSearchService fileSearchService;
 
   @MockBean
   private DtoMapper dtoMapper;

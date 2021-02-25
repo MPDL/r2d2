@@ -81,7 +81,7 @@ public class VocabularyController {
 
     String query = objectMapper.writeValueAsString(query_params);
     SearchSourceBuilder ssb = Utils.parseJsonToSearchSourceBuilder(query);
-    SearchResponse resp = affiliationSearchService.searchDetailed(ssb, -1, p);
+    SearchResponse resp = affiliationSearchService.searchDetailed(ssb, -1, false, p);
     SearchHit[] hits = resp.getHits().getHits();
     List<Object> list = Arrays.stream(hits).map(hit -> hit.getSourceAsMap()).map(map -> {
       return objectMapper.valueToTree(map);

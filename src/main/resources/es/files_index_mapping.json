@@ -1,0 +1,94 @@
+{
+	"properties": {
+		"checksum": {
+			"type": "keyword"
+		},
+		"creationDate": {
+			"type": "date"
+		},
+		"creator": {
+			"type": "keyword"
+		},
+		"datasets": {
+			"properties": {
+				"id": {
+					"type": "keyword"
+				},
+				"versionNumber": {
+					"type": "long"
+				},
+				"versionId" :
+				{
+					"type" : "keyword"
+				}
+			}
+		},
+		"filename": {
+			"type": "text",
+			"fields": {
+				"keyword": {
+					"type": "keyword",
+					"ignore_above": 256
+				}
+			}
+		},
+		"format": {
+			"type": "text",
+			"fields": {
+				"keyword": {
+					"type": "keyword",
+					"ignore_above": 256
+				}
+			}
+		},
+		"id": {
+			"type": "keyword"
+		},
+		"internal": {
+			"properties": {
+				"creationDate": {
+					"type": "date"
+				},
+				"creator": {
+					"type": "keyword"
+				},
+				"id": {
+					"type": "keyword"
+				},
+				"latestVersion": {
+					"type": "long"
+				},
+				"modificationDate": {
+					"type": "date"
+				},
+				"modifier": {
+					"type": "keyword"
+				},
+				"state": {
+					"type": "keyword"
+				}
+			}
+		},
+		"modificationDate": {
+			"type": "date"
+		},
+		"modifier": {
+			"type": "keyword"
+		},
+		"size": {
+			"type": "long"
+		},
+		"state": {
+			"type": "keyword"
+		},
+		"storageLocation": {
+			"type": "text",
+			"fields": {
+				"keyword": {
+					"type": "keyword",
+					"ignore_above": 256
+				}
+			}
+		}
+	}
+	}

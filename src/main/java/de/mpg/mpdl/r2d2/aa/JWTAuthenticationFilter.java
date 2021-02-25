@@ -2,6 +2,7 @@ package de.mpg.mpdl.r2d2.aa;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -23,6 +24,7 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 
 import de.mpg.mpdl.r2d2.db.UserAccountRepository;
+import de.mpg.mpdl.r2d2.exceptions.AuthorizationException;
 import de.mpg.mpdl.r2d2.model.aa.R2D2Principal;
 import de.mpg.mpdl.r2d2.model.aa.UserAccount;
 
@@ -59,7 +61,7 @@ public class JWTAuthenticationFilter extends BasicAuthenticationFilter {
     chain.doFilter(req, res);
   }
 
-  private UsernamePasswordAuthenticationToken getAuthentication(HttpServletRequest request) {
+  private UsernamePasswordAuthenticationToken getAuthentication(HttpServletRequest request) throws ServletException {
     String token = request.getHeader(JWTLoginFilter.HEADER_STRING);
     if (token != null) {
       // parse the token.
@@ -67,12 +69,17 @@ public class JWTAuthenticationFilter extends BasicAuthenticationFilter {
           .verify(token.replace(JWTLoginFilter.TOKEN_PREFIX, "")).getClaim("user_id").asString();
 
       if (userId != null) {
-        UserAccount ua = userAccountRepository.findById(UUID.fromString(userId)).get();
+        Optional<UserAccount> oua = userAccountRepository.findById(UUID.fromString(userId));
+        if (oua.isEmpty()) {
+          logger.info("Cannot authenticate token with user id " + userId + ". User not found.");
+          return null;
+        }
+        UserAccount ua = oua.get();
         R2D2Principal p = new R2D2Principal(ua.getEmail(), "", new ArrayList<>());
         p.setUserAccount(ua);
         // return new UsernamePasswordAuthenticationToken(p, null, new ArrayList<>());
         return new UsernamePasswordAuthenticationToken(p, null,
-            ua.getRoles().stream().map(role -> new SimpleGrantedAuthority("ROLE_" + role.name())).collect(Collectors.toList()));
+            ua.getGrants().stream().map(role -> new SimpleGrantedAuthority("ROLE_" + role.getRole().name())).collect(Collectors.toList()));
 
       }
       return null;

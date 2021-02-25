@@ -26,6 +26,7 @@ import de.mpg.mpdl.r2d2.exceptions.R2d2ApplicationException;
 import de.mpg.mpdl.r2d2.exceptions.R2d2TechnicalException;
 import de.mpg.mpdl.r2d2.model.Dataset;
 import de.mpg.mpdl.r2d2.model.DatasetVersion;
+import de.mpg.mpdl.r2d2.model.aa.Grant;
 import de.mpg.mpdl.r2d2.model.aa.R2D2Principal;
 import de.mpg.mpdl.r2d2.model.aa.UserAccount;
 import de.mpg.mpdl.r2d2.model.aa.UserAccount.Role;
@@ -185,24 +186,25 @@ public class AuthorizationService {
 
 
                 BoolQueryBuilder grantQueryBuilder = QueryBuilders.boolQuery();
-                for (Role grant : userAccount.getRoles()) {
-                  if (grant.name().equalsIgnoreCase((String) userMap.get("role"))) {
+                for (Grant grant : userAccount.getGrants()) {
+                  if (grant.getRole().name().equalsIgnoreCase((String) userMap.get("role"))) {
                     userMatch = true;
-                    /*
+
                     if (userMap.get("field_grant_id_match") != null) {
-                      if (grant.getObjectRef() != null && grant.getObjectRef().startsWith("ou_")) {
+                      /*
+                      if (grant.getDataset() != null && grant.getObjectRef().startsWith("ou_")) {
                         List<String> ouIds = new ArrayList<>();
                         ouIds.add(grant.getObjectRef());
                         List<AffiliationDbVO> childList = new ArrayList<>();
                         searchAllChildOrganizations(ouIds.get(0), childList);
                         grantQueryBuilder.should(QueryBuilders.termsQuery(indices.get(userMap.get("field_grant_id_match")), ouIds));
-                      } else {
-                        grantQueryBuilder
-                            .should(QueryBuilders.termsQuery(indices.get(userMap.get("field_grant_id_match")), grant.getObjectRef()));
-                      }
-                    
+                      } else {*/
+                      grantQueryBuilder.should(
+                          QueryBuilders.termsQuery(indices.get(userMap.get("field_grant_id_match")), grant.getDataset().toString()));
+                      //}
+
                     }
-                    */
+
 
                   }
                 }
@@ -500,24 +502,25 @@ public class AuthorizationService {
       }
       */
 
+
+
+      for (Grant grant : userAccount.getGrants()) {
+        check = (role == null || role.equals(grant.getRole().name())) && (grantFieldMatch == null
+            || (grant.getDataset() != null && grantFieldMatchValues.stream().anyMatch(id -> id.equals(grant.getDataset().toString()))));
+
+        if (check) {
+          break;
+        }
+      }
       /*
-      
-      for (GrantVO grant : userAccount.getGrantList()) {
-        check = (role == null || role.equals(grant.getRole())) && (grantFieldMatch == null
-            || (grant.getObjectRef() != null && grantFieldMatchValues.stream().anyMatch(id -> id.equals(grant.getObjectRef()))));
+      for (Role grant : userAccount.getRoles()) {
+        check = (role == null || role.equalsIgnoreCase(grant.name()));
       
         if (check) {
           break;
         }
       }
       */
-      for (Role grant : userAccount.getRoles()) {
-        check = (role == null || role.equalsIgnoreCase(grant.name()));
-
-        if (check) {
-          break;
-        }
-      }
 
       if (!check) {
         throw new AuthorizationException(

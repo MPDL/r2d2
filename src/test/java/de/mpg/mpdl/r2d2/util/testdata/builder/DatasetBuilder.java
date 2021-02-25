@@ -2,11 +2,8 @@ package de.mpg.mpdl.r2d2.util.testdata.builder;
 
 import de.mpg.mpdl.r2d2.model.Dataset;
 import de.mpg.mpdl.r2d2.model.aa.UserAccount;
-import de.mpg.mpdl.r2d2.model.aa.UserAccountRO;
 
 import java.time.OffsetDateTime;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 
 public final class DatasetBuilder {
@@ -23,7 +20,6 @@ public final class DatasetBuilder {
   //@Type(type = "jsonb")
   //@Column(columnDefinition = "jsonb")
   private Integer latestPublicVersion = null;
-  private List<UserAccountRO> datamanager = new ArrayList<UserAccountRO>();
 
   private DatasetBuilder() {}
 
@@ -71,11 +67,6 @@ public final class DatasetBuilder {
     return this;
   }
 
-  public DatasetBuilder datamanager(List<UserAccountRO> datamanager) {
-    this.datamanager = datamanager;
-    return this;
-  }
-
   public Dataset build() {
     Dataset dataset = new Dataset();
     dataset.setCreationDate(creationDate);
@@ -86,7 +77,6 @@ public final class DatasetBuilder {
     dataset.setState(state);
     dataset.setLatestVersion(latestVersion);
     dataset.setLatestPublicVersion(latestPublicVersion);
-    dataset.setDatamanager(datamanager);
     return dataset;
   }
 }

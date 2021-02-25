@@ -11,6 +11,8 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -19,9 +21,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
+import de.mpg.mpdl.r2d2.service.impl.DatasetVersionServiceDbImpl;
+
 public class ExceptionFilter extends OncePerRequestFilter {
 
   ObjectMapper mapper = new ObjectMapper();
+
+  private static Logger LOGGER = LoggerFactory.getLogger(DatasetVersionServiceDbImpl.class);
 
   @Override
   protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
@@ -29,6 +35,8 @@ public class ExceptionFilter extends OncePerRequestFilter {
     try {
       filterChain.doFilter(request, response);
     } catch (Exception ex) {
+
+      LOGGER.error("Error with HTTP request", ex);
       Map<String, Object> errors = new LinkedHashMap<>();
       errors.put("time", LocalDateTime.now());
       errors.put("cause", ex.getClass().getSimpleName());

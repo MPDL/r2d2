@@ -1,6 +1,7 @@
 package de.mpg.mpdl.r2d2.util.testdata.builder;
 
 import de.mpg.mpdl.r2d2.model.Person;
+import de.mpg.mpdl.r2d2.model.aa.Grant;
 import de.mpg.mpdl.r2d2.model.aa.UserAccount;
 
 import java.time.OffsetDateTime;
@@ -18,7 +19,7 @@ public final class UserAccountBuilder {
   private UUID id;
   private String email;
   private Person person;
-  private List<UserAccount.Role> roles = new ArrayList<UserAccount.Role>();
+  private List<Grant> grants = new ArrayList<Grant>();
 
   private UserAccountBuilder() {}
 
@@ -66,8 +67,8 @@ public final class UserAccountBuilder {
     return this;
   }
 
-  public UserAccountBuilder roles(List<UserAccount.Role> roles) {
-    this.roles = roles;
+  public UserAccountBuilder grants(List<Grant> grants) {
+    this.grants = grants;
     return this;
   }
 
@@ -81,7 +82,7 @@ public final class UserAccountBuilder {
     userAccount.setEmail(email);
     userAccount.setActive(active);
     userAccount.setPerson(person);
-    userAccount.setRoles(roles);
+    userAccount.setGrants(grants);
     return userAccount;
   }
 }

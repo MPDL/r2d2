@@ -235,6 +235,9 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
   public Page<File> listFiles(VersionId datasetId, Pageable pageable, R2D2Principal user)
       throws AuthorizationException, R2d2TechnicalException, NotFoundException {
     //AA via get
+
+
+
     DatasetVersion dv = get(datasetId, user);
     Page<File> list = fileRepository.findAllForVersion(dv.getVersionId(), pageable);
     return list;
@@ -246,7 +249,7 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
     DatasetVersion dv = get(datasetId, user);
     File f = fileRepository.findById(fileId).orElseThrow(() -> new NotFoundException("File with id " + fileId + " not found"));
 
-    if (!f.getVersions().stream().anyMatch(i -> i.getVersionId().equals(dv.getVersionId()))) {
+    if (!f.getDatasets().stream().anyMatch(i -> i.getVersionId().equals(dv.getVersionId()))) {
       throw new NotFoundException("File with id " + fileId + " not part of dataset " + dv.getVersionId());
     }
     return f;
@@ -318,7 +321,7 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
     if (!existingFiles.isEmpty()) {
       existingFiles.forEach(file -> {
         try {
-          file.getVersions().add(nextVersion);
+          file.getDatasets().add(nextVersion);
           fileRepository.saveAndFlush(file);
           indexingService.reindexFile(file, true);
         } catch (Exception e) {
@@ -531,16 +534,16 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
       LOGGER.info("Trying to add file with id " + fileIdToAdd + " to dataset version " + resultedDataset.getVersionId());
       File file = fileUploadService.get(fileIdToAdd, user);
       DatasetVersion readableDataset = resultedDataset;
-      if (!file.getVersions().stream().anyMatch(i -> i.getVersionId().equals(readableDataset.getVersionId()))) {
+      if (!file.getDatasets().stream().anyMatch(i -> i.getVersionId().equals(readableDataset.getVersionId()))) {
         switch (file.getState()) {
           case COMPLETE: {
             file.setState(UploadState.ATTACHED);
-            file.getVersions().add(resultedDataset);
+            file.getDatasets().add(resultedDataset);
             indexingService.reindexFile(file, true);
             break;
           }
           case PUBLIC: {
-            file.getVersions().add(resultedDataset);
+            file.getDatasets().add(resultedDataset);
             indexingService.reindexFile(file, true);
             break;
           }
@@ -557,17 +560,17 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
       LOGGER.info("Trying to remove file with id " + fileIdToRemove + " from dataset version " + resultedDataset.getVersionId());
       File file = fileUploadService.get(fileIdToRemove, user);
       DatasetVersion readableDataset = resultedDataset;
-      if (file.getVersions().stream().anyMatch(i -> i.getVersionId().equals(readableDataset.getVersionId()))) {
+      if (file.getDatasets().stream().anyMatch(i -> i.getVersionId().equals(readableDataset.getVersionId()))) {
         switch (file.getState()) {
           case ATTACHED: {
             file.setState(UploadState.COMPLETE);
-            file.getVersions().remove(resultedDataset);
+            file.getDatasets().remove(resultedDataset);
             indexingService.reindexFile(file, true);
             break;
           }
           case PUBLIC: {
-            file.getVersions().remove(resultedDataset);
-            if (file.getVersions().isEmpty()) {
+            file.getDatasets().remove(resultedDataset);
+            if (file.getDatasets().isEmpty()) {
               file.setState(UploadState.COMPLETE);
             }
             indexingService.reindexFile(file, true);

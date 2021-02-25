@@ -8,10 +8,7 @@ import de.mpg.mpdl.r2d2.model.DatasetVersion;
 import de.mpg.mpdl.r2d2.model.aa.R2D2Principal;
 import de.mpg.mpdl.r2d2.model.aa.UserAccount;
 import de.mpg.mpdl.r2d2.service.impl.DatasetVersionServiceDbImpl;
-import de.mpg.mpdl.r2d2.util.testdata.builder.DatasetBuilder;
-import de.mpg.mpdl.r2d2.util.testdata.builder.DatasetVersionBuilder;
-import de.mpg.mpdl.r2d2.util.testdata.builder.R2D2PrincipalBuilder;
-import de.mpg.mpdl.r2d2.util.testdata.builder.UserAccountBuilder;
+import de.mpg.mpdl.r2d2.util.testdata.builder.*;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -44,8 +41,8 @@ class AuthorizationServiceTest {
     //Given
     String method = "create";
 
-    R2D2Principal r2D2Principal = R2D2PrincipalBuilder.aR2D2Principal("userName", "pw", new ArrayList<>())
-        .userAccount(UserAccountBuilder.anUserAccount().roles(Collections.singletonList(UserAccount.Role.USER)).build()).build();
+    R2D2Principal r2D2Principal = R2D2PrincipalBuilder.aR2D2Principal("userName", "pw", new ArrayList<>()).userAccount(UserAccountBuilder
+        .anUserAccount().grants(Collections.singletonList(GrantBuilder.aGrant().role(UserAccount.Role.USER).build())).build()).build();
 
     DatasetVersion datasetVersion = DatasetVersionBuilder.aDatasetVersion().build();
 
@@ -63,8 +60,8 @@ class AuthorizationServiceTest {
     //Given
     String method = "update";
 
-    R2D2Principal r2D2Principal = R2D2PrincipalBuilder.aR2D2Principal("userName", "pw", new ArrayList<>())
-        .userAccount(UserAccountBuilder.anUserAccount().roles(Collections.singletonList(UserAccount.Role.USER)).build()).build();
+    R2D2Principal r2D2Principal = R2D2PrincipalBuilder.aR2D2Principal("userName", "pw", new ArrayList<>()).userAccount(UserAccountBuilder
+        .anUserAccount().grants(Collections.singletonList(GrantBuilder.aGrant().role(UserAccount.Role.USER).build())).build()).build();
 
     DatasetVersion datasetVersion = DatasetVersionBuilder.aDatasetVersion().build();
 
@@ -73,7 +70,7 @@ class AuthorizationServiceTest {
         .checkAuthorization(DatasetVersionServiceDbImpl.class.getCanonicalName(), method, r2D2Principal, datasetVersion);
 
     //Then
-    assertThatCode(checkAuthorizationCode).isInstanceOf(AuthorizationException.class).hasMessage("User is not owner of object.");
+    assertThatCode(checkAuthorizationCode).isInstanceOf(AuthorizationException.class);
   }
 
   //DatasetVersionServiceDbImpl + update + user & creator
@@ -82,8 +79,8 @@ class AuthorizationServiceTest {
     //Given
     String method = "update";
 
-    UserAccount userAccount =
-        UserAccountBuilder.anUserAccount().roles(Collections.singletonList(UserAccount.Role.USER)).id(UUID.randomUUID()).build();
+    UserAccount userAccount = UserAccountBuilder.anUserAccount()
+        .grants(Collections.singletonList(GrantBuilder.aGrant().role(UserAccount.Role.USER).build())).id(UUID.randomUUID()).build();
     R2D2Principal r2D2Principal = R2D2PrincipalBuilder.aR2D2Principal("userName", "pw", new ArrayList<>()).userAccount(userAccount).build();
 
     //TODO: Why must user be creator of the Dataset and not the DatasetVersion in this case?
@@ -104,8 +101,8 @@ class AuthorizationServiceTest {
     //Given
     String method = "update";
 
-    UserAccount userAccount =
-        UserAccountBuilder.anUserAccount().roles(Collections.singletonList(UserAccount.Role.ADMIN)).id(UUID.randomUUID()).build();
+    UserAccount userAccount = UserAccountBuilder.anUserAccount()
+        .grants(Collections.singletonList(GrantBuilder.aGrant().role(UserAccount.Role.ADMIN).build())).id(UUID.randomUUID()).build();
     R2D2Principal r2D2Principal = R2D2PrincipalBuilder.aR2D2Principal("userName", "pw", new ArrayList<>()).userAccount(userAccount).build();
 
     DatasetVersion datasetVersion = DatasetVersionBuilder.aDatasetVersion().build();

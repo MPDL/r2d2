@@ -81,4 +81,9 @@ public class AffiliationSearchServiceImpl extends GenericSearchServiceImpl<Affil
     }
     return null;
   }
+
+  @Override
+  protected QueryBuilder modifyQueryOnlyMine(QueryBuilder qb, R2D2Principal p) {
+    return null;
+  }
 }

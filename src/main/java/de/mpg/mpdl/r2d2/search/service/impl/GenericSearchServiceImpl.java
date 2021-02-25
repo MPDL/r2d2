@@ -11,8 +11,10 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.script.Script;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.slf4j.Logger;
@@ -31,10 +33,13 @@ import de.mpg.mpdl.r2d2.exceptions.R2d2ApplicationException;
 import de.mpg.mpdl.r2d2.exceptions.R2d2TechnicalException;
 import de.mpg.mpdl.r2d2.model.BaseDateDb;
 import de.mpg.mpdl.r2d2.model.BaseDb;
+import de.mpg.mpdl.r2d2.model.aa.Grant;
 import de.mpg.mpdl.r2d2.model.aa.R2D2Principal;
 import de.mpg.mpdl.r2d2.model.aa.UserAccount;
 import de.mpg.mpdl.r2d2.model.aa.UserAccountRO;
+import de.mpg.mpdl.r2d2.model.aa.UserAccount.Role;
 import de.mpg.mpdl.r2d2.search.dao.GenericDaoEs;
+import de.mpg.mpdl.r2d2.search.es.daoimpl.DatasetVersionDaoImpl;
 import de.mpg.mpdl.r2d2.search.model.SearchQuery;
 import de.mpg.mpdl.r2d2.search.model.SearchRecord;
 import de.mpg.mpdl.r2d2.search.model.SearchResult;
@@ -58,25 +63,32 @@ public abstract class GenericSearchServiceImpl<E> implements GenericSearchServic
     this.modelClazz = modelClazz;
   }
 
-  public SearchResponse searchDetailed(SearchSourceBuilder ssb, R2D2Principal principal)
+  public SearchResponse searchDetailed(SearchSourceBuilder ssb, boolean mineOnly, R2D2Principal principal)
       throws R2d2TechnicalException, AuthorizationException {
 
-    return searchDetailed(ssb, -1, principal);
+    return searchDetailed(ssb, -1, mineOnly, principal);
   }
 
-  public SearchResponse searchDetailed(SearchSourceBuilder ssb, long scrollTime, R2D2Principal principal)
+  public SearchResponse searchDetailed(SearchSourceBuilder ssb, long scrollTime, boolean mineOnly, R2D2Principal principal)
       throws R2d2TechnicalException, AuthorizationException {
 
     if (getIndexDao() != null) {
       QueryBuilder qb = ssb.query();
       if (principal != null) {
+
+        if (mineOnly) {
+
+          qb = modifyQueryOnlyMine(qb, principal);
+        }
+
         //filter out datasets that are not allowed to see for the user
         qb = aaService.modifyQueryForAa(getAaKey(), getAaMethod(), qb, principal);
-
 
       } else {
         qb = aaService.modifyQueryForAa(getAaKey(), getAaMethod(), qb, null);
       }
+
+
       ssb.query(qb);
       LOGGER.debug(ssb.toString());
       return getIndexDao().searchDetailed(ssb, scrollTime);
@@ -84,25 +96,26 @@ public abstract class GenericSearchServiceImpl<E> implements GenericSearchServic
     return null;
   }
 
+  protected abstract QueryBuilder modifyQueryOnlyMine(QueryBuilder qb, R2D2Principal p);
 
-  public SearchResult<E> search(SearchQuery sq, R2D2Principal principal) throws R2d2TechnicalException, AuthorizationException {
+  public SearchResult<E> search(SearchQuery sq, boolean mineOnly, R2D2Principal principal)
+      throws R2d2TechnicalException, AuthorizationException {
+    SearchResponse resp = searchDetailed(buildSearchSourceBuilderFromSearchQuery(sq), mineOnly, principal);
+    return buildSearchRetrieveResponseFromElasticSearchResponse(resp);
+  }
+
+
+  protected SearchSourceBuilder buildSearchSourceBuilderFromSearchQuery(SearchQuery sq) {
     QueryBuilder qb = QueryBuilders.queryStringQuery(sq.getQuery() != null ? sq.getQuery() : "*");
     SearchSourceBuilder ssb = SearchSourceBuilder.searchSource();
 
     ssb.query(qb);
     ssb.size(sq.getSize());
     ssb.from(sq.getFrom());
-
-
-
-    SearchResponse resp = searchDetailed(ssb, principal);
-    return getSearchRetrieveResponseFromElasticSearchResponse(resp);
-
-
-
+    return ssb;
   }
 
-  private SearchResult<E> getSearchRetrieveResponseFromElasticSearchResponse(SearchResponse sr) throws R2d2TechnicalException {
+  protected SearchResult<E> buildSearchRetrieveResponseFromElasticSearchResponse(SearchResponse sr) throws R2d2TechnicalException {
     SearchResult<E> srrVO;
     try {
       srrVO = new SearchResult<E>();
@@ -129,8 +142,6 @@ public abstract class GenericSearchServiceImpl<E> implements GenericSearchServic
 
     return srrVO;
   }
-
-
 
   protected abstract GenericDaoEs<E> getIndexDao();
 

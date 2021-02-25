@@ -1,36 +1,39 @@
 package de.mpg.mpdl.r2d2.util.testdata.builder;
 
-import de.mpg.mpdl.r2d2.model.DatasetVersion;
+import de.mpg.mpdl.r2d2.model.Dataset;
 import de.mpg.mpdl.r2d2.model.File;
-import de.mpg.mpdl.r2d2.model.FileUploadStatus;
-import de.mpg.mpdl.r2d2.model.aa.UserAccount;
+import de.mpg.mpdl.r2d2.model.VersionId;
 import de.mpg.mpdl.r2d2.search.model.FileIto;
 
 import java.time.OffsetDateTime;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 public final class FileItoBuilder {
+  private UUID id;
   private OffsetDateTime creationDate;
   private OffsetDateTime modificationDate;
-  private UserAccount creator;
-  private UserAccount modifier;
-  //@GeneratedValue(strategy = GenerationType.AUTO)
-  private UUID id;
-  private File.UploadState state = File.UploadState.INITIATED;
-  private FileUploadStatus stateInfo = new FileUploadStatus();
-  private Set<DatasetVersion> versions = new HashSet();
+  private UUID creator;
+  private UUID modifier;
   private String filename;
   private String storageLocation;
   private String checksum;
   private String format;
   private long size;
+  private File.UploadState state;
+  private List<VersionId> datasets = new ArrayList<VersionId>();
+  private Dataset internal;
 
   private FileItoBuilder() {}
 
   public static FileItoBuilder aFileIto() {
     return new FileItoBuilder();
+  }
+
+  public FileItoBuilder id(UUID id) {
+    this.id = id;
+    return this;
   }
 
   public FileItoBuilder creationDate(OffsetDateTime creationDate) {
@@ -43,33 +46,13 @@ public final class FileItoBuilder {
     return this;
   }
 
-  public FileItoBuilder creator(UserAccount creator) {
+  public FileItoBuilder creator(UUID creator) {
     this.creator = creator;
     return this;
   }
 
-  public FileItoBuilder modifier(UserAccount modifier) {
+  public FileItoBuilder modifier(UUID modifier) {
     this.modifier = modifier;
-    return this;
-  }
-
-  public FileItoBuilder id(UUID id) {
-    this.id = id;
-    return this;
-  }
-
-  public FileItoBuilder state(File.UploadState state) {
-    this.state = state;
-    return this;
-  }
-
-  public FileItoBuilder stateInfo(FileUploadStatus stateInfo) {
-    this.stateInfo = stateInfo;
-    return this;
-  }
-
-  public FileItoBuilder versions(Set<DatasetVersion> versions) {
-    this.versions = versions;
     return this;
   }
 
@@ -98,21 +81,36 @@ public final class FileItoBuilder {
     return this;
   }
 
+  public FileItoBuilder state(File.UploadState state) {
+    this.state = state;
+    return this;
+  }
+
+  public FileItoBuilder datasets(List<VersionId> datasets) {
+    this.datasets = datasets;
+    return this;
+  }
+
+  public FileItoBuilder internal(Dataset internal) {
+    this.internal = internal;
+    return this;
+  }
+
   public FileIto build() {
     FileIto fileIto = new FileIto();
+    fileIto.setId(id);
     fileIto.setCreationDate(creationDate);
     fileIto.setModificationDate(modificationDate);
     fileIto.setCreator(creator);
     fileIto.setModifier(modifier);
-    fileIto.setId(id);
-    fileIto.setState(state);
-    fileIto.setStateInfo(stateInfo);
-    fileIto.setVersions(versions);
     fileIto.setFilename(filename);
     fileIto.setStorageLocation(storageLocation);
     fileIto.setChecksum(checksum);
     fileIto.setFormat(format);
     fileIto.setSize(size);
+    fileIto.setState(state);
+    fileIto.setDatasets(datasets);
+    fileIto.setInternal(internal);
     return fileIto;
   }
 }

@@ -292,31 +292,10 @@
         "versionNumber": {
             "type": "long"
         },
-        "files": {
-            "dynamic": "false",
-            "type": "nested",
-            "properties": {
-                "id": {
-                    "type": "keyword"
-                },
-                "filename": {
-                    "type": "text",
-                    "fields": {
-                        "keyword": {
-                            "type": "keyword",
-                            "normalizer": "sort"
-                        }
-                    }
-                },
-                "format": {
-                    "type": "text",
-                    "fields": {
-                        "keyword": {
-                            "type": "keyword",
-                            "normalizer": "sort"
-                        }
-                    }
-                }
+        "internal": {
+        "dynamic": "true",
+         "properties" : {
+            
             }
         }
     }

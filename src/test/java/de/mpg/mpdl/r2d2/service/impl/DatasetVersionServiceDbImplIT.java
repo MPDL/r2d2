@@ -8,6 +8,7 @@ import de.mpg.mpdl.r2d2.model.DatasetVersionMetadata;
 import de.mpg.mpdl.r2d2.model.aa.R2D2Principal;
 import de.mpg.mpdl.r2d2.model.aa.UserAccount;
 import de.mpg.mpdl.r2d2.search.dao.DatasetVersionDaoEs;
+import de.mpg.mpdl.r2d2.search.model.DatasetVersionIto;
 import de.mpg.mpdl.r2d2.util.BaseIntegrationTest;
 import de.mpg.mpdl.r2d2.util.testdata.TestDataFactory;
 import de.mpg.mpdl.r2d2.util.testdata.builder.*;
@@ -59,15 +60,20 @@ public class DatasetVersionServiceDbImplIT extends BaseIntegrationTest {
     //Then
     DatasetVersion datasetVersionFromDB = this.datasetVersionRepository.findLatestVersion(returnedDatasetVersion.getId());
     //QUESTION: Why getVersionID != getID for datasetVersion?
-    DatasetVersion datasetVersionFromIndex = this.datasetVersionIndexDao.get(returnedDatasetVersion.getVersionId().toString());
+    DatasetVersionIto datasetVersionFromIndex = this.datasetVersionIndexDao.get(returnedDatasetVersion.getVersionId().toString());
     //FIXME: Maybe use the service or DB-access/SQL/Search-Index directly for verification and don't use the repositories!?
 
-    List<DatasetVersion> createdDatasetVersions = List.of(returnedDatasetVersion, datasetVersionFromDB, datasetVersionFromIndex);
+    List<DatasetVersion> createdDatasetVersions = List.of(returnedDatasetVersion, datasetVersionFromDB);
 
     assertThat(createdDatasetVersions).doesNotContainNull();
     assertThat(createdDatasetVersions).extracting(DatasetVersion::getMetadata).extracting(DatasetVersionMetadata::getTitle)
         .containsOnly(datasetTitle);
     assertThat(createdDatasetVersions).extracting(DatasetVersion::getVersionNumber).containsOnly(1);
+
+    assertThat(datasetVersionFromIndex).isNotNull();
+    assertThat(datasetVersionFromIndex).extracting(DatasetVersionIto::getMetadata).extracting(DatasetVersionMetadata::getTitle)
+        .isEqualTo(datasetTitle);
+    assertThat(datasetVersionFromIndex).extracting(DatasetVersionIto::getVersionNumber).isEqualTo(1);
   }
 
   @Test
