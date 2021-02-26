@@ -19,7 +19,7 @@ public final class FileBuilder {
   private UUID id;
   private File.UploadState state = File.UploadState.INITIATED;
   private FileUploadStatus stateInfo = new FileUploadStatus();
-  private Set<DatasetVersion> versions = new HashSet();
+  private Set<DatasetVersion> datasets = new HashSet();
   private String filename;
   private String storageLocation;
   private String checksum;
@@ -67,8 +67,8 @@ public final class FileBuilder {
     return this;
   }
 
-  public FileBuilder versions(Set<DatasetVersion> versions) {
-    this.versions = versions;
+  public FileBuilder datasets(Set<DatasetVersion> datasets) {
+    this.datasets = datasets;
     return this;
   }
 
@@ -106,7 +106,7 @@ public final class FileBuilder {
     file.setId(id);
     file.setState(state);
     file.setStateInfo(stateInfo);
-    file.setDatasets(versions);
+    file.setDatasets(datasets);
     file.setFilename(filename);
     file.setStorageLocation(storageLocation);
     file.setChecksum(checksum);
