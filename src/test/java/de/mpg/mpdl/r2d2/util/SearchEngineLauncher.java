@@ -18,7 +18,7 @@ public class SearchEngineLauncher {
     return elasticSearchContainer;
   }
 
-  static class Initializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
+  public static class Initializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
     @Override
     public void initialize(ConfigurableApplicationContext configurableApplicationContext) {
       TestPropertyValues.of("elasticsearch.url=" + ELASTIC_SEARCH_CONTAINER.getHttpHostAddress())

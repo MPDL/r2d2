@@ -216,8 +216,18 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-failsafe-plugin</artifactId>
+				<configuration>
+					<excludedGroups>ContractTest</excludedGroups>
+				</configuration>
 			</plugin>
 		</plugins>
+		<!-- Activate Filtering for Test resources to replace Placeholders in the application-test.properties -->
+		<testResources>
+			<testResource>
+				<directory>src/test/resources</directory>
+				<filtering>true</filtering>
+			</testResource>
+		</testResources>
 	</build>
 
 </project>

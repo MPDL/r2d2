@@ -10,6 +10,7 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.TestInstance;
 import org.mapstruct.factory.Mappers;
+import org.slf4j.LoggerFactory;
 import org.springframework.mock.env.MockEnvironment;
 
 import java.io.IOException;
@@ -28,6 +29,8 @@ public class DoiRepositoryImplMockTest extends DoiRepositoryImplAbstractTest {
 
   @BeforeAll
   void setup() throws IOException {
+    LOGGER = LoggerFactory.getLogger(DoiRepositoryImplMockTest.class);
+
     this.setupMockServer();
     this.setupDoiRepository();
   }

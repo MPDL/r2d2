@@ -19,7 +19,7 @@ public class DataBaseLauncher {
     return postgreSQLContainer;
   }
 
-  static class Initializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
+  public static class Initializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
     @Override
     public void initialize(ConfigurableApplicationContext configurableApplicationContext) {
       TestPropertyValues.of("spring.datasource.url=" + POSTGRESQL_CONTAINER.getJdbcUrl(),

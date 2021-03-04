@@ -32,9 +32,10 @@ import de.mpg.mpdl.r2d2.service.storage.SwiftObjectStoreRepository;
 @ContextConfiguration(initializers = {DataBaseLauncher.Initializer.class, SearchEngineLauncher.Initializer.class})
 public abstract class BaseIntegrationTest {
 
-  //TODO: Overwrite application.properties defining access to external Services
-
-  //TODO: Enhance/Adapt the mocking of the cloud storage access
+  //TODO:
+  // - Rebuild & Use as @interface?
+  // - Overwrite application-test.properties defining access to external Services
+  // - Enhance/Adapt the mocking of the cloud storage access
 
   @MockBean
   private SwiftObjectStoreRepository objectStoreRepository;

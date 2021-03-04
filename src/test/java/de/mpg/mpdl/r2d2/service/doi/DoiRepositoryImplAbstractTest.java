@@ -5,6 +5,7 @@ import de.mpg.mpdl.r2d2.model.DatasetVersion;
 import de.mpg.mpdl.r2d2.util.testdata.builder.DatasetBuilder;
 import de.mpg.mpdl.r2d2.util.testdata.builder.DatasetVersionBuilder;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
 
 import java.io.IOException;
 import java.util.UUID;
@@ -12,6 +13,8 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public abstract class DoiRepositoryImplAbstractTest {
+
+  static Logger LOGGER;
 
   DoiRepositoryImpl doiRepository;
 
@@ -27,6 +30,9 @@ public abstract class DoiRepositoryImplAbstractTest {
 
     //Then
     assertThat(response).isNotNull();
+    //TODO: Add further appropriate assertions
+
+    LOGGER.info("Create Draft-Doi response: " + response);
   }
 
   @Test
