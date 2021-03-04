@@ -28,7 +28,8 @@ public class UserAccount extends BaseDb {
   public enum Role {
     USER,
     ADMIN,
-    DATAMANAGER
+    DATAMANAGER,
+    DELETEADMIN
   }
 
   @Column(unique = true)

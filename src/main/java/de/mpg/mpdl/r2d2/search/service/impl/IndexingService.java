@@ -3,6 +3,8 @@ package de.mpg.mpdl.r2d2.search.service.impl;
 import java.util.UUID;
 
 import org.elasticsearch.index.query.QueryBuilders;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -16,10 +18,12 @@ import de.mpg.mpdl.r2d2.model.VersionId;
 import de.mpg.mpdl.r2d2.search.dao.DatasetVersionDaoEs;
 import de.mpg.mpdl.r2d2.search.dao.FileDaoEs;
 import de.mpg.mpdl.r2d2.search.model.DatasetVersionIto;
+import de.mpg.mpdl.r2d2.service.impl.DatasetVersionServiceDbImpl;
 import de.mpg.mpdl.r2d2.util.DtoMapper;
 
 @Service
 public class IndexingService {
+  private static Logger LOGGER = LoggerFactory.getLogger(IndexingService.class);
 
   @Autowired
   @Qualifier("PublicDatasetVersionDaoImpl")
@@ -39,6 +43,8 @@ public class IndexingService {
     DatasetVersion latestVersion = datasetVersionRepository.findLatestVersion(datasetId);
     Dataset dataset = latestVersion.getDataset();
 
+    //LOGGER.info("ModDate Version before reindex: " + latestVersion.getModificationDate());
+    //LOGGER.info("ModDate Dataset before reindex: " + latestVersion.getDataset().getModificationDate());
 
     // Delete old version, if exists
     VersionId oldVersion = new VersionId(dataset.getId(), dataset.getLatestVersion() - 1);
@@ -53,6 +59,9 @@ public class IndexingService {
     } else {
       datasetVersionIndexDao.create(latestVersion.getVersionId().toString(), latestdvIto);
     }
+
+    //LOGGER.info("ModDate Version after reindex: " + latestdvIto.getModificationDate());
+    //LOGGER.info("ModDate Dataset after reindex: " + latestdvIto.getDataset().getModificationDate());
 
     // Reindex latest public version if exists and not equal to latest version
     if (dataset.getLatestPublicVersion() != null && dataset.getLatestPublicVersion() != latestVersion.getVersionNumber()) {

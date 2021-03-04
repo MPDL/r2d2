@@ -13,12 +13,17 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.MappedSuperclass;
+import javax.persistence.PostUpdate;
+import javax.persistence.PrePersist;
+import javax.persistence.PreUpdate;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.TypeDef;
 import org.hibernate.annotations.TypeDefs;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
@@ -37,6 +42,7 @@ import com.vladmihalcea.hibernate.type.json.JsonStringType;
 
 import de.mpg.mpdl.r2d2.model.aa.UserAccount;
 import de.mpg.mpdl.r2d2.model.aa.UserAccountRO;
+import de.mpg.mpdl.r2d2.service.impl.DatasetVersionServiceDbImpl;
 
 @EntityListeners(AuditingEntityListener.class)
 
@@ -49,6 +55,7 @@ public class BaseDateDb {
   public final static String[] userIgnoreJsonProperties =
       new String[] {"creationDate", "creator", "modificationDate", "modifier", "email", "roles"};
 
+  private static Logger LOGGER = LoggerFactory.getLogger(BaseDateDb.class);
 
 
   @Column(columnDefinition = "TIMESTAMP WITH TIME ZONE", nullable = false, updatable = false)

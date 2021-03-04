@@ -62,8 +62,8 @@ public class DoiMetadataMapperTest {
     assertThat(doiMetadata.getPublicationYear()).isEqualTo(0);
     //Check default values
     assertThat(doiMetadata.getIdentifier().getIdentifierType()).isEqualTo(DoiIdentifier.IDENTIFIER_TYPE_DOI);
-    assertThat(doiMetadata.getIdentifier())
-        .extracting(DoiIdentifier::getIdentifierType, DoiIdentifier::getIdentifier).containsExactly(DoiIdentifier.IDENTIFIER_TYPE_DOI, null);
+    assertThat(doiMetadata.getIdentifier()).extracting(DoiIdentifier::getIdentifierType, DoiIdentifier::getIdentifier)
+        .containsExactly(DoiIdentifier.IDENTIFIER_TYPE_DOI, null);
     assertThat(doiMetadata.getPublisher()).isEqualTo(DoiMetadata.PUBLISHER_MPG);
     assertThat(doiMetadata.getResourceType().getResourceTypeGeneral()).isEqualTo(DoiResourceType.RESOURCE_TYPE_GENERAL_DATASET);
   }

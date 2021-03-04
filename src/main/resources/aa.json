@@ -82,6 +82,56 @@
 					"field_grant_id_match" : "datasetVersion.dataset.id"
 				}
 			}
+		],
+		"delete" : [
+			{
+				"user" : {
+					"role" : "ADMIN"
+				},
+				"datasetVersion.state" : ["PRIVATE"],
+				"datasetVersion.dataset.state" : "PRIVATE"
+			},
+			{
+				"user" : {
+					"role" : "DELETEADMIN"
+				}
+			},
+			{
+				"user" : {
+					"field_user_id_match" : "datasetVersion.dataset.creator.id"
+				},
+				"datasetVersion.state" : ["PRIVATE"],
+				"datasetVersion.dataset.state" : "PRIVATE"
+			},
+			{
+			"user" : {
+					"role" : "DATAMANAGER",
+					"field_grant_id_match" : "datasetVersion.dataset.id"
+				},
+			"datasetVersion.state" : ["PRIVATE"],
+			"datasetVersion.dataset.state" : "PRIVATE"
+			}
+		],
+		"withdraw" : [
+			{
+				"user" : {
+					"role" : "ADMIN"
+				},
+				"datasetVersion.dataset.state" : "PUBLIC"
+			},
+			{
+				"user" : {
+					"field_user_id_match" : "datasetVersion.dataset.creator.id"
+				},
+				"datasetVersion.dataset.state" : "PUBLIC"
+			},
+			{
+			"user" : {
+					"role" : "DATAMANAGER",
+					"field_grant_id_match" : "datasetVersion.dataset.id"
+				},
+			"datasetVersion.dataset.state" : "PUBLIC"
+			}
 		]
 	},
 		

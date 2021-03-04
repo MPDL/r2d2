@@ -23,13 +23,11 @@ public class DoiMetadataXmlConverterTest {
   @Test
   public void testConvertToXML() throws JAXBException, SAXException {
     //Given
-    DoiMetadata doiMetadata =
-        DoiMetadataBuilder.aDoiMetadata()
-            .titles(Arrays.asList(DoiTitleBuilder.aDoiTitle().title("TestTitle").build()))
-            .creators(Arrays.asList(
-                DoiCreatorBuilder.aDoiCreator().creatorName("Creator Name").givenName("Given Name").familyName("Family Name").build()))
-            .publicationYear(2021)
-            .identifier(DoiIdentifierBuilder.aDoiIdentifier().identifier("doi").build()).build();
+    DoiMetadata doiMetadata = DoiMetadataBuilder.aDoiMetadata()
+        .titles(Arrays.asList(DoiTitleBuilder.aDoiTitle().title("TestTitle").build()))
+        .creators(Arrays
+            .asList(DoiCreatorBuilder.aDoiCreator().creatorName("Creator Name").givenName("Given Name").familyName("Family Name").build()))
+        .publicationYear(2021).identifier(DoiIdentifierBuilder.aDoiIdentifier().identifier("doi").build()).build();
 
     //When
     String metadataXml = doiMetadataXmlConverter.convertToXML(doiMetadata);
