@@ -226,32 +226,32 @@ public class DatasetController {
   //POST files
 
   @PutMapping("/{id}/files/{fileId}")
-  public ResponseEntity<DatasetVersionDto> addFile(@PathVariable("id") String id, @PathVariable("fileId") String fileId,
+  public ResponseEntity<FileDto> addFile(@PathVariable("id") String id, @PathVariable("fileId") String fileId,
       @RequestParam(name = "lmd") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime lmd,
       @AuthenticationPrincipal R2D2Principal p) throws R2d2ApplicationException, AuthorizationException, R2d2TechnicalException {
-    DatasetVersion response = null;
+    File response = null;
     response = datasetVersionService.addFile(UUID.fromString(id), UUID.fromString(fileId), lmd, p);
 
-    return new ResponseEntity<DatasetVersionDto>(dtoMapper.convertToDatasetVersionDto(response), HttpStatus.OK);
+    return new ResponseEntity<FileDto>(dtoMapper.convertToFileDto(response), HttpStatus.OK);
   }
 
   @DeleteMapping("/{id}/files/{fileId}")
-  public ResponseEntity<DatasetVersionDto> removeFile(@PathVariable("id") String id, @PathVariable("fileId") String fileId,
+  public ResponseEntity<FileDto> removeFile(@PathVariable("id") String id, @PathVariable("fileId") String fileId,
       @RequestParam(name = "lmd") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime lmd,
       @AuthenticationPrincipal R2D2Principal p) throws R2d2ApplicationException, AuthorizationException, R2d2TechnicalException {
-    DatasetVersion response = null;
+    File response = null;
     response = datasetVersionService.removeFile(UUID.fromString(id), UUID.fromString(fileId), lmd, p);
 
-    return new ResponseEntity<DatasetVersionDto>(dtoMapper.convertToDatasetVersionDto(response), HttpStatus.OK);
+    return new ResponseEntity<FileDto>(dtoMapper.convertToFileDto(response), HttpStatus.OK);
   }
 
 
   @PutMapping("/{id}/files")
-  public ResponseEntity<DatasetVersionDto> updateFiles(@PathVariable("id") String id, @RequestBody SetFilesDto filesDto,
+  public ResponseEntity<List<FileDto>> updateFiles(@PathVariable("id") String id, @RequestBody SetFilesDto filesDto,
       @AuthenticationPrincipal R2D2Principal p) throws R2d2ApplicationException, AuthorizationException, R2d2TechnicalException {
-    DatasetVersion response = null;
+    List<File> response = null;
     response = datasetVersionService.updateFiles(UUID.fromString(id), filesDto.getFiles(), filesDto.getModificationDate(), p);
-    return new ResponseEntity<DatasetVersionDto>(dtoMapper.convertToDatasetVersionDto(response), HttpStatus.OK);
+    return new ResponseEntity<List<FileDto>>(dtoMapper.convertToFileDtoList(response), HttpStatus.OK);
   }
 
   @RequestMapping(value = "/search", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE,

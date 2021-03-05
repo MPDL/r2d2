@@ -1,5 +1,7 @@
 package de.mpg.mpdl.r2d2.util;
 
+import java.util.List;
+
 import org.mapstruct.InheritConfiguration;
 import org.mapstruct.InheritInverseConfiguration;
 import org.mapstruct.Mapper;
@@ -71,6 +73,8 @@ public abstract class DtoMapper {
   public abstract File convertToFile(FileDto fDto);
 
   public abstract FileDto convertToFileDto(FileIto dv);
+
+  public abstract List<FileDto> convertToFileDtoList(List<File> dv);
 
 
   public abstract VersionId toId(DatasetVersion version);
