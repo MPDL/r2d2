@@ -21,6 +21,8 @@ public class DoiAttributes {
 
   private DoiEvent event;
 
+  private String doi;
+
   private String prefix;
 
   private String url;
@@ -33,6 +35,14 @@ public class DoiAttributes {
 
   public void setEvent(DoiEvent event) {
     this.event = event;
+  }
+
+  public String getDoi() {
+    return doi;
+  }
+
+  public void setDoi(String doi) {
+    this.doi = doi;
   }
 
   public String getPrefix() {

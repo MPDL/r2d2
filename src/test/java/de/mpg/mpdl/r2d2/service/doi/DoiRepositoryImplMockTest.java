@@ -27,6 +27,9 @@ public class DoiRepositoryImplMockTest extends DoiRepositoryImplAbstractTest {
   private String username = "apiUsername";
   private String password = "apiPassword";
 
+  private String responseBody =
+      "{\"data\": {\"id\": \"10.1000/1234-5678\", \"type\": \"dois\", \"attributes\": {\"doi\": \"10.1000/1234-5678\"} } }";
+
   @BeforeAll
   void setup() throws IOException {
     LOGGER = LoggerFactory.getLogger(DoiRepositoryImplMockTest.class);
@@ -41,8 +44,8 @@ public class DoiRepositoryImplMockTest extends DoiRepositoryImplAbstractTest {
     WireMock.configureFor("localhost", wireMockServer.port());
 
     //TODO: Refine the Stub: Add Body, Add different Responses, ...
-    stubFor(post(urlEqualTo("/dois")).withHeader("Content-Type", equalTo("application/json")).willReturn(
-        aResponse().withStatus(200).withHeader("Content-Type", "application/json").withBody("<response>Some content</response>")));
+    stubFor(post(urlEqualTo("/dois")).withHeader("Content-Type", equalTo("application/json"))
+        .willReturn(aResponse().withStatus(200).withHeader("Content-Type", "application/json").withBody(responseBody)));
   }
 
   void setupDoiRepository() {

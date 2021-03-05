@@ -16,6 +16,7 @@ public class DoiRepositoryImpl implements DoiRepository {
   // - Maybe use an extra Class DoiClient for the REST-Calls and call the DoiData-Creation in another Class(Repository/Service)?
   // - Make the Webclient-Calls asynchronous?
   // - Optimise creation of the WebClient (via configuration)
+  // - Cover different responses/error-statusCodes in the requests
 
   private Environment env;
 
@@ -39,10 +40,12 @@ public class DoiRepositoryImpl implements DoiRepository {
 
     String uri = "/dois";
 
-    String response = dataciteWebClient.post().uri(uri).header(HttpHeaders.CONTENT_TYPE, "application/json").bodyValue(doiData).retrieve()
-        .bodyToMono(String.class).block();
+    DoiData response = dataciteWebClient.post().uri(uri).header(HttpHeaders.CONTENT_TYPE, "application/json").bodyValue(doiData).retrieve()
+        .bodyToMono(DoiData.class).block();
 
-    return response;
+    String doi = response.getAttributes().getDoi();
+
+    return doi;
   }
 
   @Override
