@@ -54,6 +54,7 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
     configuration.applyPermitDefaultValues();
     configuration.addAllowedMethod(HttpMethod.PUT);
     configuration.addAllowedMethod(HttpMethod.DELETE);
+    configuration.addAllowedMethod(HttpMethod.PATCH);
     configuration.addExposedHeader("Authorization");
     configuration.addExposedHeader("Content-Disposition");
     configuration.addExposedHeader("ETag");
