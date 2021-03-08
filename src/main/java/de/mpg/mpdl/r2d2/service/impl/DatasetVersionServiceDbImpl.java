@@ -436,31 +436,29 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
 
   @Override
   @Transactional(rollbackFor = Throwable.class)
-  public DatasetVersion addFile(UUID id, UUID fileId, OffsetDateTime lastModificationDate, R2D2Principal user)
-      throws R2d2TechnicalException, OptimisticLockingException, ValidationException, NotFoundException, InvalidStateException,
-      AuthorizationException {
+  public File addFile(UUID id, UUID fileId, OffsetDateTime lastModificationDate, R2D2Principal user) throws R2d2TechnicalException,
+      OptimisticLockingException, ValidationException, NotFoundException, InvalidStateException, AuthorizationException {
 
     List<UUID> filesToAdd = new ArrayList<UUID>();
     filesToAdd.add(fileId);
-    return addOrRemoveFile(id, filesToAdd, Collections.emptyList(), lastModificationDate, user);
+    return addOrRemoveFile(id, filesToAdd, Collections.emptyList(), lastModificationDate, user).get(0);
 
   }
 
   @Override
   @Transactional(rollbackFor = Throwable.class)
-  public DatasetVersion removeFile(UUID id, UUID fileId, OffsetDateTime lastModificationDate, R2D2Principal user)
-      throws R2d2TechnicalException, OptimisticLockingException, ValidationException, NotFoundException, InvalidStateException,
-      AuthorizationException {
+  public File removeFile(UUID id, UUID fileId, OffsetDateTime lastModificationDate, R2D2Principal user) throws R2d2TechnicalException,
+      OptimisticLockingException, ValidationException, NotFoundException, InvalidStateException, AuthorizationException {
 
     List<UUID> filesToRemove = new ArrayList<UUID>();
     filesToRemove.add(fileId);
-    return addOrRemoveFile(id, Collections.emptyList(), filesToRemove, lastModificationDate, user);
+    return addOrRemoveFile(id, Collections.emptyList(), filesToRemove, lastModificationDate, user).get(0);
 
   }
 
   @Override
   @Transactional(rollbackFor = Throwable.class)
-  public DatasetVersion updateFiles(UUID id, List<UUID> fileIds, OffsetDateTime lastModificationDate, R2D2Principal user)
+  public List<File> updateFiles(UUID id, List<UUID> fileIds, OffsetDateTime lastModificationDate, R2D2Principal user)
       throws R2d2TechnicalException, OptimisticLockingException, ValidationException, NotFoundException, InvalidStateException,
       AuthorizationException {
     DatasetVersion latestVersion = datasetVersionRepository.findLatestVersion(id);
@@ -508,7 +506,7 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
   }
 
 
-  private DatasetVersion addOrRemoveFile(UUID id, List<UUID> fileIdsToAdd, List<UUID> fileIdsToRemove, OffsetDateTime lastModificationDate,
+  private List<File> addOrRemoveFile(UUID id, List<UUID> fileIdsToAdd, List<UUID> fileIdsToRemove, OffsetDateTime lastModificationDate,
       R2D2Principal user) throws R2d2TechnicalException, OptimisticLockingException, ValidationException, NotFoundException,
       InvalidStateException, AuthorizationException {
 
@@ -525,9 +523,12 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
     // create new version if necessary
     resultedDataset = createNewVersion(latestVersion, user);
 
+    List<File> processedFiles = new ArrayList<File>();
+
     for (UUID fileIdToAdd : fileIdsToAdd) {
       LOGGER.info("Trying to add file with id " + fileIdToAdd + " to dataset version " + resultedDataset.getVersionId());
       File file = fileUploadService.get(fileIdToAdd, user);
+      processedFiles.add(file);
       DatasetVersion readableDataset = resultedDataset;
       if (!file.getDatasets().stream().anyMatch(i -> i.getVersionId().equals(readableDataset.getVersionId()))) {
         switch (file.getState()) {
@@ -543,7 +544,7 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
             break;
           }
           default: {
-            throw new ValidationException("Ignoring adding file. Invalid state " + file.getState() + " of file with id " + fileIdToAdd);
+            throw new ValidationException("Cannot add file. Invalid state " + file.getState() + " of file with id " + fileIdToAdd);
           }
         }
       } else {
@@ -554,6 +555,7 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
     for (UUID fileIdToRemove : fileIdsToRemove) {
       LOGGER.info("Trying to remove file with id " + fileIdToRemove + " from dataset version " + resultedDataset.getVersionId());
       File file = fileUploadService.get(fileIdToRemove, user);
+      processedFiles.add(file);
       DatasetVersion readableDataset = resultedDataset;
       if (file.getDatasets().stream().anyMatch(i -> i.getVersionId().equals(readableDataset.getVersionId()))) {
         switch (file.getState()) {
@@ -589,7 +591,7 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
 
     indexingService.reindexDataset(resultedDataset.getId(), true);
 
-    return resultedDataset;
+    return processedFiles;
   }
 
 
