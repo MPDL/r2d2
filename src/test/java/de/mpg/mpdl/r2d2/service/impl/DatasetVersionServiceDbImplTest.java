@@ -1,6 +1,7 @@
 package de.mpg.mpdl.r2d2.service.impl;
 
 import de.mpg.mpdl.r2d2.aa.AuthorizationService;
+import de.mpg.mpdl.r2d2.db.AuditRepository;
 import de.mpg.mpdl.r2d2.db.DatasetVersionRepository;
 import de.mpg.mpdl.r2d2.db.FileRepository;
 import de.mpg.mpdl.r2d2.exceptions.AuthorizationException;
@@ -45,6 +46,9 @@ public class DatasetVersionServiceDbImplTest {
   private FileRepository fileRepository;
 
   @Mock
+  private AuditRepository auditRepository;
+
+  @Mock
   private IndexingService indexingService;
 
   @Mock
@@ -76,6 +80,7 @@ public class DatasetVersionServiceDbImplTest {
     this.datasetVersionServiceDbImpl.create(datasetVersion, r2d2Principal);
 
     //Then
+    //TODO: Add Check for Audit Log call
     InOrder inOrder = Mockito.inOrder(aaService, datasetVersionRepository, indexingService);
 
     ArgumentCaptor<Object> objectArguments = ArgumentCaptor.forClass(Object.class);

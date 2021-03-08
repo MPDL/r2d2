@@ -1,6 +1,7 @@
 package de.mpg.mpdl.r2d2.service.impl;
 
 import de.mpg.mpdl.r2d2.db.DatasetVersionRepository;
+import de.mpg.mpdl.r2d2.db.UserAccountRepository;
 import de.mpg.mpdl.r2d2.exceptions.*;
 import de.mpg.mpdl.r2d2.model.Dataset;
 import de.mpg.mpdl.r2d2.model.DatasetVersion;
@@ -35,6 +36,9 @@ public class DatasetVersionServiceDbImplIT extends BaseIntegrationTest {
   private DatasetVersionServiceDbImpl datasetVersionServiceDbImpl;
 
   @Autowired
+  private UserAccountRepository userAccountRepository;
+
+  @Autowired
   private DatasetVersionRepository datasetVersionRepository;
 
   //TODO: Use LatestDatasetVersionDaoImpl instead of PublicDatasetVersionDaoImpl !?
@@ -53,6 +57,8 @@ public class DatasetVersionServiceDbImplIT extends BaseIntegrationTest {
     UserAccount userAccount = TestDataFactory.anUser().build();
     R2D2Principal r2d2Principal =
         R2D2PrincipalBuilder.aR2D2Principal("username", "pw", new ArrayList<GrantedAuthority>()).userAccount(userAccount).build();
+
+    userAccountRepository.save(userAccount);
 
     //When
     DatasetVersion returnedDatasetVersion = this.datasetVersionServiceDbImpl.create(datasetVersion, r2d2Principal);
