@@ -53,10 +53,12 @@ public class DoiRepositoryImpl implements DoiRepository {
     DoiData doiData = doiDataCreator.createDoiDataForDoiPublication(datasetVersion);
     String uri = "/dois" + "/" + datasetVersion.getMetadata().getDoi();
 
-    String response = dataciteWebClient.put().uri(uri).header(HttpHeaders.CONTENT_TYPE, "application/json").bodyValue(doiData).retrieve()
-        .bodyToMono(String.class).block();
+    DoiData response = dataciteWebClient.put().uri(uri).header(HttpHeaders.CONTENT_TYPE, "application/json").bodyValue(doiData).retrieve()
+        .bodyToMono(DoiData.class).block();
 
-    return response;
+    String doi = response.getAttributes().getDoi();
+
+    return doi;
   }
 
 }

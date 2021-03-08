@@ -27,7 +27,10 @@ public class DoiRepositoryImplMockTest extends DoiRepositoryImplAbstractTest {
   private String username = "apiUsername";
   private String password = "apiPassword";
 
-  private String responseBody =
+  private String createDraftDoiResponseBody =
+      "{\"data\": {\"id\": \"10.1000/1234-5678\", \"type\": \"dois\", \"attributes\": {\"doi\": \"10.1000/1234-5678\"} } }";
+
+  private String updateToFindableDoiResponseBody =
       "{\"data\": {\"id\": \"10.1000/1234-5678\", \"type\": \"dois\", \"attributes\": {\"doi\": \"10.1000/1234-5678\"} } }";
 
   @BeforeAll
@@ -45,7 +48,13 @@ public class DoiRepositoryImplMockTest extends DoiRepositoryImplAbstractTest {
 
     //TODO: Refine the Stub: Add Body, Add different Responses, ...
     stubFor(post(urlEqualTo("/dois")).withHeader("Content-Type", equalTo("application/json"))
-        .willReturn(aResponse().withStatus(200).withHeader("Content-Type", "application/json").withBody(responseBody)));
+        .willReturn(aResponse().withStatus(200).withHeader("Content-Type", "application/json").withBody(createDraftDoiResponseBody)));
+
+    //TODO: Add Request body
+    stubFor(put(urlMatching("/dois/.*")).withHeader("Content-Type", equalTo("application/json"))
+        //How to check the request body more precise?
+        .withRequestBody(matchingJsonPath("$.data", matchingJsonPath("$.attributes")))
+        .willReturn(aResponse().withStatus(200).withHeader("Content-Type", "application/json").withBody(updateToFindableDoiResponseBody)));
   }
 
   void setupDoiRepository() {
