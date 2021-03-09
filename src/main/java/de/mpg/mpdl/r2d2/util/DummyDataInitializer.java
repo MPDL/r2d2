@@ -73,7 +73,9 @@ public class DummyDataInitializer {
     // user3.setModificationDate(currentDateTime);
     user.getGrants().add(role);
 
-
+    user.setCreationDate(Utils.generateCurrentDateTimeForDatabase());
+    user.setModificationDate(Utils.generateCurrentDateTimeForDatabase());
+    
     user = userRepository.save(user);
 
     LocalUserAccount internaluser3 = new LocalUserAccount();
@@ -106,8 +108,8 @@ public class DummyDataInitializer {
     //dv.setId(UUID.fromString("a6124f2a-9a06-489d-a7e2-40b583ebbd23"));
     dv.setCreator(user);
     dv.setModifier(user);
-    // dv.setCreationDate(currentDateTime);
-    // dv.setModificationDate(currentDateTime);
+    dv.setCreationDate(currentDateTime);
+    dv.setModificationDate(currentDateTime);
     dv.getMetadata().setTitle("Test title");
 
     Person author = new Person();
@@ -119,8 +121,8 @@ public class DummyDataInitializer {
     dataset.setId(UUID.fromString("a6124f2a-9a06-489d-a7e2-40b583ebbd23"));
     dataset.setCreator(user);
     dataset.setModifier(user);
-    // dataset.setCreationDate(currentDateTime);
-    // dataset.setModificationDate(currentDateTime);
+    dataset.setCreationDate(currentDateTime);
+    dataset.setModificationDate(currentDateTime);
     //dataset.getDatamanager().add(new UserAccountRO(user));
     dataset.setLatestVersion(1);
     dv.setDataset(dataset);
@@ -133,8 +135,8 @@ public class DummyDataInitializer {
     //dv2.setId(UUID.fromString("a6124f2a-9a06-489d-a7e2-40b583ebbd24"));
     dv2.setCreator(user);
     dv2.setModifier(user);
-    // dv2.setCreationDate(currentDateTime);
-    // dv2.setModificationDate(currentDateTime);
+    dv2.setCreationDate(currentDateTime);
+    dv2.setModificationDate(currentDateTime);
     dv2.getMetadata().setTitle("Test title 2");
 
     Person author2 = new Person();
@@ -146,8 +148,8 @@ public class DummyDataInitializer {
     dataset2.setId(UUID.fromString("a6124f2a-9a06-489d-a7e2-40b583ebbd24"));
     dataset2.setCreator(user);
     dataset2.setModifier(user);
-    // dataset2.setCreationDate(currentDateTime);
-    // dataset2.setModificationDate(currentDateTime);
+    dataset2.setCreationDate(currentDateTime);
+    dataset2.setModificationDate(currentDateTime);
     dataset2.setState(State.PUBLIC);
     dataset2.setLatestPublicVersion(1);
     dataset2.setLatestVersion(1);
@@ -164,8 +166,8 @@ public class DummyDataInitializer {
     //dv3.setId(UUID.fromString("a6124f2a-9a06-489d-a7e2-40b583ebbd25"));
     dv2.setCreator(user);
     dv3.setModifier(user);
-    // dv3.setCreationDate(currentDateTime);
-    // dv3.setModificationDate(currentDateTime);
+    dv3.setCreationDate(currentDateTime);
+    dv3.setModificationDate(currentDateTime);
     dv3.getMetadata().setTitle("Test private item from user");
 
     Person author3 = new Person();
@@ -177,8 +179,8 @@ public class DummyDataInitializer {
     dataset3.setId(UUID.fromString("a6124f2a-9a06-489d-a7e2-40b583ebbd25"));
     dataset3.setCreator(user);
     dataset3.setModifier(user);
-    // dataset3.setCreationDate(currentDateTime);
-    // dataset3.setModificationDate(currentDateTime);
+    dataset3.setCreationDate(currentDateTime);
+    dataset3.setModificationDate(currentDateTime);
     dataset3.setState(State.PUBLIC);
     dataset3.setLatestVersion(1);
     dataset3.setLatestPublicVersion(1);
