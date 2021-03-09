@@ -75,7 +75,7 @@ public class DummyDataInitializer {
 
     user.setCreationDate(Utils.generateCurrentDateTimeForDatabase());
     user.setModificationDate(Utils.generateCurrentDateTimeForDatabase());
-    
+
     user = userRepository.save(user);
 
     LocalUserAccount internaluser3 = new LocalUserAccount();
@@ -164,7 +164,7 @@ public class DummyDataInitializer {
     DatasetVersion dv3 = new DatasetVersion();
     dv3.setState(State.PUBLIC);
     //dv3.setId(UUID.fromString("a6124f2a-9a06-489d-a7e2-40b583ebbd25"));
-    dv2.setCreator(user);
+    dv3.setCreator(user);
     dv3.setModifier(user);
     dv3.setCreationDate(currentDateTime);
     dv3.setModificationDate(currentDateTime);
