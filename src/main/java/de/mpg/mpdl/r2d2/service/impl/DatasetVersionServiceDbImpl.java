@@ -86,7 +86,7 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
     DatasetVersion datasetVersionToCreate = buildDatasetVersionToCreate(datasetVersion, user.getUserAccount(), 1, null);
 
     checkAa("create", user, datasetVersionToCreate);
-    
+
     setBasicCreationProperties(datasetVersionToCreate, user.getUserAccount());
     // TODO validation
 
@@ -245,7 +245,7 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
     latestVersion.getDataset().setState(State.PUBLIC);
     latestVersion.getDataset().setLatestPublicVersion(latestVersion.getVersionNumber());
     latestVersion.setPublicationDate(OffsetDateTime.now());
-    
+
     setBasicModificationProperties(latestVersion, user.getUserAccount());
 
     //set all files to Public  
@@ -419,7 +419,7 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
 
   }
 
-  
+
   protected void setBasicCreationProperties(DatasetVersion baseObject, UserAccount creator) {
     OffsetDateTime dateTime = Utils.generateCurrentDateTimeForDatabase();
     super.setBasicCreationProperties(baseObject, creator, dateTime);
@@ -435,7 +435,6 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
     super.setBasicModificationProperties(baseObject, creator, dateTime);
     super.setBasicModificationProperties(baseObject.getDataset(), creator, dateTime);
   }
-  
 
 
 

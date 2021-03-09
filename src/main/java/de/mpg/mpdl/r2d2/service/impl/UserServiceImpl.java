@@ -40,11 +40,11 @@ public class UserServiceImpl extends GenericServiceDbImpl<UserAccount> implement
   @Autowired
   private PasswordEncoder passwordEncoder;
 
-  
-   public UserServiceImpl() {
-   super(UserAccount.class);
+
+  public UserServiceImpl() {
+    super(UserAccount.class);
   }
-  
+
   @Transactional
   @Override
   public LocalUserAccount registerNewUser(RegistrationRequest request) throws EntityExistsException {
@@ -138,7 +138,7 @@ public class UserServiceImpl extends GenericServiceDbImpl<UserAccount> implement
     account.getGrants().add(new Grant(Role.USER, null));
 
     setBasicCreationProperties(account, null);
-    
+
     account = accountRepository.save(account);
 
     // account.setCreator(new UserAccountRO(account));

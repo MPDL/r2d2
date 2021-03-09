@@ -128,20 +128,20 @@ public abstract class GenericServiceDbImpl<E> {
   
   
   */
-  
-  
-  
+
+
+
   protected void setBasicCreationProperties(BaseDateDb baseObject, UserAccount creator) {
     //Truncate to microseconds, as the database doesn't support more
     setBasicCreationProperties(baseObject, creator, Utils.generateCurrentDateTimeForDatabase());
   }
- 
+
   protected void setBasicCreationProperties(BaseDateDb baseObject, UserAccount creator, OffsetDateTime dateTime) {
     baseObject.setCreator(creator);
     baseObject.setCreationDate(dateTime);
     setBasicModificationProperties(baseObject, creator, dateTime);
   }
- 
+
   protected void setBasicModificationProperties(BaseDateDb baseObject, UserAccount creator) {
     //Truncate to microseconds, as the database doesn't support more
     setBasicModificationProperties(baseObject, creator, Utils.generateCurrentDateTimeForDatabase());
@@ -151,7 +151,7 @@ public abstract class GenericServiceDbImpl<E> {
     baseObject.setModifier(creator);
     baseObject.setModificationDate(dateTime);
   }
-  
+
   /*
   protected abstract GenericDaoEs<E> getIndexDao();
   */

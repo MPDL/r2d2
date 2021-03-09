@@ -111,7 +111,7 @@ public class FileSearchServiceImpl extends GenericSearchServiceImpl<FileIto> imp
       if (qb != null) {
         filterQuery.must(qb);
       }
-      if(myDatasetQuery != null) {
+      if (myDatasetQuery != null) {
         filterQuery.filter(myDatasetQuery);
       }
 
