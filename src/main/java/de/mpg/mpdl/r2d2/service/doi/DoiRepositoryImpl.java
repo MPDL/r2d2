@@ -8,15 +8,16 @@ import org.springframework.core.env.Environment;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Repository;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 @Repository
 public class DoiRepositoryImpl implements DoiRepository {
 
   //TODO:
   // - Maybe use an extra Class DoiClient for the REST-Calls and call the DoiData-Creation in another Class(Repository/Service)?
-  // - Make the Webclient-Calls asynchronous?
+  // - Make the Webclient-Calls asynchronous? Or set Timeouts (default is 30s)
   // - Optimise creation of the WebClient (via configuration)
-  // - Cover different responses/error-statusCodes in the requests
+  // - Cover different responses/error-statusCodes in the requests?
 
   private Environment env;
 
@@ -37,15 +38,17 @@ public class DoiRepositoryImpl implements DoiRepository {
   @Override
   public String createDraftDoi(DatasetVersion datasetVersion) throws R2d2TechnicalException {
     DoiData doiData = doiDataCreator.createDoiDataForDraftDoiCreation(datasetVersion);
-
     String uri = "/dois";
 
-    DoiData response = dataciteWebClient.post().uri(uri).header(HttpHeaders.CONTENT_TYPE, "application/json").bodyValue(doiData).retrieve()
-        .bodyToMono(DoiData.class).block();
+    try {
+      DoiData doiDataResponse = dataciteWebClient.post().uri(uri).header(HttpHeaders.CONTENT_TYPE, "application/json").bodyValue(doiData)
+          .retrieve().bodyToMono(DoiData.class).block();
 
-    String doi = response.getAttributes().getDoi();
-
-    return doi;
+      String doi = doiDataResponse.getAttributes().getDoi();
+      return doi;
+    } catch (WebClientResponseException e) {
+      throw new R2d2TechnicalException(e);
+    }
   }
 
   @Override
@@ -53,12 +56,15 @@ public class DoiRepositoryImpl implements DoiRepository {
     DoiData doiData = doiDataCreator.createDoiDataForDoiPublication(datasetVersion);
     String uri = "/dois" + "/" + datasetVersion.getMetadata().getDoi();
 
-    DoiData response = dataciteWebClient.put().uri(uri).header(HttpHeaders.CONTENT_TYPE, "application/json").bodyValue(doiData).retrieve()
-        .bodyToMono(DoiData.class).block();
+    try {
+      DoiData response = dataciteWebClient.put().uri(uri).header(HttpHeaders.CONTENT_TYPE, "application/json").bodyValue(doiData).retrieve()
+          .bodyToMono(DoiData.class).block();
 
-    String doi = response.getAttributes().getDoi();
-
-    return doi;
+      String doi = response.getAttributes().getDoi();
+      return doi;
+    } catch (WebClientResponseException e) {
+      throw new R2d2TechnicalException(e);
+    }
   }
 
 }
