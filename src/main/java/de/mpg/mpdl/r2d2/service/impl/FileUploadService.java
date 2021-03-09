@@ -60,6 +60,7 @@ public class FileUploadService extends GenericServiceDbImpl<File> implements Fil
 
   private File create(File object, R2D2Principal user) throws R2d2TechnicalException, ValidationException, AuthorizationException {
     try {
+      setBasicCreationProperties(object, user.getUserAccount());
       fileRepository.save(object);
     } catch (Exception e) {
       throw new R2d2TechnicalException(e);

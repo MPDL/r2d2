@@ -10,6 +10,7 @@ import java.util.UUID;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
+import org.jclouds.openstack.nova.v2_0.options.CreateBackupOfServerOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,6 +43,7 @@ import de.mpg.mpdl.r2d2.model.aa.UserAccount;
 import de.mpg.mpdl.r2d2.search.service.impl.IndexingService;
 import de.mpg.mpdl.r2d2.service.DatasetVersionService;
 import de.mpg.mpdl.r2d2.service.storage.SwiftObjectStoreRepository;
+import de.mpg.mpdl.r2d2.util.Utils;
 
 @Service
 public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVersion> implements DatasetVersionService {
@@ -84,6 +86,8 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
     DatasetVersion datasetVersionToCreate = buildDatasetVersionToCreate(datasetVersion, user.getUserAccount(), 1, null);
 
     checkAa("create", user, datasetVersionToCreate);
+    
+    setBasicCreationProperties(datasetVersionToCreate, user.getUserAccount());
     // TODO validation
 
     // datasetVersionToCreate.setFiles(handleFiles(datasetVersion, null, principal));
@@ -241,6 +245,8 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
     latestVersion.getDataset().setState(State.PUBLIC);
     latestVersion.getDataset().setLatestPublicVersion(latestVersion.getVersionNumber());
     latestVersion.setPublicationDate(OffsetDateTime.now());
+    
+    setBasicModificationProperties(latestVersion, user.getUserAccount());
 
     //set all files to Public  
     List<File> filesOfDatasetVersion = fileRepository.findAllForVersion(latestVersion.getVersionId());
@@ -413,7 +419,7 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
 
   }
 
-  /*
+  
   protected void setBasicCreationProperties(DatasetVersion baseObject, UserAccount creator) {
     OffsetDateTime dateTime = Utils.generateCurrentDateTimeForDatabase();
     super.setBasicCreationProperties(baseObject, creator, dateTime);
@@ -423,14 +429,13 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
       super.setBasicModificationProperties(baseObject.getDataset(), creator, dateTime);
     }
   }
-  */
-  /*
+
   protected void setBasicModificationProperties(DatasetVersion baseObject, UserAccount creator) {
     OffsetDateTime dateTime = Utils.generateCurrentDateTimeForDatabase();
     super.setBasicModificationProperties(baseObject, creator, dateTime);
     super.setBasicModificationProperties(baseObject.getDataset(), creator, dateTime);
   }
-  */
+  
 
 
 
@@ -496,11 +501,13 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
       attachFiles(resultedDataset, latestVersion);
       resultedDataset.getDataset().setLatestVersion(resultedDataset.getVersionNumber());
       // setBasicCreationProperties(result, user.getUserAccount());
+      setBasicCreationProperties(resultedDataset, user.getUserAccount());
       resultedDataset = datasetVersionRepository.save(resultedDataset);
       auditRepository.save(new Audit(Action.CREATE, resultedDataset.getVersionId(), user.getUserAccount()));
       return resultedDataset;
 
     } else {
+      setBasicModificationProperties(latestVersion, user.getUserAccount());
       return latestVersion;
     }
   }
@@ -515,7 +522,7 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
     DatasetVersion resultedDataset = null;
 
     checkAa("update", user, latestVersion);
-    //TODO AA of file via getFile, see below
+    //AA of file via FileService.getFile(), see below
     //TODO Auditing files
 
     checkEqualModificationDate(lastModificationDate, latestVersion.getModificationDate());
@@ -529,6 +536,7 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
       LOGGER.info("Trying to add file with id " + fileIdToAdd + " to dataset version " + resultedDataset.getVersionId());
       File file = fileUploadService.get(fileIdToAdd, user);
       processedFiles.add(file);
+      setBasicModificationProperties(file, user.getUserAccount());
       DatasetVersion readableDataset = resultedDataset;
       if (!file.getDatasets().stream().anyMatch(i -> i.getVersionId().equals(readableDataset.getVersionId()))) {
         switch (file.getState()) {
@@ -556,6 +564,7 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
       LOGGER.info("Trying to remove file with id " + fileIdToRemove + " from dataset version " + resultedDataset.getVersionId());
       File file = fileUploadService.get(fileIdToRemove, user);
       processedFiles.add(file);
+      setBasicModificationProperties(file, user.getUserAccount());
       DatasetVersion readableDataset = resultedDataset;
       if (file.getDatasets().stream().anyMatch(i -> i.getVersionId().equals(readableDataset.getVersionId()))) {
         switch (file.getState()) {

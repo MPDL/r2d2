@@ -41,7 +41,7 @@ public class Utils {
   }
 
 
-
+  //Truncate to microseconds, as the database doesn't support nanoseconds
   public static OffsetDateTime generateCurrentDateTimeForDatabase() {
     return OffsetDateTime.now().truncatedTo(ChronoUnit.MICROS);
   }

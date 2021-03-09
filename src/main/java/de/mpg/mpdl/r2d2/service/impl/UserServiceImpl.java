@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import de.mpg.mpdl.r2d2.db.ConfirmationTokenRepository;
 import de.mpg.mpdl.r2d2.db.LocalUserAccountRepository;
 import de.mpg.mpdl.r2d2.db.UserAccountRepository;
+import de.mpg.mpdl.r2d2.model.File;
 import de.mpg.mpdl.r2d2.model.Person;
 import de.mpg.mpdl.r2d2.model.aa.Grant;
 import de.mpg.mpdl.r2d2.model.aa.LocalUserAccount;
@@ -25,7 +26,7 @@ import de.mpg.mpdl.r2d2.service.UserService;
 import de.mpg.mpdl.r2d2.util.Utils;
 
 @Service
-public class UserServiceImpl implements UserService {
+public class UserServiceImpl extends GenericServiceDbImpl<UserAccount> implements UserService {
 
   @Autowired
   private UserAccountRepository accountRepository;
@@ -39,6 +40,11 @@ public class UserServiceImpl implements UserService {
   @Autowired
   private PasswordEncoder passwordEncoder;
 
+  
+   public UserServiceImpl() {
+   super(UserAccount.class);
+  }
+  
   @Transactional
   @Override
   public LocalUserAccount registerNewUser(RegistrationRequest request) throws EntityExistsException {
@@ -127,10 +133,12 @@ public class UserServiceImpl implements UserService {
       person.setOrcid(request.getOrcid());
     }
     account.setPerson(person);
-    account.setCreationDate(Utils.generateCurrentDateTimeForDatabase());
-    account.setModificationDate(Utils.generateCurrentDateTimeForDatabase());
+    //account.setCreationDate(Utils.generateCurrentDateTimeForDatabase());
+    //account.setModificationDate(Utils.generateCurrentDateTimeForDatabase());
     account.getGrants().add(new Grant(Role.USER, null));
 
+    setBasicCreationProperties(account, null);
+    
     account = accountRepository.save(account);
 
     // account.setCreator(new UserAccountRO(account));

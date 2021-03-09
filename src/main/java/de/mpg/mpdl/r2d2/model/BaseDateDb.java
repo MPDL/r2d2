@@ -59,11 +59,11 @@ public class BaseDateDb {
 
 
   @Column(columnDefinition = "TIMESTAMP WITH TIME ZONE", nullable = false, updatable = false)
-  @CreatedDate
+  //@CreatedDate
   private OffsetDateTime creationDate;
 
   @Column(columnDefinition = "TIMESTAMP WITH TIME ZONE", nullable = false)
-  @LastModifiedDate
+  //@LastModifiedDate
   private OffsetDateTime modificationDate;
 
 
