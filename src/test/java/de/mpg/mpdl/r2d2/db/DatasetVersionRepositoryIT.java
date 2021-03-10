@@ -1,10 +1,9 @@
 package de.mpg.mpdl.r2d2.db;
 
 import de.mpg.mpdl.r2d2.model.*;
-import de.mpg.mpdl.r2d2.util.BaseIntegrationTest;
+import de.mpg.mpdl.r2d2.util.*;
 import de.mpg.mpdl.r2d2.util.testdata.EntityManagerWrapper;
 import de.mpg.mpdl.r2d2.util.testdata.TestDataFactory;
-import de.mpg.mpdl.r2d2.util.testdata.builder.DatasetVersionBuilder;
 import de.mpg.mpdl.r2d2.util.testdata.builder.DatasetVersionMetadataBuilder;
 import de.mpg.mpdl.r2d2.util.testdata.builder.GeolocationBuilder;
 import de.mpg.mpdl.r2d2.util.testdata.builder.PersonBuilder;
@@ -31,6 +30,10 @@ public class DatasetVersionRepositoryIT extends BaseIntegrationTest {
 
   @Autowired
   private EntityManagerWrapper entityManagerWrapper;
+
+  //TODO: Can TestEntityManager be used instead of EntityManager by @AutoConfigureTestEntityManager (and without @DataJpaTest)?
+  //  @Autowired
+  //  private TestEntityManager testEntityManager;
 
   @Autowired
   private DatasetVersionRepository datasetVersionRepository;
@@ -67,7 +70,9 @@ public class DatasetVersionRepositoryIT extends BaseIntegrationTest {
 
     DatasetVersionMetadata metadata = DatasetVersionMetadataBuilder.aDatasetVersionMetadata().title(title)
         .authors(Arrays.asList(PersonBuilder.aPerson().build())).description(description).geolocation(geolocation).build();
-    DatasetVersion datasetVersion = DatasetVersionBuilder.aDatasetVersion().metadata(metadata).build();
+    Dataset dataset = TestDataFactory.aDatasetWithCreationAndModificationDate().build();
+    DatasetVersion datasetVersion =
+        TestDataFactory.aDatasetVersionWithCreationAndModificationDate().dataset(dataset).metadata(metadata).build();
 
     //When
     datasetVersionRepository.save(datasetVersion);
@@ -75,8 +80,6 @@ public class DatasetVersionRepositoryIT extends BaseIntegrationTest {
     //Then
     List<DatasetVersion> datasetVersions =
         entityManager.createQuery("Select datasetVersion from " + DatasetVersion.class.getSimpleName() + " datasetVersion").getResultList();
-    //TODO: Use EntityManager or Repository at this level?
-    //    List<DatasetVersion> datasetVersions = datasetVersionRepository.findAll();
 
     assertThat(datasetVersions).hasSize(1);
 

@@ -85,13 +85,14 @@ public class DatasetVersionServiceDbImplIT extends BaseIntegrationTest {
   @Test
   void testGetLatestDatasetVersionPublic() throws AuthorizationException, NotFoundException, R2d2TechnicalException {
     //Given
-    Dataset dataset = DatasetBuilder.aDataset().id(UUID.randomUUID()).build();
+    Dataset dataset = TestDataFactory.aDatasetWithCreationAndModificationDate().id(UUID.randomUUID()).build();
 
-    DatasetVersion datasetVersion1 = DatasetVersionBuilder.aDatasetVersion().dataset(dataset).state(Dataset.State.PUBLIC).build();
-    DatasetVersion datasetVersion2 = DatasetVersionBuilder.aDatasetVersion().dataset(dataset).state(Dataset.State.PUBLIC).versionNumber(2)
-        .publicationComment("publication Comment").build();
-    DatasetVersion datasetVersion3 =
-        DatasetVersionBuilder.aDatasetVersion().dataset(dataset).state(Dataset.State.PRIVATE).versionNumber(3).build();
+    DatasetVersion datasetVersion1 =
+        TestDataFactory.aDatasetVersionWithCreationAndModificationDate().dataset(dataset).state(Dataset.State.PUBLIC).build();
+    DatasetVersion datasetVersion2 = TestDataFactory.aDatasetVersionWithCreationAndModificationDate().dataset(dataset)
+        .state(Dataset.State.PUBLIC).versionNumber(2).publicationComment("publication Comment").build();
+    DatasetVersion datasetVersion3 = TestDataFactory.aDatasetVersionWithCreationAndModificationDate().dataset(dataset)
+        .state(Dataset.State.PRIVATE).versionNumber(3).build();
 
     R2D2Principal r2D2Principal = R2D2PrincipalBuilder.aR2D2Principal("username", "pw", new ArrayList<>())
         .userAccount(UserAccountBuilder.anUserAccount().build()).build();
