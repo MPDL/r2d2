@@ -6,9 +6,7 @@ import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
 import de.mpg.mpdl.r2d2.transformation.doi.DoiDataCreator;
 import de.mpg.mpdl.r2d2.transformation.doi.DoiMetadataMapper;
 import de.mpg.mpdl.r2d2.transformation.doi.DoiMetadataXmlConverter;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.*;
 import org.mapstruct.factory.Mappers;
 import org.slf4j.LoggerFactory;
 import org.springframework.mock.env.MockEnvironment;
@@ -35,8 +33,6 @@ public class DoiRepositoryImplMockTest extends DoiRepositoryImplAbstractTest {
 
   @BeforeAll
   void setup() throws IOException {
-    LOGGER = LoggerFactory.getLogger(DoiRepositoryImplMockTest.class);
-
     this.setupMockServer();
     this.setupDoiRepository();
   }

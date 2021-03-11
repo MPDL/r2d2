@@ -33,8 +33,6 @@ public class DoiRepositoryImplContractIT extends DoiRepositoryImplAbstractTest {
 
   @BeforeAll
   void setupDoiDataCreator(@Autowired DoiRepositoryImpl doiRepository) throws IOException {
-    LOGGER = LoggerFactory.getLogger(DoiRepositoryImplContractIT.class);
-
     this.doiRepository = doiRepository;
   }
 

@@ -19,8 +19,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public abstract class DoiRepositoryImplAbstractTest {
 
-  static Logger LOGGER;
-
   DoiRepositoryImpl doiRepository;
 
   DatasetVersion datasetVersion;
@@ -41,7 +39,6 @@ public abstract class DoiRepositoryImplAbstractTest {
     //TODO: Add further appropriate assertions
 
     //After
-    LOGGER.info("Created Draft Doi: " + response);
     this.doi = response;
   }
 
@@ -60,8 +57,6 @@ public abstract class DoiRepositoryImplAbstractTest {
     //Then
     assertThat(response).isNotNull();
     //TODO: Add further appropriate assertions
-
-    LOGGER.info("Update to Findable Doi: " + response);
   }
 
 }
