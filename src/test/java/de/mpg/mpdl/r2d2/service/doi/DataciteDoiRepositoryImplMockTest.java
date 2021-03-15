@@ -54,7 +54,7 @@ public class DataciteDoiRepositoryImplMockTest extends DataciteDoiRepositoryImpl
 
   void setupDoiRepository() {
     MockEnvironment env = new MockEnvironment();
-    env.setProperty("r2d2.url", r2d2URL);
+    env.setProperty("r2d2.frontend.url", r2d2URL);
     env.setProperty("datacite.doi.prefix", prefix);
     env.setProperty("datacite.doi.api.url", wireMockServer.baseUrl());
     env.setProperty("datacite.doi.api.username", username);

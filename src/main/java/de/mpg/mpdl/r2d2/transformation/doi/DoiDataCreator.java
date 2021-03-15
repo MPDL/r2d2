@@ -71,9 +71,11 @@ public class DoiDataCreator {
     return doiMetadataXmlBase64Encoded;
   }
 
-  //TODO: Move/Refactor getting the URL of a Dataset
+  //TODO: Refactor getting the URL of a Dataset
+  // - Move to another class. Make it static?
+  // - Version ID also necessary?
   private String getDatasetURL(UUID dataSetID) {
-    String r2d2URL = this.env.getProperty("r2d2.url");
+    String r2d2URL = this.env.getProperty("r2d2.frontend.url");
 
     String datasetURL = r2d2URL + "/datasets" + "/" + dataSetID;
     return datasetURL;
