@@ -14,6 +14,7 @@ import javax.xml.bind.JAXBException;
 import java.util.Base64;
 import java.util.UUID;
 
+// TODO: Rename this class and all Doi model classes to Datacite... instead of Doi!?
 @Component
 public class DoiDataCreator {
 

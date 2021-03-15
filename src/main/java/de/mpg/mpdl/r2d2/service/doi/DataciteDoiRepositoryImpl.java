@@ -20,7 +20,6 @@ public class DataciteDoiRepositoryImpl implements DoiRepository {
   // - Make the Webclient-Calls asynchronous? Or set Timeouts (default is 30s)
   // - Optimise creation of the WebClient (via configuration)
   // - Cover different responses/error-statusCodes in the requests?
-  // - Rename class to DataciteRepository?
 
   private static Logger LOGGER = LoggerFactory.getLogger(DataciteDoiRepositoryImpl.class);
 
