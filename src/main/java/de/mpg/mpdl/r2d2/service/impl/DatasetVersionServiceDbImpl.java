@@ -271,6 +271,48 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
 
   }
 
+
+  public DatasetVersion withdraw(UUID id, OffsetDateTime lastModificationDate, String comment, R2D2Principal user)
+      throws R2d2TechnicalException, OptimisticLockingException, ValidationException, NotFoundException, InvalidStateException,
+      AuthorizationException {
+
+
+    DatasetVersion latestVersion = datasetVersionRepository.findLatestVersion(id);
+
+    checkAa("withdraw", user, latestVersion);
+    checkEqualModificationDate(lastModificationDate, latestVersion.getModificationDate());
+
+    if (!State.PUBLIC.equals(latestVersion.getDataset().getState())) {
+      throw new InvalidStateException("Dataset in state " + latestVersion.getState() + "cannot be withdrawn.");
+    }
+
+    latestVersion.getDataset().setState(State.WITHDRAWN);
+    latestVersion.getDataset().setWithdrawComment(comment);
+
+    setBasicModificationProperties(latestVersion, user.getUserAccount());
+
+    //set all files to Attached 
+    //TODO use ATTACHED here or another state for withdrawn or delete files?
+    List<File> filesOfDataset = fileRepository.findAllForDataset(latestVersion.getId());
+    for (File f : filesOfDataset) {
+      f.setState(UploadState.ATTACHED);
+      indexingService.reindexFile(f, true);
+    }
+
+    try {
+      latestVersion = datasetVersionRepository.saveAndFlush(latestVersion);
+    } catch (Exception e) {
+      throw new R2d2TechnicalException(e);
+    }
+    auditRepository.save(new Audit(Action.WITHDRAW, latestVersion.getVersionId(), user.getUserAccount()));
+    indexingService.reindexDataset(latestVersion.getId(), true);
+
+    return latestVersion;
+
+
+  }
+
+
   public Page<File> listFiles(VersionId datasetId, Pageable pageable, R2D2Principal user)
       throws AuthorizationException, R2d2TechnicalException, NotFoundException {
     //AA via get

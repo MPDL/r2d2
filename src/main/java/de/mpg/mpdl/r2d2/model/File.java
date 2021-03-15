@@ -117,7 +117,8 @@ public class File extends BaseDb {
     ONGOING,
     COMPLETE,
     ATTACHED,
-    PUBLIC
+    PUBLIC,
+    WITHDRAWN
   }
 
 }

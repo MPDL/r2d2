@@ -110,7 +110,6 @@ public class DatasetController {
       @AuthenticationPrincipal R2D2Principal p) throws R2d2TechnicalException, R2d2ApplicationException {
 
 
-    DatasetVersionDto dvToReturn = null;
     switch (datasetVersion.getState()) {
 
       case PUBLIC: {
@@ -119,17 +118,15 @@ public class DatasetController {
 
       }
       case WITHDRAWN: {
-        //TODO
-        //DatasetVersion publishedDv = datasetVersionService.withdraw(UUID.fromString(id), datasetVersion.getModificationDate(), Utils.toCustomPrincipal(prinz));
-        //return new ResponseEntity<DatasetVersionDto>(dtoMapper.convertToDatasetVersionDto(publishedDv), HttpStatus.OK);
-        break;
+        DatasetVersion withdrawnDv = datasetVersionService.withdraw(UUID.fromString(id), datasetVersion.getModificationDate(), null, p);
+        return new ResponseEntity<DatasetVersionDto>(dtoMapper.convertToDatasetVersionDto(withdrawnDv), HttpStatus.OK);
+
       }
       default: {
         throw new R2d2ApplicationException("Unknown state: " + datasetVersion.getState());
       }
     }
 
-    return null;
   }
 
 

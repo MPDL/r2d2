@@ -23,4 +23,7 @@ public interface FileRepository extends JpaRepository<File, UUID> {
   @Query("select file from File file join file.datasets version where version.id = :versionId")
   List<File> findAllForVersion(@Param("versionId") VersionId versionId);
 
+  @Query("select file from File file join file.datasets version where version.dataset.id = :datasetId")
+  List<File> findAllForDataset(@Param("datasetId") UUID datasetId);
+
 }

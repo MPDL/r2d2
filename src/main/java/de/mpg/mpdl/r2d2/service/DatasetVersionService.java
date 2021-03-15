@@ -53,6 +53,10 @@ public interface DatasetVersionService extends GenericService<DatasetVersion> {
   public DatasetVersion publish(UUID id, OffsetDateTime lastModificationDate, R2D2Principal user) throws R2d2TechnicalException,
       OptimisticLockingException, ValidationException, NotFoundException, InvalidStateException, AuthorizationException;
 
+  public DatasetVersion withdraw(UUID id, OffsetDateTime lastModificationDate, String comment, R2D2Principal user)
+      throws R2d2TechnicalException, OptimisticLockingException, ValidationException, NotFoundException, InvalidStateException,
+      AuthorizationException;
+
   //public FileDownloadWrapper getFileContent(VersionId datasetId, UUID fileId, R2D2Principal user) throws R2d2TechnicalException,
   //   OptimisticLockingException, ValidationException, NotFoundException, InvalidStateException, AuthorizationException;
 

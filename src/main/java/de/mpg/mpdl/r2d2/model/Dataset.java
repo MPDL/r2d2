@@ -38,6 +38,8 @@ public class Dataset extends BaseDb {
   //@Column(columnDefinition = "jsonb")
   private Integer latestPublicVersion = null;
 
+  private String withdrawComment;
+
 
   /*
   @Type(type = "jsonb")
@@ -95,6 +97,14 @@ public class Dataset extends BaseDb {
     }
 
     return null;
+  }
+
+  public String getWithdrawComment() {
+    return withdrawComment;
+  }
+
+  public void setWithdrawComment(String withdrawComment) {
+    this.withdrawComment = withdrawComment;
   }
 
 
