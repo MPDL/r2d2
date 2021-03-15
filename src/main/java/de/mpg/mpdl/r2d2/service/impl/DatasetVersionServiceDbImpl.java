@@ -87,7 +87,7 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
 
     checkAa("create", user, datasetVersionToCreate);
 
-    setBasicCreationProperties(datasetVersionToCreate, user.getUserAccount());
+    // setBasicCreationProperties(datasetVersionToCreate, user.getUserAccount());
     // TODO validation
 
     // datasetVersionToCreate.setFiles(handleFiles(datasetVersion, null, principal));
@@ -413,7 +413,7 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
 
     }
     datasetVersionToCreate.setDataset(datasetToCreate);
-    // setBasicCreationProperties(datasetVersionToCreate, creator);
+    setBasicCreationProperties(datasetVersionToCreate, creator);
 
     return datasetVersionToCreate;
 
