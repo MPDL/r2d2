@@ -6,7 +6,6 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -23,7 +22,7 @@ import java.io.IOException;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ActiveProfiles("test")
 @Tag("ContractTest") //Tag to exclude this Test from default execution (see: pom.xml -> excludedGroups)
-public class DoiRepositoryImplContractIT extends DoiRepositoryImplAbstractTest {
+public class DataciteDoiRepositoryImplContractIT extends DataciteDoiRepositoryImplAbstractTest {
 
   //TODO: How to start only relevant context? Only initialization of the application-test.properties for this test.
   // to remove not needed DB/ES initialization
@@ -32,7 +31,7 @@ public class DoiRepositoryImplContractIT extends DoiRepositoryImplAbstractTest {
   private SwiftObjectStoreRepository objectStoreRepository;
 
   @BeforeAll
-  void setupDoiDataCreator(@Autowired DoiRepositoryImpl doiRepository) throws IOException {
+  void setupDoiDataCreator(@Autowired DataciteDoiRepositoryImpl doiRepository) throws IOException {
     this.doiRepository = doiRepository;
   }
 

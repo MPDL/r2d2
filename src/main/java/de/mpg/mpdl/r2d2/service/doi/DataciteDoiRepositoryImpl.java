@@ -13,7 +13,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 @Repository
-public class DoiRepositoryImpl implements DoiRepository {
+public class DataciteDoiRepositoryImpl implements DoiRepository {
 
   //TODO:
   // - Maybe use an extra Class DoiClient for the REST-Calls and call the DoiData-Creation in another Class(Repository/Service)?
@@ -22,7 +22,7 @@ public class DoiRepositoryImpl implements DoiRepository {
   // - Cover different responses/error-statusCodes in the requests?
   // - Rename class to DataciteRepository?
 
-  private static Logger LOGGER = LoggerFactory.getLogger(DoiRepositoryImpl.class);
+  private static Logger LOGGER = LoggerFactory.getLogger(DataciteDoiRepositoryImpl.class);
 
   private Environment env;
 
@@ -30,7 +30,7 @@ public class DoiRepositoryImpl implements DoiRepository {
 
   private WebClient dataciteWebClient;
 
-  public DoiRepositoryImpl(Environment env, DoiDataCreator doiDataCreator) {
+  public DataciteDoiRepositoryImpl(Environment env, DoiDataCreator doiDataCreator) {
     this.env = env;
     this.doiDataCreator = doiDataCreator;
 

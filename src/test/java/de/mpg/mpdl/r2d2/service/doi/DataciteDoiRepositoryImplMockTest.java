@@ -8,7 +8,6 @@ import de.mpg.mpdl.r2d2.transformation.doi.DoiMetadataMapper;
 import de.mpg.mpdl.r2d2.transformation.doi.DoiMetadataXmlConverter;
 import org.junit.jupiter.api.*;
 import org.mapstruct.factory.Mappers;
-import org.slf4j.LoggerFactory;
 import org.springframework.mock.env.MockEnvironment;
 
 import java.io.IOException;
@@ -16,7 +15,7 @@ import java.io.IOException;
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-public class DoiRepositoryImplMockTest extends DoiRepositoryImplAbstractTest {
+public class DataciteDoiRepositoryImplMockTest extends DataciteDoiRepositoryImplAbstractTest {
 
   private WireMockServer wireMockServer;
 
@@ -65,7 +64,7 @@ public class DoiRepositoryImplMockTest extends DoiRepositoryImplAbstractTest {
     DoiMetadataXmlConverter doiMetadataXmlConverter = new DoiMetadataXmlConverter();
     DoiDataCreator doiDataCreator = new DoiDataCreator(doiMetadataMapper, doiMetadataXmlConverter, env);
 
-    doiRepository = new DoiRepositoryImpl(env, doiDataCreator);
+    doiRepository = new DataciteDoiRepositoryImpl(env, doiDataCreator);
   }
 
   @AfterAll

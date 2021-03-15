@@ -8,7 +8,6 @@ import de.mpg.mpdl.r2d2.util.testdata.builder.DatasetVersionMetadataBuilder;
 import de.mpg.mpdl.r2d2.util.testdata.builder.PersonBuilder;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
 
 import java.time.OffsetDateTime;
 import java.time.temporal.ChronoUnit;
@@ -17,9 +16,9 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public abstract class DoiRepositoryImplAbstractTest {
+public abstract class DataciteDoiRepositoryImplAbstractTest {
 
-  DoiRepositoryImpl doiRepository;
+  DataciteDoiRepositoryImpl doiRepository;
 
   DatasetVersion datasetVersion;
   String doi;
