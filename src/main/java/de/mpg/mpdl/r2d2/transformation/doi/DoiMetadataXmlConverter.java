@@ -1,8 +1,9 @@
 package de.mpg.mpdl.r2d2.transformation.doi;
 
 import de.mpg.mpdl.r2d2.transformation.doi.model.DoiMetadata;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
-import org.xml.sax.SAXException;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -15,6 +16,8 @@ import java.io.StringWriter;
 
 @Component
 public class DoiMetadataXmlConverter {
+
+  private static Logger LOGGER = LoggerFactory.getLogger(DoiMetadataXmlConverter.class);
 
   public static final String DATACITE_METADATA_SCHEMA_4_3_LOCATION =
       "http://datacite.org/schema/kernel-4 http://schema.datacite.org/meta/kernel-4.3/metadata.xsd";
@@ -30,10 +33,14 @@ public class DoiMetadataXmlConverter {
     marshaller.setProperty(Marshaller.JAXB_SCHEMA_LOCATION, DATACITE_METADATA_SCHEMA_4_3_LOCATION);
     marshaller.marshal(doiMetadata, result);
 
-    return stringWriter.toString();
+    String doiMetadataXml = stringWriter.toString();
+
+    LOGGER.debug(doiMetadataXml);
+
+    return doiMetadataXml;
   }
 
-  public DoiMetadata convertToDoiMetadata(String metadataXml) throws JAXBException, SAXException {
+  public DoiMetadata convertToDoiMetadata(String metadataXml) throws JAXBException {
     JAXBContext context = JAXBContext.newInstance(DoiMetadata.class);
     Unmarshaller unmarshaller = context.createUnmarshaller();
 
