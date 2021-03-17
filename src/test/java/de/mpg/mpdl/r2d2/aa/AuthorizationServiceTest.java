@@ -9,18 +9,23 @@ import de.mpg.mpdl.r2d2.model.aa.R2D2Principal;
 import de.mpg.mpdl.r2d2.model.aa.UserAccount;
 import de.mpg.mpdl.r2d2.service.impl.DatasetVersionServiceDbImpl;
 import de.mpg.mpdl.r2d2.util.testdata.builder.*;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.ThrowableAssert.ThrowingCallable;
+import static de.mpg.mpdl.r2d2.model.aa.UserAccount.Role;
+import static de.mpg.mpdl.r2d2.model.aa.UserAccount.Role.*;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 @ExtendWith(MockitoExtension.class)
 class AuthorizationServiceTest {
@@ -35,84 +40,42 @@ class AuthorizationServiceTest {
   @Mock
   private UserAccountRepository userAccountRepository;
 
-  //DatasetVersionServiceDbImpl + create + user
-  @Test
-  void testCheckAuthorizationCreateDatasetVersionAsUser() {
-    //Given
-    String method = "create";
+  private static Stream<Arguments> provideArgumentsForAuthorization() {
+    String datasetVersionServiceName = DatasetVersionServiceDbImpl.class.getCanonicalName();
 
-    R2D2Principal r2D2Principal = R2D2PrincipalBuilder.aR2D2Principal("userName", "pw", new ArrayList<>()).userAccount(UserAccountBuilder
-        .anUserAccount().grants(Collections.singletonList(GrantBuilder.aGrant().role(UserAccount.Role.USER).build())).build()).build();
-
-    DatasetVersion datasetVersion = DatasetVersionBuilder.aDatasetVersion().build();
-
-    //When
-    ThrowingCallable checkAuthorizationCode = () -> this.authorizationService
-        .checkAuthorization(DatasetVersionServiceDbImpl.class.getCanonicalName(), method, r2D2Principal, datasetVersion);
-
-    //Then
-    assertThatCode(checkAuthorizationCode).doesNotThrowAnyException();
+    return Stream.of(
+        //authorized, serviceName, methodName, isCreator(?), Role, Grants???
+        Arguments.of(true, datasetVersionServiceName, "create", false, USER),
+        Arguments.of(false, datasetVersionServiceName, "update", false, USER),
+        Arguments.of(true, datasetVersionServiceName, "update", true, USER),
+        Arguments.of(true, datasetVersionServiceName, "update", false, ADMIN));
   }
 
-  //DatasetVersionServiceDbImpl + update + user
-  @Test
-  void testCheckAuthorizationUpdateDatasetVersionAsUserThrowsException() {
+  @ParameterizedTest
+  @MethodSource("provideArgumentsForAuthorization")
+  void testCheckAuthorizationDatasetVersionServiceNoException(boolean authorized, String serviceName, String methodName, boolean isCreator, Role role) {
     //Given
-    String method = "update";
-
-    R2D2Principal r2D2Principal = R2D2PrincipalBuilder.aR2D2Principal("userName", "pw", new ArrayList<>()).userAccount(UserAccountBuilder
-        .anUserAccount().grants(Collections.singletonList(GrantBuilder.aGrant().role(UserAccount.Role.USER).build())).build()).build();
-
-    DatasetVersion datasetVersion = DatasetVersionBuilder.aDatasetVersion().build();
-
-    //When
-    ThrowingCallable checkAuthorizationCode = () -> this.authorizationService
-        .checkAuthorization(DatasetVersionServiceDbImpl.class.getCanonicalName(), method, r2D2Principal, datasetVersion);
-
-    //Then
-    assertThatCode(checkAuthorizationCode).isInstanceOf(AuthorizationException.class);
-  }
-
-  //DatasetVersionServiceDbImpl + update + user & creator
-  @Test
-  void testCheckAuthorizationUpdateDatasetVersionAsUserAndCreator() {
-    //Given
-    String method = "update";
-
-    UserAccount userAccount = UserAccountBuilder.anUserAccount()
-        .grants(Collections.singletonList(GrantBuilder.aGrant().role(UserAccount.Role.USER).build())).id(UUID.randomUUID()).build();
-    R2D2Principal r2D2Principal = R2D2PrincipalBuilder.aR2D2Principal("userName", "pw", new ArrayList<>()).userAccount(userAccount).build();
-
-    //TODO: Why must user be creator of the Dataset and not the DatasetVersion in this case?
-    Dataset dataset = DatasetBuilder.aDataset().creator(userAccount).build();
-    DatasetVersion datasetVersion = DatasetVersionBuilder.aDatasetVersion().dataset(dataset).build();
-
-    //When
-    ThrowingCallable checkAuthorizationCode = () -> this.authorizationService
-        .checkAuthorization(DatasetVersionServiceDbImpl.class.getCanonicalName(), method, r2D2Principal, datasetVersion);
-
-    //Then
-    assertThatCode(checkAuthorizationCode).doesNotThrowAnyException();
-  }
-
-  //DatasetVersionServiceDbImpl + update + admin
-  @Test
-  void testCheckAuthorizationUpdateDatasetVersionAsAdmin() {
-    //Given
-    String method = "update";
-
-    UserAccount userAccount = UserAccountBuilder.anUserAccount()
-        .grants(Collections.singletonList(GrantBuilder.aGrant().role(UserAccount.Role.ADMIN).build())).id(UUID.randomUUID()).build();
+    UserAccount userAccount =
+        UserAccountBuilder.anUserAccount().grants(Collections.singletonList(GrantBuilder.aGrant().role(role).build())).id(UUID.randomUUID())
+            .build();
     R2D2Principal r2D2Principal = R2D2PrincipalBuilder.aR2D2Principal("userName", "pw", new ArrayList<>()).userAccount(userAccount).build();
 
     DatasetVersion datasetVersion = DatasetVersionBuilder.aDatasetVersion().build();
+    if (isCreator) {
+      //TODO: Why must user be creator of the Dataset and not the DatasetVersion in this case?
+      Dataset dataset = DatasetBuilder.aDataset().creator(userAccount).build();
+      datasetVersion.setDataset(dataset);
+    }
 
     //When
-    ThrowingCallable checkAuthorizationCode = () -> this.authorizationService
-        .checkAuthorization(DatasetVersionServiceDbImpl.class.getCanonicalName(), method, r2D2Principal, datasetVersion);
+    ThrowingCallable checkAuthorizationCode = () -> this.authorizationService.checkAuthorization(serviceName, methodName, r2D2Principal, datasetVersion);
 
     //Then
-    assertThatCode(checkAuthorizationCode).doesNotThrowAnyException();
+    if (authorized) {
+      assertThatCode(checkAuthorizationCode).doesNotThrowAnyException();
+    } else {
+      assertThatCode(checkAuthorizationCode).isInstanceOf(AuthorizationException.class);
+    }
   }
 
 }
