@@ -8,11 +8,13 @@ public class DoiResourceType {
 
   public static final String RESOURCE_TYPE_GENERAL_DATASET = "Dataset";
 
+  public static final String RESOURCE_TYPE_DATASET = "Dataset";
+
   @XmlAttribute
   private String resourceTypeGeneral = RESOURCE_TYPE_GENERAL_DATASET;
 
   @XmlValue
-  private String resourceType;
+  private String resourceType = RESOURCE_TYPE_DATASET;
 
   public String getResourceTypeGeneral() {
     return resourceTypeGeneral;
