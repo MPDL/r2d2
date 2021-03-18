@@ -66,6 +66,7 @@ public class DoiMetadataMapperTest {
         .containsExactly(DoiIdentifier.IDENTIFIER_TYPE_DOI, null);
     assertThat(doiMetadata.getPublisher()).isEqualTo(DoiMetadata.PUBLISHER_MPG);
     assertThat(doiMetadata.getResourceType().getResourceTypeGeneral()).isEqualTo(DoiResourceType.RESOURCE_TYPE_GENERAL_DATASET);
+    assertThat(doiMetadata.getResourceType().getResourceType()).isEqualTo(DoiResourceType.RESOURCE_TYPE_DATASET);
   }
 
 }
