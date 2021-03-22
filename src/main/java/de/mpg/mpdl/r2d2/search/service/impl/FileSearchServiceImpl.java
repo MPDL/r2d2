@@ -11,6 +11,8 @@ import org.springframework.stereotype.Service;
 
 import de.mpg.mpdl.r2d2.exceptions.AuthorizationException;
 import de.mpg.mpdl.r2d2.exceptions.R2d2TechnicalException;
+import de.mpg.mpdl.r2d2.model.Dataset;
+import de.mpg.mpdl.r2d2.model.File;
 import de.mpg.mpdl.r2d2.model.VersionId;
 import de.mpg.mpdl.r2d2.model.aa.Grant;
 import de.mpg.mpdl.r2d2.model.aa.R2D2Principal;
@@ -72,10 +74,10 @@ public class FileSearchServiceImpl extends GenericSearchServiceImpl<FileIto> imp
   }
 
   @Override
-  protected QueryBuilder modifyQueryOnlyMine(QueryBuilder qb, R2D2Principal principal) {
+  protected QueryBuilder getAdditionalFilterQuery(QueryBuilder qb, boolean mineOnly, R2D2Principal principal) {
 
     //Only return "my files" when logged in
-    if (principal != null && principal.getUserAccount() != null) {
+    if (mineOnly && principal != null && principal.getUserAccount() != null) {
 
 
       BoolQueryBuilder myDatasetQuery = null;
@@ -107,21 +109,14 @@ public class FileSearchServiceImpl extends GenericSearchServiceImpl<FileIto> imp
       }
 
 
-      BoolQueryBuilder filterQuery = QueryBuilders.boolQuery();
-      if (qb != null) {
-        filterQuery.must(qb);
-      }
-      if (myDatasetQuery != null) {
-        filterQuery.filter(myDatasetQuery);
-      }
-
-      qb = filterQuery;
-
-
+      return myDatasetQuery;
 
     }
 
-    return qb;
+    //Only public datasets without withdrawn
+    else {
+      return QueryBuilders.boolQuery().mustNot(QueryBuilders.termQuery(FileDaoImpl.INDEX_STATE, File.UploadState.WITHDRAWN.name()));
+    }
 
 
   }

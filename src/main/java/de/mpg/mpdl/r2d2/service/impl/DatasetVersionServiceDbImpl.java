@@ -291,6 +291,10 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
 
     setBasicModificationProperties(latestVersion, user.getUserAccount());
 
+    for (DatasetVersion dv : datasetVersionRepository.findAllByDatasetId(latestVersion.getId())) {
+      dv.setState(State.WITHDRAWN);
+    }
+
     //set all files to Attached 
     //TODO use ATTACHED here or another state for withdrawn or delete files?
     List<File> filesOfDataset = fileRepository.findAllForDataset(latestVersion.getId());

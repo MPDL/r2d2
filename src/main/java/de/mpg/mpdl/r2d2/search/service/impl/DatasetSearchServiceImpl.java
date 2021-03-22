@@ -18,6 +18,8 @@ import org.springframework.stereotype.Service;
 
 import de.mpg.mpdl.r2d2.exceptions.AuthorizationException;
 import de.mpg.mpdl.r2d2.exceptions.R2d2TechnicalException;
+import de.mpg.mpdl.r2d2.model.Dataset;
+import de.mpg.mpdl.r2d2.model.DatasetVersion;
 import de.mpg.mpdl.r2d2.model.aa.Grant;
 import de.mpg.mpdl.r2d2.model.aa.R2D2Principal;
 import de.mpg.mpdl.r2d2.model.aa.UserAccount.Role;
@@ -50,13 +52,14 @@ public class DatasetSearchServiceImpl extends GenericSearchServiceImpl<DatasetVe
   }
 
 
-  public QueryBuilder modifyQueryOnlyMine(QueryBuilder qb, R2D2Principal principal) {
+  public QueryBuilder getAdditionalFilterQuery(QueryBuilder qb, boolean mineOnly, R2D2Principal principal) {
     //Only return "my datasets" when logged in
-    if (principal != null && principal.getUserAccount() != null) {
 
+
+
+    if (mineOnly && principal != null && principal.getUserAccount() != null) {
 
       QueryBuilder myDatasetQuery = null;
-
 
       BoolQueryBuilder roleQuery = QueryBuilders.boolQuery();
 
@@ -72,12 +75,6 @@ public class DatasetSearchServiceImpl extends GenericSearchServiceImpl<DatasetVe
 
           roleQuery.should(
               QueryBuilders.termQuery(DatasetVersionDaoImpl.INDEX_DATASET_CREATOR_ID, principal.getUserAccount().getId().toString()));
-          /*
-          roleQuery.should(
-              QueryBuilders.termQuery(DatasetVersionDaoImpl.INDEX_DATASET_DATAMANAGER_ID, principal.getUserAccount().getId().toString()));
-          
-           */
-
 
         } else if (Role.DATAMANAGER.equals(grant.getRole())) {
 
@@ -94,17 +91,16 @@ public class DatasetSearchServiceImpl extends GenericSearchServiceImpl<DatasetVe
         myDatasetQuery = userQuery;
       }
 
-      BoolQueryBuilder filterQuery = QueryBuilders.boolQuery();
-      if (qb != null) {
-        filterQuery.must(qb);
-      }
-      filterQuery.filter(myDatasetQuery);
-
-      qb = filterQuery;
+      return myDatasetQuery;
 
     }
 
-    return qb;
+    //Only public datasets without withdrawn
+    else {
+      return QueryBuilders.boolQuery()
+          .mustNot(QueryBuilders.termQuery(DatasetVersionDaoImpl.INDEX_DATASET_STATE, Dataset.State.WITHDRAWN.name()));
+    }
+
   }
 
 

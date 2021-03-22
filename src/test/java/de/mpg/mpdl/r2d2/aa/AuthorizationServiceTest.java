@@ -53,11 +53,11 @@ class AuthorizationServiceTest {
 
   @ParameterizedTest
   @MethodSource("provideArgumentsForAuthorization")
-  void testCheckAuthorizationDatasetVersionServiceNoException(boolean authorized, String serviceName, String methodName, boolean isCreator, Role role) {
+  void testCheckAuthorizationDatasetVersionServiceNoException(boolean authorized, String serviceName, String methodName, boolean isCreator,
+      Role role) {
     //Given
-    UserAccount userAccount =
-        UserAccountBuilder.anUserAccount().grants(Collections.singletonList(GrantBuilder.aGrant().role(role).build())).id(UUID.randomUUID())
-            .build();
+    UserAccount userAccount = UserAccountBuilder.anUserAccount().grants(Collections.singletonList(GrantBuilder.aGrant().role(role).build()))
+        .id(UUID.randomUUID()).build();
     R2D2Principal r2D2Principal = R2D2PrincipalBuilder.aR2D2Principal("userName", "pw", new ArrayList<>()).userAccount(userAccount).build();
 
     DatasetVersion datasetVersion = DatasetVersionBuilder.aDatasetVersion().build();
@@ -68,7 +68,8 @@ class AuthorizationServiceTest {
     }
 
     //When
-    ThrowingCallable checkAuthorizationCode = () -> this.authorizationService.checkAuthorization(serviceName, methodName, r2D2Principal, datasetVersion);
+    ThrowingCallable checkAuthorizationCode =
+        () -> this.authorizationService.checkAuthorization(serviceName, methodName, r2D2Principal, datasetVersion);
 
     //Then
     if (authorized) {

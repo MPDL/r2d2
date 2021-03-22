@@ -74,19 +74,24 @@ public abstract class GenericSearchServiceImpl<E> implements GenericSearchServic
 
     if (getIndexDao() != null) {
       QueryBuilder qb = ssb.query();
-      if (principal != null) {
 
-        if (mineOnly) {
+      QueryBuilder myDatasetQuery = getAdditionalFilterQuery(qb, mineOnly, principal);;
+      QueryBuilder aaQuery = aaService.getAaFilterQuery(getAaKey(), getAaMethod(), principal, null);
 
-          qb = modifyQueryOnlyMine(qb, principal);
-        }
-
-        //filter out datasets that are not allowed to see for the user
-        qb = aaService.modifyQueryForAa(getAaKey(), getAaMethod(), qb, principal);
-
-      } else {
-        qb = aaService.modifyQueryForAa(getAaKey(), getAaMethod(), qb, null);
+      BoolQueryBuilder filterQuery = QueryBuilders.boolQuery();
+      if (qb != null) {
+        filterQuery.must(qb);
       }
+
+      if (myDatasetQuery != null) {
+        filterQuery.filter(myDatasetQuery);
+      }
+
+      if (aaQuery != null) {
+        filterQuery.filter(aaQuery);
+      }
+
+      qb = filterQuery;
 
 
       ssb.query(qb);
@@ -96,7 +101,7 @@ public abstract class GenericSearchServiceImpl<E> implements GenericSearchServic
     return null;
   }
 
-  protected abstract QueryBuilder modifyQueryOnlyMine(QueryBuilder qb, R2D2Principal p);
+  protected abstract QueryBuilder getAdditionalFilterQuery(QueryBuilder qb, boolean mineOnly, R2D2Principal p);
 
   public SearchResult<E> search(SearchQuery sq, boolean mineOnly, R2D2Principal principal)
       throws R2d2TechnicalException, AuthorizationException {

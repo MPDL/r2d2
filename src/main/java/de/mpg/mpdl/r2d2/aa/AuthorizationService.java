@@ -106,7 +106,7 @@ public class AuthorizationService {
   }
 
 
-  private QueryBuilder getAaFilterQuery(String serviceName, String serviceMethod, Object... objects)
+  public QueryBuilder getAaFilterQuery(String serviceName, String serviceMethod, Object... objects)
       throws AuthorizationException, R2d2TechnicalException {
     Map<String, Map<String, Object>> serviceMap = (Map<String, Map<String, Object>>) aaMap.get(serviceName);
 

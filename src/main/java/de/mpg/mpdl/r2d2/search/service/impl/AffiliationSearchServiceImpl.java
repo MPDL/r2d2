@@ -83,7 +83,7 @@ public class AffiliationSearchServiceImpl extends GenericSearchServiceImpl<Affil
   }
 
   @Override
-  protected QueryBuilder modifyQueryOnlyMine(QueryBuilder qb, R2D2Principal p) {
+  protected QueryBuilder getAdditionalFilterQuery(QueryBuilder qb, boolean mineOnly, R2D2Principal p) {
     return null;
   }
 }
