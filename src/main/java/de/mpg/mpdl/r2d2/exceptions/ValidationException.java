@@ -1,10 +1,15 @@
 package de.mpg.mpdl.r2d2.exceptions;
 
+import java.util.Set;
+
+import javax.validation.ConstraintViolation;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 @ResponseStatus(HttpStatus.BAD_REQUEST)
 public class ValidationException extends R2d2ApplicationException {
+
 
   public ValidationException(String message) {
     super(message);

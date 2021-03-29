@@ -5,17 +5,25 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import javax.validation.Valid;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotEmpty;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+
+import de.mpg.mpdl.r2d2.model.validation.PublishConstraintGroup;
+import de.mpg.mpdl.r2d2.model.validation.SaveConstraintGroup;
 
 @JsonInclude(Include.NON_EMPTY)
 public class DatasetVersionMetadata {
 
+  @NotBlank(message = "{dataset.metadata.title.blank}", groups = {SaveConstraintGroup.class, PublishConstraintGroup.class})
   private String title;
 
   // creator is in BaseDateDB
-
-  private List<Person> authors = new ArrayList<>();
+  @NotEmpty(message = "{dataset.metadata.authors.empty}", groups = {PublishConstraintGroup.class})
+  private List<@Valid Person> authors = new ArrayList<>();
 
   private String description;
 

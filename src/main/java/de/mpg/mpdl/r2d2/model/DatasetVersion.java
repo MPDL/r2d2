@@ -21,6 +21,7 @@ import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.MapsId;
 import javax.persistence.Transient;
+import javax.validation.Valid;
 
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.OnDelete;
@@ -56,6 +57,7 @@ public class DatasetVersion extends BaseDateDb {
 
   @Type(type = "jsonb")
   @Column(columnDefinition = "jsonb")
+  @Valid
   private DatasetVersionMetadata metadata = new DatasetVersionMetadata();
 
   @Id

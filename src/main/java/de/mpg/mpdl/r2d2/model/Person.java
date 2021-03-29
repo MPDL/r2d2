@@ -3,17 +3,27 @@ package de.mpg.mpdl.r2d2.model;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.validation.Valid;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotEmpty;
+
+import de.mpg.mpdl.r2d2.model.validation.PublishConstraintGroup;
+import de.mpg.mpdl.r2d2.model.validation.SaveConstraintGroup;
+
 public class Person {
 
+  @NotBlank(message = "{person.familyName.blank}", groups = {PublishConstraintGroup.class})
   private String givenName;
 
+  @NotBlank(message = "{person.givenName.blank}", groups = {PublishConstraintGroup.class})
   private String familyName;
 
   // ORCID (The id part of the ORCID-URI)
   private String orcid;
 
   // Affiliation contains department/group
-  private List<Affiliation> affiliations = new ArrayList<>();
+  @NotEmpty(message = "{person.affiliations.empty}", groups = {PublishConstraintGroup.class})
+  private List<@Valid Affiliation> affiliations = new ArrayList<>();
 
   public String getGivenName() {
     return givenName;

@@ -5,10 +5,13 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import javax.validation.ConstraintViolation;
+import javax.validation.Validator;
 
 import org.jclouds.openstack.nova.v2_0.options.CreateBackupOfServerOptions;
 import org.slf4j.Logger;
@@ -40,6 +43,8 @@ import de.mpg.mpdl.r2d2.model.File.UploadState;
 import de.mpg.mpdl.r2d2.model.VersionId;
 import de.mpg.mpdl.r2d2.model.aa.R2D2Principal;
 import de.mpg.mpdl.r2d2.model.aa.UserAccount;
+import de.mpg.mpdl.r2d2.model.validation.PublishConstraintGroup;
+import de.mpg.mpdl.r2d2.model.validation.SaveConstraintGroup;
 import de.mpg.mpdl.r2d2.search.service.impl.IndexingService;
 import de.mpg.mpdl.r2d2.service.DatasetVersionService;
 import de.mpg.mpdl.r2d2.service.storage.SwiftObjectStoreRepository;
@@ -74,6 +79,9 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
   @Autowired
   private IndexingService indexingService;
 
+  @Autowired
+  private Validator beanValidator;
+
   public DatasetVersionServiceDbImpl() {
     super(DatasetVersion.class);
   }
@@ -87,6 +95,8 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
 
     checkAa("create", user, datasetVersionToCreate);
 
+    validate(datasetVersionToCreate, SaveConstraintGroup.class);
+
     // setBasicCreationProperties(datasetVersionToCreate, user.getUserAccount());
     // TODO validation
 
@@ -94,6 +104,8 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
 
     //LOGGER.info("ModDate Version before DB save: " + datasetVersionToCreate.getModificationDate());
     //LOGGER.info("ModDate Dataset before DB save: " + datasetVersionToCreate.getDataset().getModificationDate());
+
+
     try {
       datasetVersionToCreate = datasetVersionRepository.saveAndFlush(datasetVersionToCreate);
       datasetVersionToCreate.getDataset().setLatestVersion(datasetVersionToCreate.getVersionNumber());
@@ -123,12 +135,15 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
 
     checkAa("update", user, latestVersion);
     // TODO validation
+
+
+
     checkEqualModificationDate(datasetVersion.getModificationDate(), latestVersion.getModificationDate());
 
 
     datasetVersionToBeUpdated = createNewVersion(latestVersion, user);
     datasetVersionToBeUpdated.setMetadata(datasetVersion.getMetadata());
-
+    validate(datasetVersion, SaveConstraintGroup.class);
 
     try {
       datasetVersionToBeUpdated = datasetVersionRepository.saveAndFlush(datasetVersionToBeUpdated);
@@ -247,6 +262,8 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
     latestVersion.setPublicationDate(OffsetDateTime.now());
 
     setBasicModificationProperties(latestVersion, user.getUserAccount());
+
+    validate(latestVersion, SaveConstraintGroup.class, PublishConstraintGroup.class);
 
     //set all files to Public  
     List<File> filesOfDatasetVersion = fileRepository.findAllForVersion(latestVersion.getVersionId());
@@ -646,6 +663,21 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
     indexingService.reindexDataset(resultedDataset.getId(), true);
 
     return processedFiles;
+  }
+
+
+  private void validate(DatasetVersion dv, Class<?>... validationGroups) throws ValidationException {
+    Set<ConstraintViolation<DatasetVersion>> validationReports = beanValidator.validate(dv, validationGroups);
+
+    if (!validationReports.isEmpty()) {
+      StringBuilder sb = new StringBuilder();
+      for (ConstraintViolation<DatasetVersion> cv : validationReports) {
+        sb.append(cv.getPropertyPath().toString() + ": " + cv.getMessage() + "\n");
+      }
+      ValidationException ve = new ValidationException("Dataset is not valid.\n" + sb.toString());
+      throw ve;
+    }
+
   }
 
 

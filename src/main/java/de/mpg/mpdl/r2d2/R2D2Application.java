@@ -96,4 +96,6 @@ public class R2D2Application {
     return builder.setConnectTimeout(Duration.ofMillis(3000)).setReadTimeout(Duration.ofMillis(3000)).build();
   }
 
+
+
 }
