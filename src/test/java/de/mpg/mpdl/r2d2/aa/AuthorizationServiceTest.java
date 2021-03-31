@@ -21,6 +21,8 @@ import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.ThrowableAssert.ThrowingCallable;
 import static de.mpg.mpdl.r2d2.model.aa.UserAccount.Role;
 import static de.mpg.mpdl.r2d2.model.aa.UserAccount.Role.*;
+import static de.mpg.mpdl.r2d2.model.Dataset.State;
+import static de.mpg.mpdl.r2d2.model.Dataset.State.*;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -44,28 +46,52 @@ class AuthorizationServiceTest {
     String datasetVersionServiceName = DatasetVersionServiceDbImpl.class.getCanonicalName();
 
     return Stream.of(
-        //authorized, serviceName, methodName, isCreator(?), Role, Grants???
-        Arguments.of(true, datasetVersionServiceName, "create", false, USER),
-        Arguments.of(false, datasetVersionServiceName, "update", false, USER),
-        Arguments.of(true, datasetVersionServiceName, "update", true, USER),
-        Arguments.of(true, datasetVersionServiceName, "update", false, ADMIN));
+        //authorized, serviceName, methodName, State (of the DatasetVersion), isCreator(?), Grant (Role for the DatasetVersion)
+        Arguments.of(true, datasetVersionServiceName, "create", PRIVATE, false, USER),
+        Arguments.of(true, datasetVersionServiceName, "create", PUBLIC, false, USER),
+        Arguments.of(false, datasetVersionServiceName, "get", PRIVATE, false, USER),
+        Arguments.of(true, datasetVersionServiceName, "get", PRIVATE, true, USER),
+        Arguments.of(true, datasetVersionServiceName, "get", PRIVATE, false, DATAMANAGER),
+        Arguments.of(true, datasetVersionServiceName, "get", PRIVATE, false, ADMIN),
+        Arguments.of(true, datasetVersionServiceName, "get", PUBLIC, false, USER),
+        Arguments.of(false, datasetVersionServiceName, "update", PRIVATE, false, USER),
+        Arguments.of(true, datasetVersionServiceName, "update", PRIVATE, true, USER),
+        Arguments.of(true, datasetVersionServiceName, "update", PRIVATE, false, DATAMANAGER),
+        Arguments.of(true, datasetVersionServiceName, "update", PRIVATE, false, ADMIN),
+        Arguments.of(false, datasetVersionServiceName, "delete", PRIVATE, false, USER),
+        Arguments.of(true, datasetVersionServiceName, "delete", PRIVATE, true, USER),
+        Arguments.of(true, datasetVersionServiceName, "delete", PRIVATE, false, DATAMANAGER),
+        Arguments.of(true, datasetVersionServiceName, "delete", PRIVATE, false, ADMIN),
+        Arguments.of(false, datasetVersionServiceName, "withdraw", PUBLIC, false, USER),
+        Arguments.of(true, datasetVersionServiceName, "withdraw", PUBLIC, true, USER),
+        Arguments.of(true, datasetVersionServiceName, "withdraw", PUBLIC, false, DATAMANAGER),
+        Arguments.of(true, datasetVersionServiceName, "withdraw", PUBLIC, false, ADMIN),
+        Arguments.of(false, datasetVersionServiceName, "publish", PRIVATE, false, USER),
+        Arguments.of(true, datasetVersionServiceName, "publish", PRIVATE, true, USER),
+        Arguments.of(true, datasetVersionServiceName, "publish", PRIVATE, false, DATAMANAGER),
+        Arguments.of(true, datasetVersionServiceName, "publish", PRIVATE, false, ADMIN)
+    );
   }
 
   @ParameterizedTest
   @MethodSource("provideArgumentsForAuthorization")
-  void testCheckAuthorizationDatasetVersionServiceNoException(boolean authorized, String serviceName, String methodName, boolean isCreator,
-      Role role) {
+  void testCheckAuthorizationForDatasetVersionService(boolean authorized, String serviceName, String methodName, State state,
+      boolean isCreator, Role role) {
     //Given
-    UserAccount userAccount = UserAccountBuilder.anUserAccount().grants(Collections.singletonList(GrantBuilder.aGrant().role(role).build()))
-        .id(UUID.randomUUID()).build();
+    DatasetVersion datasetVersion = DatasetVersionBuilder.aDatasetVersion().state(state).build();
+    Dataset dataset = DatasetBuilder.aDataset().state(state).id(UUID.randomUUID()).build();
+
+    UserAccount userAccount = UserAccountBuilder.anUserAccount()
+        .grants(Collections.singletonList(GrantBuilder.aGrant().role(role).dataset(dataset.getId()).build()))
+        .id(UUID.randomUUID())
+        .build();
     R2D2Principal r2D2Principal = R2D2PrincipalBuilder.aR2D2Principal("userName", "pw", new ArrayList<>()).userAccount(userAccount).build();
 
-    DatasetVersion datasetVersion = DatasetVersionBuilder.aDatasetVersion().build();
+    //TODO: Why must user be creator of the Dataset and not the DatasetVersion in this case?
     if (isCreator) {
-      //TODO: Why must user be creator of the Dataset and not the DatasetVersion in this case?
-      Dataset dataset = DatasetBuilder.aDataset().creator(userAccount).build();
-      datasetVersion.setDataset(dataset);
+      dataset.setCreator(userAccount);
     }
+    datasetVersion.setDataset(dataset);
 
     //When
     ThrowingCallable checkAuthorizationCode =
