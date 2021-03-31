@@ -64,6 +64,9 @@ public class DatasetVersionServiceDbImplTest {
   @Mock
   private Validator beanValidator;
 
+  @Mock
+  private DoiRepository doiRepository;
+
   @InjectMocks
   private DatasetVersionServiceDbImpl datasetVersionServiceDbImpl = new DatasetVersionServiceDbImpl();
 

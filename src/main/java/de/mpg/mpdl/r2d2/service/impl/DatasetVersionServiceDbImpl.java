@@ -13,10 +13,12 @@ import javax.persistence.PersistenceContext;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
 
-import org.jclouds.openstack.nova.v2_0.options.CreateBackupOfServerOptions;
+import de.mpg.mpdl.r2d2.model.*;
+import de.mpg.mpdl.r2d2.service.doi.DoiRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -33,14 +35,9 @@ import de.mpg.mpdl.r2d2.exceptions.NotFoundException;
 import de.mpg.mpdl.r2d2.exceptions.OptimisticLockingException;
 import de.mpg.mpdl.r2d2.exceptions.R2d2TechnicalException;
 import de.mpg.mpdl.r2d2.exceptions.ValidationException;
-import de.mpg.mpdl.r2d2.model.Audit;
 import de.mpg.mpdl.r2d2.model.Audit.Action;
-import de.mpg.mpdl.r2d2.model.Dataset;
 import de.mpg.mpdl.r2d2.model.Dataset.State;
-import de.mpg.mpdl.r2d2.model.DatasetVersion;
-import de.mpg.mpdl.r2d2.model.File;
 import de.mpg.mpdl.r2d2.model.File.UploadState;
-import de.mpg.mpdl.r2d2.model.VersionId;
 import de.mpg.mpdl.r2d2.model.aa.R2D2Principal;
 import de.mpg.mpdl.r2d2.model.aa.UserAccount;
 import de.mpg.mpdl.r2d2.model.validation.PublishConstraintGroup;
@@ -82,6 +79,11 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
   @Autowired
   private Validator beanValidator;
 
+  //TODO: Use DataciteDoiRepositoryImpl in prod (instead of DummyDoiRepositoryImpl)
+  @Autowired
+  @Qualifier("DummyDoiRepositoryImpl")
+  private DoiRepository doiRepository;
+
   public DatasetVersionServiceDbImpl() {
     super(DatasetVersion.class);
   }
@@ -105,6 +107,8 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
     //LOGGER.info("ModDate Version before DB save: " + datasetVersionToCreate.getModificationDate());
     //LOGGER.info("ModDate Dataset before DB save: " + datasetVersionToCreate.getDataset().getModificationDate());
 
+
+    generateAndSetDraftDoi(datasetVersionToCreate);
 
     try {
       datasetVersionToCreate = datasetVersionRepository.saveAndFlush(datasetVersionToCreate);
@@ -144,6 +148,11 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
     datasetVersionToBeUpdated = createNewVersion(latestVersion, user);
     datasetVersionToBeUpdated.setMetadata(datasetVersion.getMetadata());
     validate(datasetVersion, SaveConstraintGroup.class);
+
+    if (State.PUBLIC.equals(latestVersion.getState())) {
+      //FIXME: New created Draft Doi overrides doi, independent on whether the doi was updated or not.
+      generateAndSetDraftDoi(datasetVersionToBeUpdated);
+    }
 
     try {
       datasetVersionToBeUpdated = datasetVersionRepository.saveAndFlush(datasetVersionToBeUpdated);
@@ -265,7 +274,9 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
 
     validate(latestVersion, SaveConstraintGroup.class, PublishConstraintGroup.class);
 
-    //set all files to Public  
+    generateFindableDoi(latestVersion);
+
+    //set all files to Public
     List<File> filesOfDatasetVersion = fileRepository.findAllForVersion(latestVersion.getVersionId());
     for (File f : filesOfDatasetVersion) {
       if (!UploadState.PUBLIC.equals(f.getState())) {
@@ -553,6 +564,8 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
 
   }
 
+  //TODO: Refactor/Merge this method with the create() and buildDatasetVersionToCreate() methods to avoid duplicate code!?
+  //Refactor/Remove the else case which does NOT create a new DatasetVersion.
   private DatasetVersion createNewVersion(DatasetVersion latestVersion, R2D2Principal user) throws ValidationException {
 
     // create new version
@@ -591,6 +604,9 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
 
     // create new version if necessary
     resultedDataset = createNewVersion(latestVersion, user);
+    if (State.PUBLIC.equals(latestVersion.getState())) {
+      generateAndSetDraftDoi(resultedDataset);
+    }
 
     List<File> processedFiles = new ArrayList<File>();
 
@@ -680,6 +696,26 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
 
   }
 
+  //TODO: Implement Doi workflow for cases: delete & withdraw
 
+  //TODO: Add the doi creation into createNewVersion() or buildDatasetVersionToCreate(), instead of calling this method in service methods.
+  private void generateAndSetDraftDoi(DatasetVersion datasetVersion) {
+    try {
+      String doi = doiRepository.createDraftDoi(datasetVersion);
+      datasetVersion.getMetadata().setDoi(doi);
+    } catch (R2d2TechnicalException e) {
+      LOGGER.error("Draft Doi could not be created.", e);
+      //TODO: Implement workflow if Doi creation fails
+    }
+  }
+
+  private void generateFindableDoi(DatasetVersion datasetVersion) {
+    try {
+      doiRepository.updateToFindableDoi(datasetVersion);
+    } catch (R2d2TechnicalException e) {
+      LOGGER.error("Draft Doi could not be published.", e);
+      //TODO: Implement workflow if Doi publication fails
+    }
+  }
 
 }
