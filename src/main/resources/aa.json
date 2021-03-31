@@ -59,9 +59,14 @@
 				}
 			},
 			{
-			"user" : {
+				"user" : {
 					"role" : "DATAMANAGER",
 					"field_grant_id_match" : "datasetVersion.dataset.id"
+				}
+			},
+			{
+				"user" : {
+					"token_match" : "datasetVersion.dataset.id"
 				}
 			}
 			

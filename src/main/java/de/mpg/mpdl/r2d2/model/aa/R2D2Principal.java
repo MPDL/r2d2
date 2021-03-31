@@ -24,6 +24,8 @@ public class R2D2Principal extends User {
   }
 
   private UserAccount userAccount;
+  
+  private String reviewToken;
 
   public UserAccount getUserAccount() {
     return userAccount;
@@ -31,6 +33,14 @@ public class R2D2Principal extends User {
 
   public void setUserAccount(UserAccount userAccount) {
     this.userAccount = userAccount;
+  }
+
+  public String getReviewToken() {
+    return reviewToken;
+  }
+
+  public void setReviewToken(String readToken) {
+    this.reviewToken = readToken;
   }
 
 }
