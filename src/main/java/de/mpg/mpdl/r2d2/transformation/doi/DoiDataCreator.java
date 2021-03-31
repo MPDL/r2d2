@@ -30,10 +30,11 @@ public class DoiDataCreator {
     this.env = env;
   }
 
-  public DoiData createDoiDataForDraftDoiCreation(DatasetVersion datasetVersion) throws R2d2TechnicalException {
+  public DoiData createDoiDataForDraftDoiCreation(DatasetVersion datasetVersion) {
     DoiAttributes doiAttributes = new DoiAttributes();
     doiAttributes.setPrefix(env.getProperty("datacite.doi.prefix"));
-    doiAttributes.setUrl(this.getDatasetURL(datasetVersion.getId()));
+    //TODO: Set/Send the Dataset Url when creating the draft doi?
+    //    doiAttributes.setUrl(this.getDatasetURL(datasetVersion.getId()));
 
     DoiData doiData = new DoiData();
     doiData.setType(DoiType.DOIS);

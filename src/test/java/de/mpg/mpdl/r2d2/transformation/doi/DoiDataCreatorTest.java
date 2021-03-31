@@ -48,7 +48,7 @@ public class DoiDataCreatorTest {
     assertThat(doiData).extracting(DoiData::getType).isEqualTo(DoiData.DoiType.DOIS);
     assertThat(doiData).extracting(DoiData::getAttributes).isNotNull();
     assertThat(doiData.getAttributes()).extracting(DoiAttributes::getPrefix).isEqualTo(this.prefix);
-    assertThat(doiData.getAttributes().getUrl()).endsWith(uuid.toString());
+    //    assertThat(doiData.getAttributes().getUrl()).endsWith(uuid.toString());
   }
 
   @Test
