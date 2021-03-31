@@ -18,9 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.core.GrantedAuthority;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -58,7 +56,7 @@ public class DatasetVersionServiceDbImplIT extends BaseIntegrationTest {
     R2D2Principal r2d2Principal =
         R2D2PrincipalBuilder.aR2D2Principal("username", "pw", new ArrayList<GrantedAuthority>()).userAccount(userAccount).build();
 
-    userAccountRepository.save(userAccount);
+    this.userAccountRepository.save(userAccount);
 
     //When
     DatasetVersion returnedDatasetVersion = this.datasetVersionServiceDbImpl.create(datasetVersion, r2d2Principal);
@@ -74,12 +72,92 @@ public class DatasetVersionServiceDbImplIT extends BaseIntegrationTest {
     assertThat(createdDatasetVersions).doesNotContainNull();
     assertThat(createdDatasetVersions).extracting(DatasetVersion::getMetadata).extracting(DatasetVersionMetadata::getTitle)
         .containsOnly(datasetTitle);
+    assertThat(createdDatasetVersions).extracting(DatasetVersion::getMetadata).extracting(DatasetVersionMetadata::getDoi).isNotEmpty();
     assertThat(createdDatasetVersions).extracting(DatasetVersion::getVersionNumber).containsOnly(1);
 
     assertThat(datasetVersionFromIndex).isNotNull();
     assertThat(datasetVersionFromIndex).extracting(DatasetVersionIto::getMetadata).extracting(DatasetVersionMetadata::getTitle)
         .isEqualTo(datasetTitle);
     assertThat(datasetVersionFromIndex).extracting(DatasetVersionIto::getVersionNumber).isEqualTo(1);
+  }
+
+  @Test
+  void testPublishDatasetVersion() throws InvalidStateException, R2d2TechnicalException, ValidationException, OptimisticLockingException,
+      NotFoundException, AuthorizationException {
+    //Given
+    UserAccount userAccount = TestDataFactory.anUser().build();
+
+    String datasetTitle = "datasetTitle";
+
+    DatasetVersionMetadata metadata = DatasetVersionMetadataBuilder.aDatasetVersionMetadata()
+        .title(datasetTitle).authors(Arrays.asList(PersonBuilder.aPerson().
+            familyName("AuthorFamilyName").givenName("AuthorGivenName")
+            .affiliations(Arrays.asList(AffiliationBuilder.anAffiliation()
+                .organization("Organization").build())).build()))
+        .build();
+    Dataset dataset = TestDataFactory.aDatasetWithCreationAndModificationDate().creator(userAccount).build();
+    DatasetVersion datasetVersion =
+        TestDataFactory.aDatasetVersionWithCreationAndModificationDate()
+            .dataset(dataset).creator(userAccount).metadata(metadata).state(Dataset.State.PRIVATE).build();
+
+    this.userAccountRepository.save(userAccount);
+    DatasetVersion savedDatasetVersion = this.datasetVersionRepository.save(datasetVersion);
+
+    //FIXME: Simplify Grants/Authorization management in tests (and in prod code?)
+    userAccount.setGrants(Collections.singletonList(GrantBuilder.aGrant()
+        .role(UserAccount.Role.USER).dataset(savedDatasetVersion.getDataset().getId()).build()));
+    R2D2Principal r2d2Principal =
+        R2D2PrincipalBuilder.aR2D2Principal("username", "pw", new ArrayList<GrantedAuthority>()).userAccount(userAccount).build();
+
+    //When
+    DatasetVersion returnedDatasetVerion =
+        this.datasetVersionServiceDbImpl.publish(savedDatasetVersion.getId(), savedDatasetVersion.getModificationDate(), r2d2Principal);
+
+    //Then
+    assertThat(returnedDatasetVerion).isNotNull();
+    assertThat(returnedDatasetVerion).extracting(DatasetVersion::getState).isEqualTo(Dataset.State.PUBLIC);
+    //TODO: Add further assertions
+  }
+
+  @Test
+  void testUpdatePublicDatasetVersion()
+      throws InvalidStateException, R2d2TechnicalException, ValidationException, OptimisticLockingException, NotFoundException,
+      AuthorizationException {
+    //Given
+    UserAccount userAccount = TestDataFactory.anUser().build();
+
+    String datasetTitle = "datasetTitle";
+
+    DatasetVersionMetadata metadata = DatasetVersionMetadataBuilder.aDatasetVersionMetadata()
+        .title(datasetTitle).build();
+    Dataset dataset = TestDataFactory.aDatasetWithCreationAndModificationDate().creator(userAccount).build();
+    DatasetVersion existingDatasetVersion =
+        TestDataFactory.aDatasetVersionWithCreationAndModificationDate()
+            .dataset(dataset).creator(userAccount).metadata(metadata).state(Dataset.State.PUBLIC).build();
+
+    this.userAccountRepository.save(userAccount);
+    DatasetVersion savedDatasetVersion = this.datasetVersionRepository.save(existingDatasetVersion);
+
+    userAccount.setGrants(Collections.singletonList(GrantBuilder.aGrant()
+        .role(UserAccount.Role.USER).dataset(savedDatasetVersion.getDataset().getId()).build()));
+    R2D2Principal r2d2Principal =
+        R2D2PrincipalBuilder.aR2D2Principal("username", "pw", new ArrayList<GrantedAuthority>()).userAccount(userAccount).build();
+
+    DatasetVersion updatedDatasetVerion = savedDatasetVersion;
+    DatasetVersionMetadata upDatedMetadata = updatedDatasetVerion.getMetadata();
+    String updatedDescription = "New updated Description";
+    upDatedMetadata.setDescription(updatedDescription);
+    updatedDatasetVerion.setMetadata(upDatedMetadata);
+
+    //When
+    DatasetVersion returnedDatasetVersion =
+        this.datasetVersionServiceDbImpl.update(savedDatasetVersion.getId(), updatedDatasetVerion, r2d2Principal);
+
+    //Then
+    assertThat(returnedDatasetVersion).isNotNull();
+    assertThat(returnedDatasetVersion).extracting(DatasetVersion::getMetadata)
+        .extracting(DatasetVersionMetadata::getDescription).isEqualTo(updatedDescription);
+    //TODO: Add further assertions
   }
 
   @Test
