@@ -24,7 +24,8 @@ public class Dataset extends BaseDb {
   public enum State {
     PUBLIC,
     PRIVATE,
-    WITHDRAWN
+    WITHDRAWN,
+    IN_REVIEW,
   }
 
   @Enumerated(EnumType.STRING)

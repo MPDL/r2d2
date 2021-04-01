@@ -89,23 +89,20 @@ public class DatasetVersionServiceDbImplIT extends BaseIntegrationTest {
 
     String datasetTitle = "datasetTitle";
 
-    DatasetVersionMetadata metadata = DatasetVersionMetadataBuilder.aDatasetVersionMetadata()
-        .title(datasetTitle).authors(Arrays.asList(PersonBuilder.aPerson().
-            familyName("AuthorFamilyName").givenName("AuthorGivenName")
-            .affiliations(Arrays.asList(AffiliationBuilder.anAffiliation()
-                .organization("Organization").build())).build()))
+    DatasetVersionMetadata metadata = DatasetVersionMetadataBuilder.aDatasetVersionMetadata().title(datasetTitle)
+        .authors(Arrays.asList(PersonBuilder.aPerson().familyName("AuthorFamilyName").givenName("AuthorGivenName")
+            .affiliations(Arrays.asList(AffiliationBuilder.anAffiliation().organization("Organization").build())).build()))
         .build();
     Dataset dataset = TestDataFactory.aDatasetWithCreationAndModificationDate().creator(userAccount).build();
-    DatasetVersion datasetVersion =
-        TestDataFactory.aDatasetVersionWithCreationAndModificationDate()
-            .dataset(dataset).creator(userAccount).metadata(metadata).state(Dataset.State.PRIVATE).build();
+    DatasetVersion datasetVersion = TestDataFactory.aDatasetVersionWithCreationAndModificationDate().dataset(dataset).creator(userAccount)
+        .metadata(metadata).state(Dataset.State.PRIVATE).build();
 
     this.userAccountRepository.save(userAccount);
     DatasetVersion savedDatasetVersion = this.datasetVersionRepository.save(datasetVersion);
 
     //FIXME: Simplify Grants/Authorization management in tests (and in prod code?)
-    userAccount.setGrants(Collections.singletonList(GrantBuilder.aGrant()
-        .role(UserAccount.Role.USER).dataset(savedDatasetVersion.getDataset().getId()).build()));
+    userAccount.setGrants(Collections
+        .singletonList(GrantBuilder.aGrant().role(UserAccount.Role.USER).dataset(savedDatasetVersion.getDataset().getId()).build()));
     R2D2Principal r2d2Principal =
         R2D2PrincipalBuilder.aR2D2Principal("username", "pw", new ArrayList<GrantedAuthority>()).userAccount(userAccount).build();
 
@@ -120,26 +117,23 @@ public class DatasetVersionServiceDbImplIT extends BaseIntegrationTest {
   }
 
   @Test
-  void testUpdatePublicDatasetVersion()
-      throws InvalidStateException, R2d2TechnicalException, ValidationException, OptimisticLockingException, NotFoundException,
-      AuthorizationException {
+  void testUpdatePublicDatasetVersion() throws InvalidStateException, R2d2TechnicalException, ValidationException,
+      OptimisticLockingException, NotFoundException, AuthorizationException {
     //Given
     UserAccount userAccount = TestDataFactory.anUser().build();
 
     String datasetTitle = "datasetTitle";
 
-    DatasetVersionMetadata metadata = DatasetVersionMetadataBuilder.aDatasetVersionMetadata()
-        .title(datasetTitle).build();
+    DatasetVersionMetadata metadata = DatasetVersionMetadataBuilder.aDatasetVersionMetadata().title(datasetTitle).build();
     Dataset dataset = TestDataFactory.aDatasetWithCreationAndModificationDate().creator(userAccount).build();
-    DatasetVersion existingDatasetVersion =
-        TestDataFactory.aDatasetVersionWithCreationAndModificationDate()
-            .dataset(dataset).creator(userAccount).metadata(metadata).state(Dataset.State.PUBLIC).build();
+    DatasetVersion existingDatasetVersion = TestDataFactory.aDatasetVersionWithCreationAndModificationDate().dataset(dataset)
+        .creator(userAccount).metadata(metadata).state(Dataset.State.PUBLIC).build();
 
     this.userAccountRepository.save(userAccount);
     DatasetVersion savedDatasetVersion = this.datasetVersionRepository.save(existingDatasetVersion);
 
-    userAccount.setGrants(Collections.singletonList(GrantBuilder.aGrant()
-        .role(UserAccount.Role.USER).dataset(savedDatasetVersion.getDataset().getId()).build()));
+    userAccount.setGrants(Collections
+        .singletonList(GrantBuilder.aGrant().role(UserAccount.Role.USER).dataset(savedDatasetVersion.getDataset().getId()).build()));
     R2D2Principal r2d2Principal =
         R2D2PrincipalBuilder.aR2D2Principal("username", "pw", new ArrayList<GrantedAuthority>()).userAccount(userAccount).build();
 
@@ -155,8 +149,8 @@ public class DatasetVersionServiceDbImplIT extends BaseIntegrationTest {
 
     //Then
     assertThat(returnedDatasetVersion).isNotNull();
-    assertThat(returnedDatasetVersion).extracting(DatasetVersion::getMetadata)
-        .extracting(DatasetVersionMetadata::getDescription).isEqualTo(updatedDescription);
+    assertThat(returnedDatasetVersion).extracting(DatasetVersion::getMetadata).extracting(DatasetVersionMetadata::getDescription)
+        .isEqualTo(updatedDescription);
     //TODO: Add further assertions
   }
 

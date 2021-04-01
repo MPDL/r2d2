@@ -49,8 +49,9 @@ public class JWTAuthenticationFilter extends BasicAuthenticationFilter {
   @Override
   protected void doFilterInternal(HttpServletRequest req, HttpServletResponse res, FilterChain chain) throws IOException, ServletException {
     String header = req.getHeader(JWTLoginFilter.HEADER_STRING);
+    String reviewToken = req.getParameter(JWTLoginFilter.REVIEW_TOKEN_PARAM_NAME);
 
-    if (header == null || !header.startsWith(JWTLoginFilter.TOKEN_PREFIX)) {
+    if ((header == null || !header.startsWith(JWTLoginFilter.TOKEN_PREFIX)) && (reviewToken == null || reviewToken.isBlank())) {
       chain.doFilter(req, res);
       return;
     }

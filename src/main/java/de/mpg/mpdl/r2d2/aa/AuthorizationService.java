@@ -46,7 +46,7 @@ public class AuthorizationService {
 
   @Autowired
   private UserAccountRepository userAccountRepository;
-  
+
   @Autowired
   private ReviewTokenRepository reviewTokenRepository;
 
@@ -415,13 +415,47 @@ public class AuthorizationService {
   private void checkUser(Map<String, Object> ruleMap, List<String> order, Object[] objects)
       throws AuthorizationException, R2d2TechnicalException {
     R2D2Principal principal = (R2D2Principal) objects[order.indexOf("user")];
-    if (principal == null) {
-      throw new AuthorizationException("You have to be logged in with username/password or ip address.");
-    }
+
+
+
     UserAccount userAccount = principal.getUserAccount();
 
-    
-    
+
+    if (principal == null) {
+      throw new AuthorizationException("You have to be logged in with username/password or review token.");
+    }
+
+    String tokenMatch = (String) ruleMap.get("token_match");
+
+    if (tokenMatch != null) {
+      if (principal.getReviewToken() == null) {
+        throw new AuthorizationException("Review token is null");
+      }
+
+      ReviewToken reviewToken = reviewTokenRepository.findByToken(principal.getReviewToken())
+          .orElseThrow(() -> new AuthorizationException("Invalid review token: " + principal.getReviewToken()));
+
+
+      Collection<Object> idsToBeMatched = new ArrayList<>();
+      Object idToBeMatched = getFieldValueOrString(order, objects, tokenMatch);
+      if (idToBeMatched instanceof Collection) {
+        idsToBeMatched = (Collection<Object>) idToBeMatched;
+      } else {
+        idsToBeMatched.add(idToBeMatched);
+      }
+
+      boolean check = idsToBeMatched.stream().anyMatch(i -> reviewToken.getDataset().equals(i));
+
+      if (!check) {
+        throw new AuthorizationException("Review token " + principal.getReviewToken() + " does not give access to " + idsToBeMatched);
+      }
+
+
+    } else if (userAccount == null) {
+      throw new AuthorizationException("You have to be logged in with username/password or review token.");
+    }
+
+
     /*
     String ipMatch = (String) ruleMap.get("ip_match");
     
@@ -469,6 +503,7 @@ public class AuthorizationService {
     
     
     */
+
     String userIdFieldMatch = (String) ruleMap.get("field_user_id_match");
 
     if (userIdFieldMatch != null) {
@@ -539,35 +574,7 @@ public class AuthorizationService {
     }
 
 
-    String tokenMatch = (String) ruleMap.get("token_match");
-    
-    if (tokenMatch != null) {
-      if(principal.getReviewToken() == null) 
-      {
-        throw new AuthorizationException("Review token is null");
-      }
-      
-      ReviewToken reviewToken = reviewTokenRepository.findById(principal.getReviewToken()).orElseThrow(() -> new AuthorizationException("Invalid review token: " + principal.getReviewToken()));
-      
-      
-      Collection<Object> idsToBeMatched = new ArrayList<>();
-      Object idToBeMatched = getFieldValueOrString(order, objects, tokenMatch);
-      if (idToBeMatched instanceof String) {
-        idsToBeMatched.add(idToBeMatched.toString());
-      } else if (idToBeMatched instanceof Collection) {
-        idsToBeMatched = (Collection<Object>) idToBeMatched;
-      }
-      
-      boolean check = idsToBeMatched.stream().anyMatch(i-> reviewToken.getDataset().equals(i));
-      
-      if(!check)
-      {
-        throw new AuthorizationException("Review token " + principal.getReviewToken() + " does not give access to " + idsToBeMatched);
-      }
-      
-      
-    }
-    
+
     /*
     if (ruleMap.containsKey("field_ou_id_match")) {
       String userOuId = principal.getUserAccount().getAffiliation().getObjectId();
@@ -615,15 +622,11 @@ public class AuthorizationService {
       } else {
         List<Object> results = new ArrayList<Object>();
         getFieldValueViaGetter(object, field.substring(field.indexOf(".") + 1, field.length()), results);
-        if(results.isEmpty())
-        {
+        if (results.isEmpty()) {
           return null;
-        }
-        else if (results.size()==1)
-        {
+        } else if (results.size() == 1) {
           return results.get(0);
-        }
-        else {
+        } else {
           return results;
         }
       }
@@ -653,20 +656,16 @@ public class AuthorizationService {
 
           } else {
             String nextField = field.substring(field.indexOf(".") + 1, field.length());
-            if(value instanceof Collection)
-            {
-              
-              for(Object o : (Collection<Object>)value)
-              {
+            if (value instanceof Collection) {
+
+              for (Object o : (Collection<Object>) value) {
                 getFieldValueViaGetter(o, nextField, results);
               }
-              
-            }
-            else
-            {
+
+            } else {
               getFieldValueViaGetter(value, nextField, results);
             }
-            
+
           }
         }
 

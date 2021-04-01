@@ -46,17 +46,17 @@ public class Utils {
   public static OffsetDateTime generateCurrentDateTimeForDatabase() {
     return OffsetDateTime.now().truncatedTo(ChronoUnit.MICROS);
   }
-  
-  
+
+
   static final String tokenChars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
   static SecureRandom secureRandom = new SecureRandom();
 
   /** Create a secure random string for tokens, eg. review tokens **/
-  public static String randomString(int len){
-     StringBuilder sb = new StringBuilder(len);
-     for(int i = 0; i < len; i++)
-        sb.append(tokenChars.charAt(secureRandom.nextInt(tokenChars.length())));
-     return sb.toString();
+  public static String randomString(int len) {
+    StringBuilder sb = new StringBuilder(len);
+    for (int i = 0; i < len; i++)
+      sb.append(tokenChars.charAt(secureRandom.nextInt(tokenChars.length())));
+    return sb.toString();
   }
 
 }
