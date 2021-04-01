@@ -216,6 +216,11 @@
 					"role" : "DATAMANAGER",
 					"field_grant_id_match" : "file.dataset.id"
 				}
+			},
+			{
+				"user" : {
+					"token_match" : "file.dataset.id"
+				}
 			}
 			
 		]

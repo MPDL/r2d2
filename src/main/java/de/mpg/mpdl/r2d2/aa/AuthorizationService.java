@@ -417,14 +417,12 @@ public class AuthorizationService {
     R2D2Principal principal = (R2D2Principal) objects[order.indexOf("user")];
 
 
-
-    UserAccount userAccount = principal.getUserAccount();
-
-
     if (principal == null) {
       throw new AuthorizationException("You have to be logged in with username/password or review token.");
     }
-
+    
+    UserAccount userAccount = principal.getUserAccount();
+    
     String tokenMatch = (String) ruleMap.get("token_match");
 
     if (tokenMatch != null) {
