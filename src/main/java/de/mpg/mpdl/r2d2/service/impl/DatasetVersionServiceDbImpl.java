@@ -574,22 +574,31 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
     DatasetVersion latestVersion = getLatest(dataset, user);
 
     checkAa("createReviewToken", user, latestVersion);
-    // TODO validation
-
-
     boolean exists = reviewTokenRepository.existsById(latestVersion.getId());
     if (exists) {
       throw new ValidationException("A review link already exists for the given dataset");
     }
     ReviewToken rt = new ReviewToken();
     rt.setDataset(latestVersion.getId());
-    rt.setToken(Utils.randomString(10));
+    rt.setToken(Utils.randomString(25));
 
     reviewTokenRepository.save(rt);
 
     return rt;
 
 
+
+  }
+
+  public ReviewToken getReviewToken(UUID datasetId, R2D2Principal user) throws R2d2TechnicalException, OptimisticLockingException,
+      ValidationException, NotFoundException, InvalidStateException, AuthorizationException {
+    DatasetVersion latestVersion = getLatest(datasetId, user);
+
+    checkAa("createReviewToken", user, latestVersion);
+    ReviewToken rt = reviewTokenRepository.findById(datasetId)
+        .orElseThrow(() -> new NotFoundException("No review token for dataset " + datasetId.toString() + " found"));
+
+    return rt;
 
   }
 

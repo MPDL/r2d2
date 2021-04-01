@@ -43,6 +43,7 @@ import de.mpg.mpdl.r2d2.exceptions.R2d2ApplicationException;
 import de.mpg.mpdl.r2d2.exceptions.R2d2TechnicalException;
 import de.mpg.mpdl.r2d2.model.DatasetVersion;
 import de.mpg.mpdl.r2d2.model.File;
+import de.mpg.mpdl.r2d2.model.ReviewToken;
 import de.mpg.mpdl.r2d2.model.VersionId;
 import de.mpg.mpdl.r2d2.model.aa.R2D2Principal;
 import de.mpg.mpdl.r2d2.rest.controller.dto.DatasetVersionDto;
@@ -129,6 +130,27 @@ public class DatasetController {
 
   }
 
+
+  @PostMapping(path = "/{id}/reviewToken")
+  public ResponseEntity<ReviewToken> createReviewToken(@PathVariable("id") String id, @AuthenticationPrincipal R2D2Principal p)
+      throws R2d2TechnicalException, R2d2ApplicationException {
+
+    ReviewToken rt = datasetVersionService.createReviewToken(UUID.fromString(id), p);
+
+    return new ResponseEntity<ReviewToken>(rt, HttpStatus.CREATED);
+
+  }
+
+
+  @GetMapping(path = "/{id}/reviewToken")
+  public ResponseEntity<ReviewToken> getReviewToken(@PathVariable("id") String id, @AuthenticationPrincipal R2D2Principal p)
+      throws R2d2TechnicalException, R2d2ApplicationException {
+
+    ReviewToken rt = datasetVersionService.getReviewToken(UUID.fromString(id), p);
+
+    return new ResponseEntity<ReviewToken>(rt, HttpStatus.OK);
+
+  }
 
   @GetMapping(path = "/{id}")
   public DatasetVersionDto getDataset(@PathVariable("id") String id, @RequestParam(name = "v", required = false) Integer versionNumber,
