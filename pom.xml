@@ -134,6 +134,7 @@
 	        <artifactId>mapstruct</artifactId>
 	        <version>${org.mapstruct.version}</version>
         </dependency>
+		<!-- Spring WebFlux used only for the Spring WebClient. Spring MVC used by default for the REST Controller. -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-webflux</artifactId>
