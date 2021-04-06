@@ -69,8 +69,7 @@ class AuthorizationServiceTest {
         Arguments.of(false, datasetVersionServiceName, "publish", PRIVATE, false, USER),
         Arguments.of(true, datasetVersionServiceName, "publish", PRIVATE, true, USER),
         Arguments.of(true, datasetVersionServiceName, "publish", PRIVATE, false, DATAMANAGER),
-        Arguments.of(true, datasetVersionServiceName, "publish", PRIVATE, false, ADMIN)
-    );
+        Arguments.of(true, datasetVersionServiceName, "publish", PRIVATE, false, ADMIN));
   }
 
   @ParameterizedTest
@@ -82,9 +81,7 @@ class AuthorizationServiceTest {
     Dataset dataset = DatasetBuilder.aDataset().state(state).id(UUID.randomUUID()).build();
 
     UserAccount userAccount = UserAccountBuilder.anUserAccount()
-        .grants(Collections.singletonList(GrantBuilder.aGrant().role(role).dataset(dataset.getId()).build()))
-        .id(UUID.randomUUID())
-        .build();
+        .grants(Collections.singletonList(GrantBuilder.aGrant().role(role).dataset(dataset.getId()).build())).id(UUID.randomUUID()).build();
     R2D2Principal r2D2Principal = R2D2PrincipalBuilder.aR2D2Principal("userName", "pw", new ArrayList<>()).userAccount(userAccount).build();
 
     //TODO: Why must user be creator of the Dataset and not the DatasetVersion in this case?
