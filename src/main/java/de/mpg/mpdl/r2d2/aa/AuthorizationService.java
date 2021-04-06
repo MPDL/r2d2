@@ -7,6 +7,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
@@ -20,12 +22,14 @@ import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import de.mpg.mpdl.r2d2.db.ReviewTokenRepository;
 import de.mpg.mpdl.r2d2.db.UserAccountRepository;
 import de.mpg.mpdl.r2d2.exceptions.AuthorizationException;
 import de.mpg.mpdl.r2d2.exceptions.R2d2ApplicationException;
 import de.mpg.mpdl.r2d2.exceptions.R2d2TechnicalException;
 import de.mpg.mpdl.r2d2.model.Dataset;
 import de.mpg.mpdl.r2d2.model.DatasetVersion;
+import de.mpg.mpdl.r2d2.model.ReviewToken;
 import de.mpg.mpdl.r2d2.model.aa.Grant;
 import de.mpg.mpdl.r2d2.model.aa.R2D2Principal;
 import de.mpg.mpdl.r2d2.model.aa.UserAccount;
@@ -42,6 +46,9 @@ public class AuthorizationService {
 
   @Autowired
   private UserAccountRepository userAccountRepository;
+
+  @Autowired
+  private ReviewTokenRepository reviewTokenRepository;
 
 
   private ObjectMapper modelMapper;
@@ -408,10 +415,44 @@ public class AuthorizationService {
   private void checkUser(Map<String, Object> ruleMap, List<String> order, Object[] objects)
       throws AuthorizationException, R2d2TechnicalException {
     R2D2Principal principal = (R2D2Principal) objects[order.indexOf("user")];
+
+
     if (principal == null) {
-      throw new AuthorizationException("You have to be logged in with username/password or ip address.");
+      throw new AuthorizationException("You have to be logged in with username/password or review token.");
     }
+    
     UserAccount userAccount = principal.getUserAccount();
+    
+    String tokenMatch = (String) ruleMap.get("token_match");
+
+    if (tokenMatch != null) {
+      if (principal.getReviewToken() == null) {
+        throw new AuthorizationException("Review token is null");
+      }
+
+      ReviewToken reviewToken = reviewTokenRepository.findByToken(principal.getReviewToken())
+          .orElseThrow(() -> new AuthorizationException("Invalid review token: " + principal.getReviewToken()));
+
+
+      Collection<Object> idsToBeMatched = new ArrayList<>();
+      Object idToBeMatched = getFieldValueOrString(order, objects, tokenMatch);
+      if (idToBeMatched instanceof Collection) {
+        idsToBeMatched = (Collection<Object>) idToBeMatched;
+      } else {
+        idsToBeMatched.add(idToBeMatched);
+      }
+
+      boolean check = idsToBeMatched.stream().anyMatch(i -> reviewToken.getDataset().equals(i));
+
+      if (!check) {
+        throw new AuthorizationException("Review token " + principal.getReviewToken() + " does not give access to " + idsToBeMatched);
+      }
+
+
+    } else if (userAccount == null) {
+      throw new AuthorizationException("You have to be logged in with username/password or review token.");
+    }
+
 
     /*
     String ipMatch = (String) ruleMap.get("ip_match");
@@ -460,6 +501,7 @@ public class AuthorizationService {
     
     
     */
+
     String userIdFieldMatch = (String) ruleMap.get("field_user_id_match");
 
     if (userIdFieldMatch != null) {
@@ -530,6 +572,7 @@ public class AuthorizationService {
     }
 
 
+
     /*
     if (ruleMap.containsKey("field_ou_id_match")) {
       String userOuId = principal.getUserAccount().getAffiliation().getObjectId();
@@ -575,7 +618,15 @@ public class AuthorizationService {
       if (object == null) {
         return null;
       } else {
-        return getFieldValueViaGetter(object, field.substring(field.indexOf(".") + 1, field.length()));
+        List<Object> results = new ArrayList<Object>();
+        getFieldValueViaGetter(object, field.substring(field.indexOf(".") + 1, field.length()), results);
+        if (results.isEmpty()) {
+          return null;
+        } else if (results.size() == 1) {
+          return results.get(0);
+        } else {
+          return results;
+        }
       }
 
 
@@ -585,7 +636,7 @@ public class AuthorizationService {
     }
   }
 
-  private Object getFieldValueViaGetter(Object object, String field) throws AuthorizationException {
+  private void getFieldValueViaGetter(Object object, String field, List<Object> results) throws AuthorizationException {
     try {
       String[] fieldHierarchy = field.split("\\.");
 
@@ -594,14 +645,25 @@ public class AuthorizationService {
         if (pd.getName().equals(fieldHierarchy[0])) {
           Object value = pd.getReadMethod().invoke(object);
           if (value == null) {
-            return null;
+            return;
           }
 
           if (fieldHierarchy.length == 1) {
-            return value;
+            results.add(value);
+            return;
 
           } else {
-            return getFieldValueViaGetter(value, field.substring(field.indexOf(".") + 1, field.length()));
+            String nextField = field.substring(field.indexOf(".") + 1, field.length());
+            if (value instanceof Collection) {
+
+              for (Object o : (Collection<Object>) value) {
+                getFieldValueViaGetter(o, nextField, results);
+              }
+
+            } else {
+              getFieldValueViaGetter(value, nextField, results);
+            }
+
           }
         }
 
@@ -611,7 +673,7 @@ public class AuthorizationService {
     } catch (Exception e) {
       throw new AuthorizationException("Error while calling getter in object", e);
     }
-    return null;
+    return;
 
   }
 

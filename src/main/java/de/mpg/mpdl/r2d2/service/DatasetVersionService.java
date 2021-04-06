@@ -20,6 +20,7 @@ import de.mpg.mpdl.r2d2.model.DatasetVersion;
 import de.mpg.mpdl.r2d2.model.DatasetVersionMetadata;
 import de.mpg.mpdl.r2d2.model.File;
 import de.mpg.mpdl.r2d2.model.FileChunk;
+import de.mpg.mpdl.r2d2.model.ReviewToken;
 import de.mpg.mpdl.r2d2.model.VersionId;
 import de.mpg.mpdl.r2d2.model.aa.R2D2Principal;
 import de.mpg.mpdl.r2d2.model.aa.UserAccount;
@@ -75,6 +76,12 @@ public interface DatasetVersionService extends GenericService<DatasetVersion> {
   public List<File> updateFiles(UUID id, List<UUID> fileIds, OffsetDateTime lastModificationDate, R2D2Principal user)
       throws R2d2TechnicalException, OptimisticLockingException, ValidationException, NotFoundException, InvalidStateException,
       AuthorizationException;
+
+  public ReviewToken createReviewToken(UUID dataset, R2D2Principal user) throws R2d2TechnicalException, OptimisticLockingException,
+      ValidationException, NotFoundException, InvalidStateException, AuthorizationException;
+
+  public ReviewToken getReviewToken(UUID datasetId, R2D2Principal user) throws R2d2TechnicalException, OptimisticLockingException,
+      ValidationException, NotFoundException, InvalidStateException, AuthorizationException;
   /*
   public File uploadSingleFile(UUID datasetId, File file, InputStream fileStream, R2D2Principal user) throws R2d2TechnicalException,
       OptimisticLockingException, ValidationException, NotFoundException, InvalidStateException, AuthorizationException;

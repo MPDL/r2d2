@@ -29,6 +29,7 @@ import de.mpg.mpdl.r2d2.db.AuditRepository;
 import de.mpg.mpdl.r2d2.db.DatasetRepository;
 import de.mpg.mpdl.r2d2.db.DatasetVersionRepository;
 import de.mpg.mpdl.r2d2.db.FileRepository;
+import de.mpg.mpdl.r2d2.db.ReviewTokenRepository;
 import de.mpg.mpdl.r2d2.exceptions.AuthorizationException;
 import de.mpg.mpdl.r2d2.exceptions.InvalidStateException;
 import de.mpg.mpdl.r2d2.exceptions.NotFoundException;
@@ -63,6 +64,9 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
 
   @Autowired
   private AuditRepository auditRepository;
+
+  @Autowired
+  private ReviewTokenRepository reviewTokenRepository;
 
   @Autowired
   private SwiftObjectStoreRepository objectStoreRepository;
@@ -208,7 +212,7 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
       throw new NotFoundException("Dataset with id " + id + " not found");
     }
 
-    if (principal == null) {
+    if (principal == null || !principal.hasAuthentication()) {
       requestedVersion = datasetVersionRepository.findLatestPublicVersion(id);
     } else {
 
@@ -561,6 +565,40 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
 
 
     return addOrRemoveFile(id, filesToAdd, filesToRemove, lastModificationDate, user);
+
+  }
+
+
+  public ReviewToken createReviewToken(UUID dataset, R2D2Principal user) throws R2d2TechnicalException, OptimisticLockingException,
+      ValidationException, NotFoundException, InvalidStateException, AuthorizationException {
+    DatasetVersion latestVersion = getLatest(dataset, user);
+
+    checkAa("createReviewToken", user, latestVersion);
+    boolean exists = reviewTokenRepository.existsById(latestVersion.getId());
+    if (exists) {
+      throw new ValidationException("A review link already exists for the given dataset");
+    }
+    ReviewToken rt = new ReviewToken();
+    rt.setDataset(latestVersion.getId());
+    rt.setToken(Utils.randomString(25));
+
+    reviewTokenRepository.save(rt);
+
+    return rt;
+
+
+
+  }
+
+  public ReviewToken getReviewToken(UUID datasetId, R2D2Principal user) throws R2d2TechnicalException, OptimisticLockingException,
+      ValidationException, NotFoundException, InvalidStateException, AuthorizationException {
+    DatasetVersion latestVersion = getLatest(datasetId, user);
+
+    checkAa("createReviewToken", user, latestVersion);
+    ReviewToken rt = reviewTokenRepository.findById(datasetId)
+        .orElseThrow(() -> new NotFoundException("No review token for dataset " + datasetId.toString() + " found"));
+
+    return rt;
 
   }
 

@@ -59,9 +59,14 @@
 				}
 			},
 			{
-			"user" : {
+				"user" : {
 					"role" : "DATAMANAGER",
 					"field_grant_id_match" : "datasetVersion.dataset.id"
+				}
+			},
+			{
+				"user" : {
+					"token_match" : "datasetVersion.dataset.id"
 				}
 			}
 			
@@ -140,6 +145,27 @@
 				"datasetVersion.dataset.state" : "PUBLIC",
 				"datasetVersion.state" : "PUBLIC"
 			}
+		],
+		"createReviewToken" : [
+			{
+				"user" : {
+					"role" : "ADMIN"
+				},
+				"datasetVersion.dataset.state" : "PRIVATE"
+			},
+			{
+				"user" : {
+					"field_user_id_match" : "datasetVersion.dataset.creator.id"
+				},
+				"datasetVersion.dataset.state" : "PRIVATE"
+			},
+			{
+				"user" : {
+						"role" : "DATAMANAGER",
+						"field_grant_id_match" : "datasetVersion.dataset.id"
+					},
+				"datasetVersion.dataset.state" : "PRIVATE"
+			}
 		]
 	},
 		
@@ -189,6 +215,11 @@
 			"user" : {
 					"role" : "DATAMANAGER",
 					"field_grant_id_match" : "file.dataset.id"
+				}
+			},
+			{
+				"user" : {
+					"token_match" : "file.dataset.id"
 				}
 			}
 			

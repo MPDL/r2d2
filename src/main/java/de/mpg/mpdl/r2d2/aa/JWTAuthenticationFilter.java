@@ -49,8 +49,9 @@ public class JWTAuthenticationFilter extends BasicAuthenticationFilter {
   @Override
   protected void doFilterInternal(HttpServletRequest req, HttpServletResponse res, FilterChain chain) throws IOException, ServletException {
     String header = req.getHeader(JWTLoginFilter.HEADER_STRING);
+    String reviewToken = req.getParameter(JWTLoginFilter.REVIEW_TOKEN_PARAM_NAME);
 
-    if (header == null || !header.startsWith(JWTLoginFilter.TOKEN_PREFIX)) {
+    if ((header == null || !header.startsWith(JWTLoginFilter.TOKEN_PREFIX)) && (reviewToken == null || reviewToken.isBlank())) {
       chain.doFilter(req, res);
       return;
     }
@@ -63,6 +64,10 @@ public class JWTAuthenticationFilter extends BasicAuthenticationFilter {
 
   private UsernamePasswordAuthenticationToken getAuthentication(HttpServletRequest request) throws ServletException {
     String token = request.getHeader(JWTLoginFilter.HEADER_STRING);
+    String reviewToken = request.getParameter(JWTLoginFilter.REVIEW_TOKEN_PARAM_NAME);
+
+    R2D2Principal principal = null;
+
     if (token != null) {
       // parse the token.
       String userId = JWT.require(Algorithm.HMAC512(JWTLoginFilter.SECRET.getBytes())).build()
@@ -72,18 +77,39 @@ public class JWTAuthenticationFilter extends BasicAuthenticationFilter {
         Optional<UserAccount> oua = userAccountRepository.findById(UUID.fromString(userId));
         if (oua.isEmpty()) {
           logger.info("Cannot authenticate token with user id " + userId + ". User not found.");
-          return null;
+        } else {
+          UserAccount ua = oua.get();
+          principal = new R2D2Principal(ua.getEmail(), "", new ArrayList<>());
+          principal.setUserAccount(ua);
+          // return new UsernamePasswordAuthenticationToken(p, null, new ArrayList<>());
+
         }
-        UserAccount ua = oua.get();
-        R2D2Principal p = new R2D2Principal(ua.getEmail(), "", new ArrayList<>());
-        p.setUserAccount(ua);
-        // return new UsernamePasswordAuthenticationToken(p, null, new ArrayList<>());
-        return new UsernamePasswordAuthenticationToken(p, null,
-            ua.getGrants().stream().map(role -> new SimpleGrantedAuthority("ROLE_" + role.getRole().name())).collect(Collectors.toList()));
 
       }
+
+    }
+
+    if (reviewToken != null && !reviewToken.isBlank()) {
+      if (principal != null) {
+        principal.setReviewToken(reviewToken);
+      } else {
+        principal = new R2D2Principal("anonymous_reviewer", "", new ArrayList<>());
+        principal.setReviewToken(reviewToken);
+      }
+
+    }
+
+
+    if (principal != null) {
+      return new UsernamePasswordAuthenticationToken(principal, null, principal.getUserAccount() != null
+          ? principal.getUserAccount().getGrants().stream().map(role -> new SimpleGrantedAuthority("ROLE_" + role.getRole().name()))
+              .collect(Collectors.toList())
+          : new ArrayList<>());
+    } else {
       return null;
     }
-    return null;
+
+
+
   }
 }
