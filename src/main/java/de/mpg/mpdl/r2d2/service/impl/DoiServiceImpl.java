@@ -12,6 +12,7 @@ import de.mpg.mpdl.r2d2.model.DatasetVersion;
 import de.mpg.mpdl.r2d2.model.aa.R2D2Principal;
 import de.mpg.mpdl.r2d2.service.DoiService;
 
+//TODO: DOI Service & Interface currently not used. Remove both if no explicit (user controlled) Doi creation will be implemented.
 public class DoiServiceImpl implements DoiService {
 
   @Autowired
