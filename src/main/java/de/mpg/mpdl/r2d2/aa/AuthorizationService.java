@@ -121,9 +121,11 @@ public class AuthorizationService {
     Map<String, String> indices = (Map<String, String>) serviceMap.get("technical").get("indices");
     List<Map<String, Object>> allowedMap = (List<Map<String, Object>>) serviceMap.get(serviceMethod);
 
-    UserAccount userAccount;
+    R2D2Principal principal = null;
+    UserAccount userAccount = null;
     try {
-      userAccount = ((R2D2Principal) objects[order.indexOf("user")]).getUserAccount();
+      principal = ((R2D2Principal) objects[order.indexOf("user")]);
+      userAccount = principal.getUserAccount();
     } catch (NullPointerException e) {
       userAccount = null;
 
@@ -174,9 +176,9 @@ public class AuthorizationService {
         switch (rule.getKey()) {
           case "user": {
 
-
+            Map<String, String> userMap = (Map<String, String>) rule.getValue();
             if (userAccount != null) {
-              Map<String, String> userMap = (Map<String, String>) rule.getValue();
+
 
               if (userMap.containsKey("field_user_id_match")) {
                 String value = (String) userMap.get("field_user_id_match");
@@ -239,6 +241,18 @@ public class AuthorizationService {
               */
 
             }
+            if (userMap.containsKey("token_match") && principal.getReviewToken() != null) {
+              ReviewToken reviewToken = reviewTokenRepository.findByToken(principal.getReviewToken()).orElse(null);
+
+              if (reviewToken != null) {
+                subQb.must(QueryBuilders.termsQuery(indices.get(userMap.get("token_match")), reviewToken.getDataset().toString()));
+                userMatch = true;
+              }
+
+
+
+            }
+
             if (!userMatch) {
               //reset queryBuilder
               subQb = QueryBuilders.boolQuery();
@@ -420,9 +434,9 @@ public class AuthorizationService {
     if (principal == null) {
       throw new AuthorizationException("You have to be logged in with username/password or review token.");
     }
-    
+
     UserAccount userAccount = principal.getUserAccount();
-    
+
     String tokenMatch = (String) ruleMap.get("token_match");
 
     if (tokenMatch != null) {
