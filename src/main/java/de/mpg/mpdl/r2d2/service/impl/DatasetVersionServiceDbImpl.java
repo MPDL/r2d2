@@ -303,7 +303,8 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
 
   }
 
-
+  @Override
+  @Transactional(rollbackFor = Throwable.class)
   public DatasetVersion withdraw(UUID id, OffsetDateTime lastModificationDate, String comment, R2D2Principal user)
       throws R2d2TechnicalException, OptimisticLockingException, ValidationException, NotFoundException, InvalidStateException,
       AuthorizationException {
