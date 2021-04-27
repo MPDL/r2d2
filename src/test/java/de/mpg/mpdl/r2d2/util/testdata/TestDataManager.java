@@ -5,6 +5,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import java.util.Arrays;
 
 /**
  * Class to persist Test Data objects.
@@ -13,7 +14,7 @@ import javax.persistence.PersistenceContext;
  *
  */
 @Component
-public class EntityManagerWrapper {
+public class TestDataManager {
 
   //TODO: Use EntityFactory to get the EntityManager?
   //EntityManager entityManager = entityManagerFactory.createEntityManager()
@@ -23,17 +24,8 @@ public class EntityManagerWrapper {
   private EntityManager entityManager;
 
   @Transactional
-  public void persist(Object objectToPersist) {
-    entityManager.persist(objectToPersist);
-  }
-
-  @Transactional
-  public <T> T merge(T objectToMerge) {
-    return entityManager.merge(objectToMerge);
-  }
-
-  public EntityManager getEntityManager() {
-    return this.entityManager;
+  public void persist(Object... objectsToPersist) {
+    Arrays.stream(objectsToPersist).forEach(object -> entityManager.persist(object));
   }
 
 }

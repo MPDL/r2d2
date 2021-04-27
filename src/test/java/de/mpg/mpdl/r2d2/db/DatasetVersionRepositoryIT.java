@@ -2,7 +2,7 @@ package de.mpg.mpdl.r2d2.db;
 
 import de.mpg.mpdl.r2d2.model.*;
 import de.mpg.mpdl.r2d2.util.*;
-import de.mpg.mpdl.r2d2.util.testdata.EntityManagerWrapper;
+import de.mpg.mpdl.r2d2.util.testdata.TestDataManager;
 import de.mpg.mpdl.r2d2.util.testdata.TestDataFactory;
 import de.mpg.mpdl.r2d2.util.testdata.builder.DatasetVersionMetadataBuilder;
 import de.mpg.mpdl.r2d2.util.testdata.builder.GeolocationBuilder;
@@ -29,11 +29,7 @@ public class DatasetVersionRepositoryIT extends BaseIntegrationTest {
   private EntityManager entityManager;
 
   @Autowired
-  private EntityManagerWrapper entityManagerWrapper;
-
-  //TODO: Can TestEntityManager be used instead of EntityManager by @AutoConfigureTestEntityManager (and without @DataJpaTest)?
-  //  @Autowired
-  //  private TestEntityManager testEntityManager;
+  private TestDataManager testDataManager;
 
   @Autowired
   private DatasetVersionRepository datasetVersionRepository;
@@ -48,9 +44,7 @@ public class DatasetVersionRepositoryIT extends BaseIntegrationTest {
     DatasetVersion datasetVersion2 =
         TestDataFactory.aDatasetVersionWithCreationAndModificationDate().dataset(dataset).versionNumber(latestVersionNumber).build();
 
-    entityManagerWrapper.persist(dataset);
-    entityManagerWrapper.merge(datasetVersion1);
-    entityManagerWrapper.merge(datasetVersion2);
+    testDataManager.persist(datasetVersion1, datasetVersion2);
 
     //When
     DatasetVersion latestDatasetVersion = datasetVersionRepository.findLatestVersion(dataset.getId());

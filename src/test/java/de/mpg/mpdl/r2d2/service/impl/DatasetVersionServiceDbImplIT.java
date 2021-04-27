@@ -2,16 +2,14 @@ package de.mpg.mpdl.r2d2.service.impl;
 
 import de.mpg.mpdl.r2d2.db.DatasetRepository;
 import de.mpg.mpdl.r2d2.db.DatasetVersionRepository;
-import de.mpg.mpdl.r2d2.db.UserAccountRepository;
 import de.mpg.mpdl.r2d2.exceptions.*;
-import de.mpg.mpdl.r2d2.model.Dataset;
-import de.mpg.mpdl.r2d2.model.DatasetVersion;
-import de.mpg.mpdl.r2d2.model.DatasetVersionMetadata;
+import de.mpg.mpdl.r2d2.model.*;
 import de.mpg.mpdl.r2d2.model.aa.R2D2Principal;
 import de.mpg.mpdl.r2d2.model.aa.UserAccount;
 import de.mpg.mpdl.r2d2.search.dao.DatasetVersionDaoEs;
 import de.mpg.mpdl.r2d2.search.model.DatasetVersionIto;
 import de.mpg.mpdl.r2d2.util.BaseIntegrationTest;
+import de.mpg.mpdl.r2d2.util.testdata.TestDataManager;
 import de.mpg.mpdl.r2d2.util.testdata.TestDataFactory;
 import de.mpg.mpdl.r2d2.util.testdata.builder.*;
 import org.junit.jupiter.api.Test;
@@ -35,13 +33,13 @@ public class DatasetVersionServiceDbImplIT extends BaseIntegrationTest {
   private DatasetVersionServiceDbImpl datasetVersionServiceDbImpl;
 
   @Autowired
-  private UserAccountRepository userAccountRepository;
-
-  @Autowired
   private DatasetVersionRepository datasetVersionRepository;
 
   @Autowired
   private DatasetRepository datasetRepository;
+
+  @Autowired
+  private TestDataManager testDataManager;
 
   //TODO: Use LatestDatasetVersionDaoImpl instead of PublicDatasetVersionDaoImpl !?
   @Autowired
@@ -60,7 +58,7 @@ public class DatasetVersionServiceDbImplIT extends BaseIntegrationTest {
     R2D2Principal r2d2Principal =
         R2D2PrincipalBuilder.aR2D2Principal("username", "pw", new ArrayList<GrantedAuthority>()).userAccount(userAccount).build();
 
-    this.userAccountRepository.save(userAccount);
+    this.testDataManager.persist(userAccount);
 
     //When
     DatasetVersion returnedDatasetVersion = this.datasetVersionServiceDbImpl.create(datasetVersion, r2d2Principal);
@@ -101,8 +99,7 @@ public class DatasetVersionServiceDbImplIT extends BaseIntegrationTest {
     DatasetVersion datasetVersion = TestDataFactory.aDatasetVersionWithCreationAndModificationDate().dataset(dataset).metadata(metadata)
         .state(Dataset.State.PRIVATE).build();
 
-    this.userAccountRepository.save(userAccount);
-    DatasetVersion savedDatasetVersion = this.datasetVersionRepository.save(datasetVersion);
+    this.testDataManager.persist(userAccount, datasetVersion);
 
     //FIXME: Simplify Grants/Authorization management in tests (and in prod code?)
     R2D2Principal r2d2Principal =
@@ -110,7 +107,7 @@ public class DatasetVersionServiceDbImplIT extends BaseIntegrationTest {
 
     //When
     DatasetVersion returnedDatasetVerion =
-        this.datasetVersionServiceDbImpl.publish(savedDatasetVersion.getId(), savedDatasetVersion.getModificationDate(), r2d2Principal);
+        this.datasetVersionServiceDbImpl.publish(datasetVersion.getId(), datasetVersion.getModificationDate(), r2d2Principal);
 
     //Then
     assertThat(returnedDatasetVerion).isNotNull();
@@ -128,22 +125,19 @@ public class DatasetVersionServiceDbImplIT extends BaseIntegrationTest {
 
     DatasetVersionMetadata metadata = DatasetVersionMetadataBuilder.aDatasetVersionMetadata().title(datasetTitle).build();
     Dataset dataset = TestDataFactory.aDatasetWithCreationAndModificationDate().creator(userAccount).build();
-    DatasetVersion existingDatasetVersion = TestDataFactory.aDatasetVersionWithCreationAndModificationDate().dataset(dataset)
-        .metadata(metadata).state(Dataset.State.PUBLIC).build();
+    DatasetVersion datasetVersion = TestDataFactory.aDatasetVersionWithCreationAndModificationDate().dataset(dataset).metadata(metadata)
+        .state(Dataset.State.PUBLIC).build();
 
-    this.userAccountRepository.save(userAccount);
-    DatasetVersion savedDatasetVersion = this.datasetVersionRepository.save(existingDatasetVersion);
+    this.testDataManager.persist(userAccount, datasetVersion);
+
+    String newDescription = "New Description";
+    datasetVersion.getMetadata().setDescription(newDescription);
 
     R2D2Principal r2d2Principal =
         R2D2PrincipalBuilder.aR2D2Principal("username", "pw", new ArrayList<GrantedAuthority>()).userAccount(userAccount).build();
 
-    DatasetVersion updatedDatasetVerion = savedDatasetVersion;
-    String newDescription = "New Description";
-    updatedDatasetVerion.getMetadata().setDescription(newDescription);
-
     //When
-    DatasetVersion returnedDatasetVersion =
-        this.datasetVersionServiceDbImpl.update(savedDatasetVersion.getId(), updatedDatasetVerion, r2d2Principal);
+    DatasetVersion returnedDatasetVersion = this.datasetVersionServiceDbImpl.update(datasetVersion.getId(), datasetVersion, r2d2Principal);
 
     //Then
     assertThat(returnedDatasetVersion).isNotNull();
@@ -164,19 +158,17 @@ public class DatasetVersionServiceDbImplIT extends BaseIntegrationTest {
     DatasetVersion datasetVersion =
         TestDataFactory.aDatasetVersionWithCreationAndModificationDate().dataset(dataset).state(Dataset.State.PUBLIC).build();
 
-    this.userAccountRepository.save(userAccount);
-    DatasetVersion savedDatasetVersion = datasetVersionRepository.save(datasetVersion);
+    this.testDataManager.persist(userAccount, datasetVersion);
 
     String withdrawComment = "Withdraw comment";
 
     //When
-    this.datasetVersionServiceDbImpl.withdraw(savedDatasetVersion.getId(), datasetVersion.getModificationDate(), withdrawComment,
-        r2d2Principal);
+    this.datasetVersionServiceDbImpl.withdraw(datasetVersion.getId(), datasetVersion.getModificationDate(), withdrawComment, r2d2Principal);
 
     //Then
-    List<DatasetVersion> datasetVersionsFromDB = this.datasetVersionRepository.findAllByDatasetId(savedDatasetVersion.getId());
-    Optional<Dataset> datasetOptional = this.datasetRepository.findById(savedDatasetVersion.getId());
-    DatasetVersionIto datasetVersionFromIndex = this.datasetVersionIndexDao.get(savedDatasetVersion.getVersionId().toString());
+    List<DatasetVersion> datasetVersionsFromDB = this.datasetVersionRepository.findAllByDatasetId(datasetVersion.getId());
+    Optional<Dataset> datasetOptional = this.datasetRepository.findById(datasetVersion.getId());
+    DatasetVersionIto datasetVersionFromIndex = this.datasetVersionIndexDao.get(datasetVersion.getVersionId().toString());
 
     assertThat(datasetVersionsFromDB).isNotEmpty();
     assertThat(datasetVersionsFromDB).extracting(DatasetVersion::getState).containsOnly(Dataset.State.WITHDRAWN);
@@ -191,7 +183,7 @@ public class DatasetVersionServiceDbImplIT extends BaseIntegrationTest {
   @Test
   void testGetLatestDatasetVersionPublic() throws AuthorizationException, NotFoundException, R2d2TechnicalException {
     //Given
-    Dataset dataset = TestDataFactory.aDatasetWithCreationAndModificationDate().id(UUID.randomUUID()).build();
+    Dataset dataset = TestDataFactory.aDatasetWithCreationAndModificationDate().build();
 
     DatasetVersion datasetVersion1 =
         TestDataFactory.aDatasetVersionWithCreationAndModificationDate().dataset(dataset).state(Dataset.State.PUBLIC).build();
@@ -200,15 +192,13 @@ public class DatasetVersionServiceDbImplIT extends BaseIntegrationTest {
     DatasetVersion datasetVersion3 = TestDataFactory.aDatasetVersionWithCreationAndModificationDate().dataset(dataset)
         .state(Dataset.State.PRIVATE).versionNumber(3).build();
 
-    R2D2Principal r2D2Principal = R2D2PrincipalBuilder.aR2D2Principal("username", "pw", new ArrayList<>())
+    R2D2Principal r2d2Principal = R2D2PrincipalBuilder.aR2D2Principal("username", "pw", new ArrayList<>())
         .userAccount(UserAccountBuilder.anUserAccount().build()).build();
 
-    datasetVersionRepository.save(datasetVersion1);
-    datasetVersionRepository.save(datasetVersion2);
-    datasetVersionRepository.save(datasetVersion3);
+    this.testDataManager.persist(datasetVersion1, datasetVersion2, datasetVersion3);
 
     //When
-    DatasetVersion returnedDatasetVersion = this.datasetVersionServiceDbImpl.getLatest(dataset.getId(), r2D2Principal);
+    DatasetVersion returnedDatasetVersion = this.datasetVersionServiceDbImpl.getLatest(dataset.getId(), r2d2Principal);
 
     //Then
     assertThat(returnedDatasetVersion).isNotNull();
