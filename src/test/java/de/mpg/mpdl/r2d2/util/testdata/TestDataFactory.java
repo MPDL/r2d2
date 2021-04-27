@@ -48,4 +48,11 @@ public class TestDataFactory {
     return userAccountBuilder;
   }
 
+  public static FileBuilder aFileWithDates() {
+    FileBuilder fileBuilder = FileBuilder.aFile().creationDate(Utils.generateCurrentDateTimeForDatabase())
+        .modificationDate(Utils.generateCurrentDateTimeForDatabase());
+
+    return fileBuilder;
+  }
+
 }

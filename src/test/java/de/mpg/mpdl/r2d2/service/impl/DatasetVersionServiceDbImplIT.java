@@ -205,4 +205,53 @@ public class DatasetVersionServiceDbImplIT extends BaseIntegrationTest {
     assertThat(returnedDatasetVersion.getVersionNumber()).isEqualTo(2);
   }
 
+  @Test
+  void testGetDatasetVersion() throws AuthorizationException, NotFoundException, R2d2TechnicalException {
+    //Given
+    UserAccount userAccount = TestDataFactory.anUser().build();
+    R2D2Principal r2d2Principal =
+        R2D2PrincipalBuilder.aR2D2Principal("username", "pw", new ArrayList<GrantedAuthority>()).userAccount(userAccount).build();
+
+    Dataset dataset = TestDataFactory.aDatasetWithCreationAndModificationDate().creator(userAccount).build();
+
+    DatasetVersion datasetVersion1 = TestDataFactory.aDatasetVersionWithCreationAndModificationDate().dataset(dataset).build();
+    DatasetVersion datasetVersion2 =
+        TestDataFactory.aDatasetVersionWithCreationAndModificationDate().dataset(dataset).versionNumber(2).build();
+    DatasetVersion datasetVersion3 =
+        TestDataFactory.aDatasetVersionWithCreationAndModificationDate().dataset(dataset).versionNumber(3).build();
+
+    this.testDataManager.persist(userAccount, datasetVersion1, datasetVersion2, datasetVersion3);
+    VersionId versionId2 = datasetVersion2.getVersionId();
+
+    //When
+    DatasetVersion returnedDatasetVersion = this.datasetVersionServiceDbImpl.get(versionId2, r2d2Principal);
+
+    //Then
+    assertThat(returnedDatasetVersion).isNotNull();
+    assertThat(returnedDatasetVersion.getVersionNumber()).isEqualTo(2);
+    assertThat(returnedDatasetVersion.getVersionId()).isEqualTo(versionId2);
+  }
+
+  @Test
+  void testGetFileForDataset() throws AuthorizationException, R2d2TechnicalException, NotFoundException {
+    //Given
+    UserAccount userAccount = TestDataFactory.anUser().build();
+    R2D2Principal r2d2Principal =
+        R2D2PrincipalBuilder.aR2D2Principal("username", "pw", new ArrayList<GrantedAuthority>()).userAccount(userAccount).build();
+
+    Dataset dataset = TestDataFactory.aDatasetWithCreationAndModificationDate().creator(userAccount).build();
+    DatasetVersion datasetVersion = TestDataFactory.aDatasetVersionWithCreationAndModificationDate().dataset(dataset).build();
+
+    File file = TestDataFactory.aFileWithDates().datasets(Collections.singleton(datasetVersion)).build();
+
+    this.testDataManager.persist(userAccount, datasetVersion, file);
+
+    //When
+    File returnedFile = this.datasetVersionServiceDbImpl.getFileForDataset(datasetVersion.getVersionId(), file.getId(), r2d2Principal);
+
+    //Then
+    assertThat(returnedFile).isNotNull();
+    assertThat(returnedFile.getId()).isEqualTo(file.getId());
+  }
+
 }
