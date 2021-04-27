@@ -233,7 +233,7 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
   }
 
   @Override
-  // @Transactional(readOnly = true)
+  @Transactional(readOnly = true)
   public DatasetVersion get(VersionId id, R2D2Principal principal)
       throws R2d2TechnicalException, NotFoundException, AuthorizationException {
 
@@ -361,6 +361,7 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
     return list;
   }
 
+  @Transactional(readOnly = true)
   public File getFileForDataset(VersionId datasetId, UUID fileId, R2D2Principal user)
       throws AuthorizationException, R2d2TechnicalException, NotFoundException {
     //AA via get
