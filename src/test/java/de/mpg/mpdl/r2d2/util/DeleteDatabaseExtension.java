@@ -18,17 +18,27 @@ public class DeleteDatabaseExtension implements AfterEachCallback {
     //TODO: Delete/recreate tables instead of truncate them?
 
     DataSource dataSource = SpringExtension.getApplicationContext(context).getBean(DataSource.class);
-    Connection connection = dataSource.getConnection();
 
-    String[] table_types = {"TABLE"};
-    ResultSet tablesResultSet = connection.getMetaData().getTables(null, null, "%", table_types);
+    Connection connection = null;
+    try {
+      connection = dataSource.getConnection();
 
-    Statement statement = connection.createStatement();
-    while (tablesResultSet.next()) {
-      String tableName = tablesResultSet.getString("TABLE_NAME");
-      statement.addBatch("TRUNCATE TABLE " + tableName + " CASCADE");
+      String[] table_types = {"TABLE"};
+      ResultSet tablesResultSet = connection.getMetaData().getTables(null, null, "%", table_types);
+
+      Statement statement = connection.createStatement();
+      while (tablesResultSet.next()) {
+        String tableName = tablesResultSet.getString("TABLE_NAME");
+        statement.addBatch("TRUNCATE TABLE " + tableName + " CASCADE");
+      }
+      statement.executeBatch();
+
+      statement.close();
+    } finally {
+      if (connection != null) {
+        connection.close();
+      }
     }
-    statement.executeBatch();
 
     //TODO: Check persistence-level Approach:
     //Another approach would be to use the EntityManager (or Hibernate or JdbcTemplate!?) to delete the test data on entity/persistence-level (instead of the sql-level)
