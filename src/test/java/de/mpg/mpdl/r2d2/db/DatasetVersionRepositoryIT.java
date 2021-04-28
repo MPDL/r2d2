@@ -39,10 +39,9 @@ public class DatasetVersionRepositoryIT extends BaseIntegrationTest {
     //Given
     int latestVersionNumber = 2;
 
-    Dataset dataset = TestDataFactory.aDatasetWithCreationAndModificationDate().build();
-    DatasetVersion datasetVersion1 = TestDataFactory.aDatasetVersionWithCreationAndModificationDate().dataset(dataset).build();
-    DatasetVersion datasetVersion2 =
-        TestDataFactory.aDatasetVersionWithCreationAndModificationDate().dataset(dataset).versionNumber(latestVersionNumber).build();
+    Dataset dataset = TestDataFactory.aDataset().build();
+    DatasetVersion datasetVersion1 = TestDataFactory.aDatasetVersion().dataset(dataset).build();
+    DatasetVersion datasetVersion2 = TestDataFactory.aDatasetVersion().dataset(dataset).versionNumber(latestVersionNumber).build();
 
     testDataManager.persist(datasetVersion1, datasetVersion2);
 
@@ -64,9 +63,8 @@ public class DatasetVersionRepositoryIT extends BaseIntegrationTest {
 
     DatasetVersionMetadata metadata = DatasetVersionMetadataBuilder.aDatasetVersionMetadata().title(title)
         .authors(Arrays.asList(PersonBuilder.aPerson().build())).description(description).geolocation(geolocation).build();
-    Dataset dataset = TestDataFactory.aDatasetWithCreationAndModificationDate().build();
-    DatasetVersion datasetVersion =
-        TestDataFactory.aDatasetVersionWithCreationAndModificationDate().dataset(dataset).metadata(metadata).build();
+    Dataset dataset = TestDataFactory.aDataset().build();
+    DatasetVersion datasetVersion = TestDataFactory.aDatasetVersion().dataset(dataset).metadata(metadata).build();
 
     //When
     datasetVersionRepository.save(datasetVersion);

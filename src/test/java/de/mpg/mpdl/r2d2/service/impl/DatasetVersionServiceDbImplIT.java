@@ -15,7 +15,6 @@ import de.mpg.mpdl.r2d2.util.testdata.builder.*;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.security.core.GrantedAuthority;
 
 import java.util.*;
 
@@ -52,7 +51,7 @@ public class DatasetVersionServiceDbImplIT extends BaseIntegrationTest {
     String datasetTitle = "datasetTitle";
 
     DatasetVersionMetadata metadata = DatasetVersionMetadataBuilder.aDatasetVersionMetadata().title(datasetTitle).build();
-    DatasetVersion datasetVersion = TestDataFactory.aDatasetVersionWithCreationAndModificationDate().metadata(metadata).build();
+    DatasetVersion datasetVersion = TestDataFactory.aDatasetVersion().metadata(metadata).build();
 
     UserAccount userAccount = TestDataFactory.anUser().build();
     R2D2Principal r2d2Principal = TestDataFactory.aR2D2Principal().userAccount(userAccount).build();
@@ -94,9 +93,9 @@ public class DatasetVersionServiceDbImplIT extends BaseIntegrationTest {
         .authors(Arrays.asList(PersonBuilder.aPerson().familyName("AuthorFamilyName").givenName("AuthorGivenName")
             .affiliations(Arrays.asList(AffiliationBuilder.anAffiliation().organization("Organization").build())).build()))
         .build();
-    Dataset dataset = TestDataFactory.aDatasetWithCreationAndModificationDate().creator(userAccount).build();
-    DatasetVersion datasetVersion = TestDataFactory.aDatasetVersionWithCreationAndModificationDate().dataset(dataset).metadata(metadata)
-        .state(Dataset.State.PRIVATE).build();
+    Dataset dataset = TestDataFactory.aDataset().creator(userAccount).build();
+    DatasetVersion datasetVersion =
+        TestDataFactory.aDatasetVersion().dataset(dataset).metadata(metadata).state(Dataset.State.PRIVATE).build();
 
     this.testDataManager.persist(userAccount, datasetVersion);
 
@@ -122,9 +121,9 @@ public class DatasetVersionServiceDbImplIT extends BaseIntegrationTest {
     String datasetTitle = "datasetTitle";
 
     DatasetVersionMetadata metadata = DatasetVersionMetadataBuilder.aDatasetVersionMetadata().title(datasetTitle).build();
-    Dataset dataset = TestDataFactory.aDatasetWithCreationAndModificationDate().creator(userAccount).build();
-    DatasetVersion datasetVersion = TestDataFactory.aDatasetVersionWithCreationAndModificationDate().dataset(dataset).metadata(metadata)
-        .state(Dataset.State.PUBLIC).build();
+    Dataset dataset = TestDataFactory.aDataset().creator(userAccount).build();
+    DatasetVersion datasetVersion =
+        TestDataFactory.aDatasetVersion().dataset(dataset).metadata(metadata).state(Dataset.State.PUBLIC).build();
 
     this.testDataManager.persist(userAccount, datasetVersion);
 
@@ -150,9 +149,8 @@ public class DatasetVersionServiceDbImplIT extends BaseIntegrationTest {
     UserAccount userAccount = TestDataFactory.anUser().build();
     R2D2Principal r2d2Principal = TestDataFactory.aR2D2Principal().userAccount(userAccount).build();
 
-    Dataset dataset = TestDataFactory.aDatasetWithCreationAndModificationDate().creator(userAccount).state(Dataset.State.PUBLIC).build();
-    DatasetVersion datasetVersion =
-        TestDataFactory.aDatasetVersionWithCreationAndModificationDate().dataset(dataset).state(Dataset.State.PUBLIC).build();
+    Dataset dataset = TestDataFactory.aDataset().creator(userAccount).state(Dataset.State.PUBLIC).build();
+    DatasetVersion datasetVersion = TestDataFactory.aDatasetVersion().dataset(dataset).state(Dataset.State.PUBLIC).build();
 
     this.testDataManager.persist(userAccount, datasetVersion);
 
@@ -179,14 +177,13 @@ public class DatasetVersionServiceDbImplIT extends BaseIntegrationTest {
   @Test
   void testGetLatestDatasetVersionPublic() throws AuthorizationException, NotFoundException, R2d2TechnicalException {
     //Given
-    Dataset dataset = TestDataFactory.aDatasetWithCreationAndModificationDate().build();
+    Dataset dataset = TestDataFactory.aDataset().build();
 
-    DatasetVersion datasetVersion1 =
-        TestDataFactory.aDatasetVersionWithCreationAndModificationDate().dataset(dataset).state(Dataset.State.PUBLIC).build();
-    DatasetVersion datasetVersion2 = TestDataFactory.aDatasetVersionWithCreationAndModificationDate().dataset(dataset)
-        .state(Dataset.State.PUBLIC).versionNumber(2).publicationComment("publication Comment").build();
-    DatasetVersion datasetVersion3 = TestDataFactory.aDatasetVersionWithCreationAndModificationDate().dataset(dataset)
-        .state(Dataset.State.PRIVATE).versionNumber(3).build();
+    DatasetVersion datasetVersion1 = TestDataFactory.aDatasetVersion().dataset(dataset).state(Dataset.State.PUBLIC).build();
+    DatasetVersion datasetVersion2 = TestDataFactory.aDatasetVersion().dataset(dataset).state(Dataset.State.PUBLIC).versionNumber(2)
+        .publicationComment("publication Comment").build();
+    DatasetVersion datasetVersion3 =
+        TestDataFactory.aDatasetVersion().dataset(dataset).state(Dataset.State.PRIVATE).versionNumber(3).build();
 
     R2D2Principal r2d2Principal = TestDataFactory.aR2D2Principal().userAccount(UserAccountBuilder.anUserAccount().build()).build();
 
@@ -206,24 +203,21 @@ public class DatasetVersionServiceDbImplIT extends BaseIntegrationTest {
     UserAccount userAccount = TestDataFactory.anUser().build();
     R2D2Principal r2d2Principal = TestDataFactory.aR2D2Principal().userAccount(userAccount).build();
 
-    Dataset dataset = TestDataFactory.aDatasetWithCreationAndModificationDate().creator(userAccount).build();
+    Dataset dataset = TestDataFactory.aDataset().creator(userAccount).build();
 
-    DatasetVersion datasetVersion1 = TestDataFactory.aDatasetVersionWithCreationAndModificationDate().dataset(dataset).build();
-    DatasetVersion datasetVersion2 =
-        TestDataFactory.aDatasetVersionWithCreationAndModificationDate().dataset(dataset).versionNumber(2).build();
-    DatasetVersion datasetVersion3 =
-        TestDataFactory.aDatasetVersionWithCreationAndModificationDate().dataset(dataset).versionNumber(3).build();
+    DatasetVersion datasetVersion1 = TestDataFactory.aDatasetVersion().dataset(dataset).build();
+    DatasetVersion datasetVersion2 = TestDataFactory.aDatasetVersion().dataset(dataset).versionNumber(2).build();
+    DatasetVersion datasetVersion3 = TestDataFactory.aDatasetVersion().dataset(dataset).versionNumber(3).build();
 
     this.testDataManager.persist(userAccount, datasetVersion1, datasetVersion2, datasetVersion3);
-    VersionId versionId2 = datasetVersion2.getVersionId();
 
     //When
-    DatasetVersion returnedDatasetVersion = this.datasetVersionServiceDbImpl.get(versionId2, r2d2Principal);
+    DatasetVersion returnedDatasetVersion = this.datasetVersionServiceDbImpl.get(datasetVersion2.getVersionId(), r2d2Principal);
 
     //Then
     assertThat(returnedDatasetVersion).isNotNull();
     assertThat(returnedDatasetVersion.getVersionNumber()).isEqualTo(2);
-    assertThat(returnedDatasetVersion.getVersionId()).isEqualTo(versionId2);
+    assertThat(returnedDatasetVersion.getVersionId()).isEqualTo(datasetVersion2.getVersionId());
   }
 
   @Test
@@ -232,10 +226,10 @@ public class DatasetVersionServiceDbImplIT extends BaseIntegrationTest {
     UserAccount userAccount = TestDataFactory.anUser().build();
     R2D2Principal r2d2Principal = TestDataFactory.aR2D2Principal().userAccount(userAccount).build();
 
-    Dataset dataset = TestDataFactory.aDatasetWithCreationAndModificationDate().creator(userAccount).build();
-    DatasetVersion datasetVersion = TestDataFactory.aDatasetVersionWithCreationAndModificationDate().dataset(dataset).build();
+    Dataset dataset = TestDataFactory.aDataset().creator(userAccount).build();
+    DatasetVersion datasetVersion = TestDataFactory.aDatasetVersion().dataset(dataset).build();
 
-    File file = TestDataFactory.aFileWithDates().datasets(Collections.singleton(datasetVersion)).build();
+    File file = TestDataFactory.aFile().datasets(Collections.singleton(datasetVersion)).build();
 
     this.testDataManager.persist(userAccount, datasetVersion, file);
 
