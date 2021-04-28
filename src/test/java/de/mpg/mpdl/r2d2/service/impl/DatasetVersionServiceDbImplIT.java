@@ -185,16 +185,38 @@ public class DatasetVersionServiceDbImplIT extends BaseIntegrationTest {
     DatasetVersion datasetVersion3 =
         TestDataFactory.aDatasetVersion().dataset(dataset).state(Dataset.State.PRIVATE).versionNumber(3).build();
 
-    R2D2Principal r2d2Principal = TestDataFactory.aR2D2Principal().userAccount(UserAccountBuilder.anUserAccount().build()).build();
-
     this.testDataManager.persist(datasetVersion1, datasetVersion2, datasetVersion3);
+
+    //When
+    DatasetVersion returnedDatasetVersion = this.datasetVersionServiceDbImpl.getLatest(dataset.getId(), null);
+
+    //Then
+    assertThat(returnedDatasetVersion).isNotNull();
+    assertThat(returnedDatasetVersion.getVersionNumber()).isEqualTo(2);
+  }
+
+  @Test
+  void testGetLatestDatasetVersionPrivate() throws AuthorizationException, NotFoundException, R2d2TechnicalException {
+    //Given
+    UserAccount userAccount = TestDataFactory.anUser().build();
+    R2D2Principal r2d2Principal = TestDataFactory.aR2D2Principal().userAccount(userAccount).build();
+
+    Dataset dataset = TestDataFactory.aDataset().creator(userAccount).build();
+
+    DatasetVersion datasetVersion1 = TestDataFactory.aDatasetVersion().dataset(dataset).state(Dataset.State.PUBLIC).build();
+    DatasetVersion datasetVersion2 = TestDataFactory.aDatasetVersion().dataset(dataset).state(Dataset.State.PUBLIC).versionNumber(2)
+        .publicationComment("publication Comment").build();
+    DatasetVersion datasetVersion3 =
+        TestDataFactory.aDatasetVersion().dataset(dataset).state(Dataset.State.PRIVATE).versionNumber(3).build();
+
+    this.testDataManager.persist(userAccount, datasetVersion1, datasetVersion2, datasetVersion3);
 
     //When
     DatasetVersion returnedDatasetVersion = this.datasetVersionServiceDbImpl.getLatest(dataset.getId(), r2d2Principal);
 
     //Then
     assertThat(returnedDatasetVersion).isNotNull();
-    assertThat(returnedDatasetVersion.getVersionNumber()).isEqualTo(2);
+    assertThat(returnedDatasetVersion.getVersionNumber()).isEqualTo(3);
   }
 
   @Test
