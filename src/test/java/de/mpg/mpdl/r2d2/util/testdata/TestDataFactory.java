@@ -6,7 +6,9 @@ import de.mpg.mpdl.r2d2.model.Person;
 import de.mpg.mpdl.r2d2.model.aa.UserAccount;
 import de.mpg.mpdl.r2d2.util.Utils;
 import de.mpg.mpdl.r2d2.util.testdata.builder.*;
+import org.springframework.security.core.GrantedAuthority;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 
@@ -53,6 +55,13 @@ public class TestDataFactory {
         .modificationDate(Utils.generateCurrentDateTimeForDatabase());
 
     return fileBuilder;
+  }
+
+  public static R2D2PrincipalBuilder aR2D2Principal() {
+    R2D2PrincipalBuilder r2D2PrincipalBuilder =
+        R2D2PrincipalBuilder.aR2D2Principal("username", "password", new ArrayList<GrantedAuthority>());
+
+    return r2D2PrincipalBuilder;
   }
 
 }

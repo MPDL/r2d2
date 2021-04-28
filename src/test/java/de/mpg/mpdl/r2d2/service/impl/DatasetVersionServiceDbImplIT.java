@@ -55,8 +55,7 @@ public class DatasetVersionServiceDbImplIT extends BaseIntegrationTest {
     DatasetVersion datasetVersion = TestDataFactory.aDatasetVersionWithCreationAndModificationDate().metadata(metadata).build();
 
     UserAccount userAccount = TestDataFactory.anUser().build();
-    R2D2Principal r2d2Principal =
-        R2D2PrincipalBuilder.aR2D2Principal("username", "pw", new ArrayList<GrantedAuthority>()).userAccount(userAccount).build();
+    R2D2Principal r2d2Principal = TestDataFactory.aR2D2Principal().userAccount(userAccount).build();
 
     this.testDataManager.persist(userAccount);
 
@@ -102,8 +101,7 @@ public class DatasetVersionServiceDbImplIT extends BaseIntegrationTest {
     this.testDataManager.persist(userAccount, datasetVersion);
 
     //FIXME: Simplify Grants/Authorization management in tests (and in prod code?)
-    R2D2Principal r2d2Principal =
-        R2D2PrincipalBuilder.aR2D2Principal("username", "pw", new ArrayList<GrantedAuthority>()).userAccount(userAccount).build();
+    R2D2Principal r2d2Principal = TestDataFactory.aR2D2Principal().userAccount(userAccount).build();
 
     //When
     DatasetVersion returnedDatasetVerion =
@@ -133,8 +131,7 @@ public class DatasetVersionServiceDbImplIT extends BaseIntegrationTest {
     String newDescription = "New Description";
     datasetVersion.getMetadata().setDescription(newDescription);
 
-    R2D2Principal r2d2Principal =
-        R2D2PrincipalBuilder.aR2D2Principal("username", "pw", new ArrayList<GrantedAuthority>()).userAccount(userAccount).build();
+    R2D2Principal r2d2Principal = TestDataFactory.aR2D2Principal().userAccount(userAccount).build();
 
     //When
     DatasetVersion returnedDatasetVersion = this.datasetVersionServiceDbImpl.update(datasetVersion.getId(), datasetVersion, r2d2Principal);
@@ -151,8 +148,7 @@ public class DatasetVersionServiceDbImplIT extends BaseIntegrationTest {
       NotFoundException, InvalidStateException {
     //Given
     UserAccount userAccount = TestDataFactory.anUser().build();
-    R2D2Principal r2d2Principal =
-        R2D2PrincipalBuilder.aR2D2Principal("username", "pw", new ArrayList<GrantedAuthority>()).userAccount(userAccount).build();
+    R2D2Principal r2d2Principal = TestDataFactory.aR2D2Principal().userAccount(userAccount).build();
 
     Dataset dataset = TestDataFactory.aDatasetWithCreationAndModificationDate().creator(userAccount).state(Dataset.State.PUBLIC).build();
     DatasetVersion datasetVersion =
@@ -192,8 +188,7 @@ public class DatasetVersionServiceDbImplIT extends BaseIntegrationTest {
     DatasetVersion datasetVersion3 = TestDataFactory.aDatasetVersionWithCreationAndModificationDate().dataset(dataset)
         .state(Dataset.State.PRIVATE).versionNumber(3).build();
 
-    R2D2Principal r2d2Principal = R2D2PrincipalBuilder.aR2D2Principal("username", "pw", new ArrayList<>())
-        .userAccount(UserAccountBuilder.anUserAccount().build()).build();
+    R2D2Principal r2d2Principal = TestDataFactory.aR2D2Principal().userAccount(UserAccountBuilder.anUserAccount().build()).build();
 
     this.testDataManager.persist(datasetVersion1, datasetVersion2, datasetVersion3);
 
@@ -209,8 +204,7 @@ public class DatasetVersionServiceDbImplIT extends BaseIntegrationTest {
   void testGetDatasetVersion() throws AuthorizationException, NotFoundException, R2d2TechnicalException {
     //Given
     UserAccount userAccount = TestDataFactory.anUser().build();
-    R2D2Principal r2d2Principal =
-        R2D2PrincipalBuilder.aR2D2Principal("username", "pw", new ArrayList<GrantedAuthority>()).userAccount(userAccount).build();
+    R2D2Principal r2d2Principal = TestDataFactory.aR2D2Principal().userAccount(userAccount).build();
 
     Dataset dataset = TestDataFactory.aDatasetWithCreationAndModificationDate().creator(userAccount).build();
 
@@ -236,8 +230,7 @@ public class DatasetVersionServiceDbImplIT extends BaseIntegrationTest {
   void testGetFileForDataset() throws AuthorizationException, R2d2TechnicalException, NotFoundException {
     //Given
     UserAccount userAccount = TestDataFactory.anUser().build();
-    R2D2Principal r2d2Principal =
-        R2D2PrincipalBuilder.aR2D2Principal("username", "pw", new ArrayList<GrantedAuthority>()).userAccount(userAccount).build();
+    R2D2Principal r2d2Principal = TestDataFactory.aR2D2Principal().userAccount(userAccount).build();
 
     Dataset dataset = TestDataFactory.aDatasetWithCreationAndModificationDate().creator(userAccount).build();
     DatasetVersion datasetVersion = TestDataFactory.aDatasetVersionWithCreationAndModificationDate().dataset(dataset).build();

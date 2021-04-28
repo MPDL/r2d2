@@ -12,6 +12,7 @@ import de.mpg.mpdl.r2d2.model.aa.R2D2Principal;
 import de.mpg.mpdl.r2d2.model.aa.UserAccount;
 import de.mpg.mpdl.r2d2.service.impl.DatasetVersionServiceDbImpl;
 import de.mpg.mpdl.r2d2.service.impl.FileUploadService;
+import de.mpg.mpdl.r2d2.util.testdata.TestDataFactory;
 import de.mpg.mpdl.r2d2.util.testdata.builder.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -117,7 +118,7 @@ class AuthorizationServiceTest {
 
     UserAccount userAccount = UserAccountBuilder.anUserAccount()
         .grants(Collections.singletonList(GrantBuilder.aGrant().role(role).dataset(dataset.getId()).build())).id(UUID.randomUUID()).build();
-    R2D2Principal r2D2Principal = R2D2PrincipalBuilder.aR2D2Principal("userName", "pw", new ArrayList<>()).userAccount(userAccount).build();
+    R2D2Principal r2D2Principal = TestDataFactory.aR2D2Principal().userAccount(userAccount).build();
 
     //TODO: Why must user be creator of the Dataset and not the DatasetVersion in this case?
     if (isCreator) {
@@ -152,7 +153,7 @@ class AuthorizationServiceTest {
 
     UserAccount userAccount = UserAccountBuilder.anUserAccount()
         .grants(Collections.singletonList(GrantBuilder.aGrant().role(role).dataset(dataset.getId()).build())).id(UUID.randomUUID()).build();
-    R2D2Principal r2D2Principal = R2D2PrincipalBuilder.aR2D2Principal("userName", "pw", new ArrayList<>()).userAccount(userAccount).build();
+    R2D2Principal r2D2Principal = TestDataFactory.aR2D2Principal().userAccount(userAccount).build();
 
     File file = FileBuilder.aFile().state(state).datasets(Collections.singleton(datasetVersion)).build();
 

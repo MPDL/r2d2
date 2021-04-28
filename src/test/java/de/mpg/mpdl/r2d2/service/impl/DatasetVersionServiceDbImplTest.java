@@ -19,6 +19,7 @@ import de.mpg.mpdl.r2d2.search.service.impl.IndexingService;
 import de.mpg.mpdl.r2d2.service.doi.DoiRepository;
 import de.mpg.mpdl.r2d2.service.storage.SwiftObjectStoreRepository;
 import de.mpg.mpdl.r2d2.util.DtoMapper;
+import de.mpg.mpdl.r2d2.util.testdata.TestDataFactory;
 import de.mpg.mpdl.r2d2.util.testdata.builder.*;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -79,8 +80,7 @@ public class DatasetVersionServiceDbImplTest {
 
     UserAccount userAccount =
         UserAccountBuilder.anUserAccount().person(PersonBuilder.aPerson().givenName("GivenName").familyName("FamilyName").build()).build();
-    R2D2Principal r2d2Principal =
-        R2D2PrincipalBuilder.aR2D2Principal("username", "pw", new ArrayList<GrantedAuthority>()).userAccount(userAccount).build();
+    R2D2Principal r2d2Principal = TestDataFactory.aR2D2Principal().userAccount(userAccount).build();
 
     DatasetVersion savedDatasetVersion =
         DatasetVersionBuilder.aDatasetVersion().dataset(DatasetBuilder.aDataset().id(UUID.randomUUID()).build()).versionNumber(1).build();
