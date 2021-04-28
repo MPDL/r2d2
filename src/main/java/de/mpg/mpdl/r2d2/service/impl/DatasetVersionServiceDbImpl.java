@@ -201,7 +201,7 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
   }
 
   @Override
-  // @Transactional(readOnly = true)
+  @Transactional(readOnly = true)
   public DatasetVersion getLatest(UUID id, R2D2Principal principal)
       throws R2d2TechnicalException, NotFoundException, AuthorizationException {
 
