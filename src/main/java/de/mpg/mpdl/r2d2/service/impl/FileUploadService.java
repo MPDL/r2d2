@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -36,6 +37,7 @@ import de.mpg.mpdl.r2d2.search.dao.FileDaoEs;
 import de.mpg.mpdl.r2d2.search.dao.GenericDaoEs;
 import de.mpg.mpdl.r2d2.search.service.impl.IndexingService;
 import de.mpg.mpdl.r2d2.service.FileService;
+import de.mpg.mpdl.r2d2.service.storage.ObjectStoreRepository;
 import de.mpg.mpdl.r2d2.service.storage.SwiftObjectStoreRepository;
 import de.mpg.mpdl.r2d2.service.util.FileDownloadWrapper;
 
@@ -53,7 +55,7 @@ public class FileUploadService extends GenericServiceDbImpl<File> implements Fil
   DatasetVersionRepository datasetVersionRepository;
 
   @Autowired
-  SwiftObjectStoreRepository objectStoreRepository;
+  ObjectStoreRepository objectStoreRepository;
 
   @Autowired
   private IndexingService indexingService;

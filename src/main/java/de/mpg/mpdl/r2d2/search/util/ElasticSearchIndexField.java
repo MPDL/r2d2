@@ -6,7 +6,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
 
-import org.elasticsearch.cluster.metadata.MappingMetaData;
+import org.elasticsearch.cluster.metadata.MappingMetadata;
+
 
 
 public class ElasticSearchIndexField {
@@ -77,7 +78,7 @@ public class ElasticSearchIndexField {
    */
   public static class Factory {
 
-    public static Map<String, ElasticSearchIndexField> createIndexMapFromElasticsearch(MappingMetaData mdd) {
+    public static Map<String, ElasticSearchIndexField> createIndexMapFromElasticsearch(MappingMetadata mdd) {
 
       Map<String, ElasticSearchIndexField> indexMap = new TreeMap<>();
 

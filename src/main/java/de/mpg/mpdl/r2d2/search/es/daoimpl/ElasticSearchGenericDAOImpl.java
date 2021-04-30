@@ -24,7 +24,7 @@ import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.client.indices.GetMappingsRequest;
 import org.elasticsearch.client.indices.GetMappingsResponse;
-import org.elasticsearch.cluster.metadata.MappingMetaData;
+import org.elasticsearch.cluster.metadata.MappingMetadata;
 import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.index.query.QueryBuilder;
@@ -358,7 +358,7 @@ public abstract class ElasticSearchGenericDAOImpl<E> implements GenericDaoEs<E> 
       GetMappingsResponse resp = this.client.indices().getMapping(getMappingRequest, RequestOptions.DEFAULT);
 
       if (resp.mappings().isEmpty() == false) { // SP: avoiding NullPointerException
-        MappingMetaData mmd = resp.mappings().get(indexName);
+        MappingMetadata mmd = resp.mappings().get(indexName);
 
         Map<String, ElasticSearchIndexField> map = ElasticSearchIndexField.Factory.createIndexMapFromElasticsearch(mmd);
         ElasticSearchIndexField allField = new ElasticSearchIndexField();

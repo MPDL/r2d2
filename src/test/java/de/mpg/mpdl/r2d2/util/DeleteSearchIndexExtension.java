@@ -16,8 +16,8 @@ import org.elasticsearch.client.core.CountResponse;
 import org.elasticsearch.client.indices.CreateIndexRequest;
 import org.elasticsearch.client.indices.GetIndexRequest;
 import org.elasticsearch.client.indices.GetIndexResponse;
-import org.elasticsearch.cluster.metadata.AliasMetaData;
-import org.elasticsearch.cluster.metadata.MappingMetaData;
+import org.elasticsearch.cluster.metadata.AliasMetadata;
+import org.elasticsearch.cluster.metadata.MappingMetadata;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.settings.Settings.Builder;
 import org.junit.jupiter.api.extension.AfterEachCallback;
@@ -63,14 +63,14 @@ public class DeleteSearchIndexExtension implements AfterEachCallback {
 
   private void reCreateIndices(RestHighLevelClient elasticSearchClient, GetIndexResponse allIndicesResponse, List<String> indicesToRecreate)
       throws IOException {
-    Map<String, List<AliasMetaData>> aliases = allIndicesResponse.getAliases();
-    Map<String, MappingMetaData> mappings = allIndicesResponse.getMappings();
+    Map<String, List<AliasMetadata>> aliases = allIndicesResponse.getAliases();
+    Map<String, MappingMetadata> mappings = allIndicesResponse.getMappings();
     Map<String, Settings> settings = allIndicesResponse.getSettings();
     //Map<String, Settings> settings = getIndexResponse.getDefaultSettings();
 
     for (String index : indicesToRecreate) {
-      List<AliasMetaData> indexAliases = aliases.get(index);
-      MappingMetaData indexMappingMetaData = mappings.get(index);
+      List<AliasMetadata> indexAliases = aliases.get(index);
+      MappingMetadata indexMappingMetaData = mappings.get(index);
       Settings indexSettings = settings.get(index);
 
       //How to get the original settings of an index (without the auto-created setting: creation_date, provided_name, uuid, version.created)?

@@ -27,6 +27,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Repository;
 
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -43,7 +44,8 @@ import de.mpg.mpdl.r2d2.model.FileChunk;
 import de.mpg.mpdl.r2d2.model.File;
 
 @Repository
-public class SwiftObjectStoreRepository {
+@ConditionalOnProperty(value = "r2d2.storage", havingValue = "cloud")
+public class SwiftObjectStoreRepository implements ObjectStoreRepository {
 
   private static Logger LOGGER = LoggerFactory.getLogger(SwiftObjectStoreRepository.class);
 

@@ -5,18 +5,19 @@ import java.io.InputStream;
 import org.springframework.core.io.InputStreamResource;
 
 import de.mpg.mpdl.r2d2.model.File;
+import de.mpg.mpdl.r2d2.service.storage.ObjectStoreRepository;
 import de.mpg.mpdl.r2d2.service.storage.SwiftObjectStoreRepository;
 
 public class FileDownloadWrapper {
 
   private File file;
 
-  private SwiftObjectStoreRepository storeRepository;
+  private ObjectStoreRepository storeRepository;
 
 
-  public FileDownloadWrapper(File file, SwiftObjectStoreRepository repo) {
+  public FileDownloadWrapper(File file, ObjectStoreRepository objectStoreRepository) {
     this.file = file;
-    this.storeRepository = repo;
+    this.storeRepository = objectStoreRepository;
 
   }
 
@@ -28,11 +29,11 @@ public class FileDownloadWrapper {
     this.file = file;
   }
 
-  public SwiftObjectStoreRepository getStoreRepository() {
+  public ObjectStoreRepository getStoreRepository() {
     return storeRepository;
   }
 
-  public void setStoreRepository(SwiftObjectStoreRepository storeRepository) {
+  public void setStoreRepository(ObjectStoreRepository storeRepository) {
     this.storeRepository = storeRepository;
   }
 

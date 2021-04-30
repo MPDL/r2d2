@@ -241,7 +241,7 @@ public class AuthorizationService {
               */
 
             }
-            if (userMap.containsKey("token_match") && principal!=null && principal.getReviewToken() != null) {
+            if (userMap.containsKey("token_match") && principal != null && principal.getReviewToken() != null) {
               ReviewToken reviewToken = reviewTokenRepository.findByToken(principal.getReviewToken()).orElse(null);
 
               if (reviewToken != null) {
