@@ -263,4 +263,55 @@ public class DatasetVersionServiceDbImplIT extends BaseIntegrationTest {
     assertThat(returnedFile.getId()).isEqualTo(file.getId());
   }
 
+  @Test
+  void testAddFile() throws ValidationException, R2d2TechnicalException, AuthorizationException, OptimisticLockingException,
+      NotFoundException, InvalidStateException {
+    //Given
+    UserAccount userAccount = TestDataFactory.anUser().build();
+    R2D2Principal r2d2Principal = TestDataFactory.aR2D2Principal().userAccount(userAccount).build();
+
+    Dataset dataset = TestDataFactory.aDataset().creator(userAccount).build();
+    DatasetVersion datasetVersion = TestDataFactory.aDatasetVersion().dataset(dataset).build();
+
+    File file = TestDataFactory.aFile().creator(userAccount).state(File.UploadState.COMPLETE).build();
+
+    this.testDataManager.persist(userAccount, datasetVersion, file);
+
+    //When
+    File returnedFile =
+        this.datasetVersionServiceDbImpl.addFile(dataset.getId(), file.getId(), datasetVersion.getModificationDate(), r2d2Principal);
+
+    //Then
+    List<File> files = this.testDataManager.findAll(File.class);
+
+    assertThat(returnedFile).isNotNull().extracting(File::getId).isEqualTo(file.getId());
+    assertThat(files).hasSize(1).extracting(File::getId).containsOnly(file.getId());
+  }
+
+  @Test
+  void testRemoveFile() throws ValidationException, R2d2TechnicalException, AuthorizationException, OptimisticLockingException,
+      NotFoundException, InvalidStateException {
+    //Given
+    UserAccount userAccount = TestDataFactory.anUser().build();
+    R2D2Principal r2d2Principal = TestDataFactory.aR2D2Principal().userAccount(userAccount).build();
+
+    Dataset dataset = TestDataFactory.aDataset().creator(userAccount).build();
+    DatasetVersion datasetVersion = TestDataFactory.aDatasetVersion().dataset(dataset).build();
+
+    File file = TestDataFactory.aFile().state(File.UploadState.ATTACHED).datasets(Collections.singleton(datasetVersion)).build();
+
+    this.testDataManager.persist(userAccount, datasetVersion, file);
+
+    //When
+    File returnedFile =
+        this.datasetVersionServiceDbImpl.removeFile(dataset.getId(), file.getId(), datasetVersion.getModificationDate(), r2d2Principal);
+
+    //Then
+    List<File> files = this.testDataManager.findAll(File.class);
+
+    assertThat(returnedFile).isNotNull().extracting(File::getId).isEqualTo(file.getId());
+    assertThat(files).hasSize(1).extracting(File::getId).containsOnly(file.getId());
+    assertThat(files).flatExtracting(File::getDatasets).extracting(DatasetVersion::getId).isEmpty();
+  }
+
 }
