@@ -570,7 +570,7 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
 
   }
 
-
+  @Transactional
   public ReviewToken createReviewToken(UUID dataset, R2D2Principal user) throws R2d2TechnicalException, OptimisticLockingException,
       ValidationException, NotFoundException, InvalidStateException, AuthorizationException {
     DatasetVersion latestVersion = getLatest(dataset, user);
@@ -592,6 +592,7 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
 
   }
 
+  @Transactional(readOnly = true)
   public ReviewToken getReviewToken(UUID datasetId, R2D2Principal user) throws R2d2TechnicalException, OptimisticLockingException,
       ValidationException, NotFoundException, InvalidStateException, AuthorizationException {
     DatasetVersion latestVersion = getLatest(datasetId, user);
