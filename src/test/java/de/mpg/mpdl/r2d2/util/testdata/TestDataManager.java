@@ -11,10 +11,12 @@ import javax.persistence.EntityGraph;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
- * Class to persist Test Data objects.
+ * Class to find and persist Test Data objects.
  * <p>
  * Wrapper class for the EntityManager.
  */
@@ -34,6 +36,28 @@ public class TestDataManager {
   }
 
   /**
+   * Search for an entity of the specified class and primary key.
+   * <p>
+   * Using eager loading: The entity with all its related associations (also LAZY fields!) are
+   * loaded and returned.
+   * 
+   * @param entityClass the entity class
+   * @param primaryKey the primary key
+   * @param <T> the class type
+   * @return the found entity instance of type T or null if the entity does not exist
+   */
+  @Transactional(readOnly = true)
+  public <T> T find(Class<T> entityClass, Object primaryKey) {
+    EntityGraph<T> entityGraphOfLazyNodes = this.createDynamicEntityGraphForLazyAttributes(entityClass);
+    Map<String, Object> properties = new HashMap<>();
+    properties.put("javax.persistence.loadgraph", entityGraphOfLazyNodes);
+
+    T entity = this.entityManager.find(entityClass, primaryKey, properties);
+
+    return entity;
+  }
+
+  /**
    * Search for all entities of the specified class.
    * <p>
    * Using eager loading: The entities with all their related associations (also LAZY fields!) are
@@ -43,7 +67,7 @@ public class TestDataManager {
    * @param <T> the class type
    * @return a List of all found entity instances of type T
    */
-  @Transactional
+  @Transactional(readOnly = true)
   public <T> List<T> findAll(Class<T> entityClass) {
     EntityGraph<T> entityGraphOfLazyNodes = this.createDynamicEntityGraphForLazyAttributes(entityClass);
 
