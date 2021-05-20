@@ -12,19 +12,20 @@ import de.mpg.mpdl.r2d2.util.BaseIntegrationTest;
 import de.mpg.mpdl.r2d2.util.testdata.TestDataManager;
 import de.mpg.mpdl.r2d2.util.testdata.TestDataFactory;
 import de.mpg.mpdl.r2d2.util.testdata.builder.*;
+import org.assertj.core.api.Condition;
+import org.assertj.core.util.Strings;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
 import java.util.*;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.*;
 
 /**
  * Integration test for DatasetVersionServiceDbImpl.
- * 
- * @author helk
  *
+ * @author helk
  */
 public class DatasetVersionServiceDbImplIT extends BaseIntegrationTest {
 
@@ -312,6 +313,87 @@ public class DatasetVersionServiceDbImplIT extends BaseIntegrationTest {
     assertThat(returnedFile).isNotNull().extracting(File::getId).isEqualTo(file.getId());
     assertThat(files).hasSize(1).extracting(File::getId).containsOnly(file.getId());
     assertThat(files).flatExtracting(File::getDatasets).extracting(DatasetVersion::getId).isEmpty();
+  }
+
+  @Test
+  void testUpdateFiles() throws ValidationException, R2d2TechnicalException, AuthorizationException, OptimisticLockingException,
+      NotFoundException, InvalidStateException {
+    //Given
+    UserAccount userAccount = TestDataFactory.anUser().build();
+    R2D2Principal r2d2Principal = TestDataFactory.aR2D2Principal().userAccount(userAccount).build();
+
+    Dataset dataset = TestDataFactory.aDataset().creator(userAccount).build();
+    DatasetVersion datasetVersion = TestDataFactory.aDatasetVersion().dataset(dataset).build();
+
+    File attachedFileToRemove = TestDataFactory.aFile().creator(userAccount).state(File.UploadState.ATTACHED)
+        .datasets(Collections.singleton(datasetVersion)).build();
+    File unattachedFileToAdd = TestDataFactory.aFile().creator(userAccount).state(File.UploadState.COMPLETE).build();
+    File attachedFileToRemain = TestDataFactory.aFile().creator(userAccount).state(File.UploadState.ATTACHED)
+        .datasets(Collections.singleton(datasetVersion)).build();
+
+    this.testDataManager.persist(userAccount, datasetVersion, attachedFileToRemove, unattachedFileToAdd, attachedFileToRemain);
+
+    //When
+    List<File> returnedFiles = this.datasetVersionServiceDbImpl.updateFiles(dataset.getId(),
+        Arrays.asList(unattachedFileToAdd.getId(), attachedFileToRemain.getId()), datasetVersion.getModificationDate(), r2d2Principal);
+
+    //Then
+    File removedFile = this.testDataManager.find(File.class, attachedFileToRemove.getId());
+    File addedFile = this.testDataManager.find(File.class, unattachedFileToAdd.getId());
+    File remainingFile = this.testDataManager.find(File.class, attachedFileToRemain.getId());
+
+    assertThat(returnedFiles).isNotNull().extracting(File::getId).containsOnly(attachedFileToRemove.getId(), unattachedFileToAdd.getId());
+    assertThat(removedFile.getDatasets()).extracting(DatasetVersion::getId).isEmpty();
+    assertThat(addedFile.getDatasets()).extracting(DatasetVersion::getId).containsOnly(datasetVersion.getId());
+    assertThat(remainingFile.getDatasets()).extracting(DatasetVersion::getId).containsOnly(datasetVersion.getId());
+  }
+
+  @Test
+  void testCreateReviewToken() throws ValidationException, R2d2TechnicalException, AuthorizationException, OptimisticLockingException,
+      NotFoundException, InvalidStateException {
+    //Given
+    UserAccount userAccount = TestDataFactory.anUser().build();
+    R2D2Principal r2d2Principal = TestDataFactory.aR2D2Principal().userAccount(userAccount).build();
+
+    Dataset dataset = TestDataFactory.aDataset().creator(userAccount).build();
+    DatasetVersion datasetVersion = TestDataFactory.aDatasetVersion().dataset(dataset).build();
+
+    this.testDataManager.persist(userAccount, datasetVersion);
+
+    //When
+    ReviewToken returnedReviewToken = this.datasetVersionServiceDbImpl.createReviewToken(dataset.getId(), r2d2Principal);
+
+    //Then
+    List<ReviewToken> reviewTokens = this.testDataManager.findAll(ReviewToken.class);
+
+    Condition<ReviewToken> tokenStringNotEmpty = new Condition<>(t -> !Strings.isNullOrEmpty(t.getToken()), "Token String not empty");
+    assertThat(returnedReviewToken).isNotNull().has(tokenStringNotEmpty).extracting(ReviewToken::getDataset).isEqualTo(dataset.getId());
+    assertThat(reviewTokens).hasSize(1).first().has(tokenStringNotEmpty).extracting(ReviewToken::getDataset).isEqualTo(dataset.getId());
+  }
+
+  @Test
+  void testGetReviewToken() throws ValidationException, R2d2TechnicalException, AuthorizationException, OptimisticLockingException,
+      NotFoundException, InvalidStateException {
+    //Given
+    UserAccount userAccount = TestDataFactory.anUser().build();
+    R2D2Principal r2d2Principal = TestDataFactory.aR2D2Principal().userAccount(userAccount).build();
+
+    Dataset dataset = TestDataFactory.aDataset().creator(userAccount).build();
+    DatasetVersion datasetVersion = TestDataFactory.aDatasetVersion().dataset(dataset).build();
+
+    this.testDataManager.persist(userAccount, datasetVersion);
+
+    String tokenString = "TheTokenString";
+    ReviewToken reviewToken = ReviewTokenBuilder.aReviewToken().dataset(dataset.getId()).token(tokenString).build();
+
+    this.testDataManager.persist(reviewToken);
+
+    //When
+    ReviewToken returnedReviewToken = this.datasetVersionServiceDbImpl.getReviewToken(dataset.getId(), r2d2Principal);
+
+    //Then
+    assertThat(returnedReviewToken).isNotNull().extracting(ReviewToken::getToken, ReviewToken::getDataset).containsExactly(tokenString,
+        dataset.getId());
   }
 
 }
