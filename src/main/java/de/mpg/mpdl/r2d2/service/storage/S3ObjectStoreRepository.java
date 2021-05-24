@@ -13,6 +13,7 @@ import org.jclouds.blobstore.BlobStoreContext;
 import org.jclouds.blobstore.domain.Blob;
 import org.jclouds.blobstore.domain.PageSet;
 import org.jclouds.blobstore.domain.StorageMetadata;
+import org.jclouds.blobstore.options.ListContainerOptions;
 import org.jclouds.io.Payload;
 import org.jclouds.io.payloads.ByteArrayPayload;
 import org.jclouds.io.payloads.InputStreamPayload;
@@ -22,7 +23,7 @@ import org.jclouds.openstack.swift.v1.domain.ObjectList;
 import org.jclouds.openstack.swift.v1.domain.Segment;
 import org.jclouds.openstack.swift.v1.features.ContainerApi;
 import org.jclouds.openstack.swift.v1.features.StaticLargeObjectApi;
-import org.jclouds.openstack.swift.v1.options.ListContainerOptions;
+import org.jclouds.s3.S3Client;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,6 +38,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.hash.HashCode;
 import com.google.common.hash.Hashing;
 
+import de.mpg.mpdl.r2d2.S3ObjectStoreConfigurationProperties;
 import de.mpg.mpdl.r2d2.SwiftStorageConfigurationProperties;
 import de.mpg.mpdl.r2d2.exceptions.NotFoundException;
 import de.mpg.mpdl.r2d2.model.File;
@@ -44,26 +46,29 @@ import de.mpg.mpdl.r2d2.model.FileChunk;
 import de.mpg.mpdl.r2d2.model.File;
 
 @Repository
-@ConditionalOnProperty(value = "r2d2.storage", havingValue = "cloud")
-public class SwiftObjectStoreRepository implements ObjectStoreRepository {
+@ConditionalOnProperty(value = "r2d2.storage", havingValue = "s3")
+public class S3ObjectStoreRepository implements ObjectStoreRepository {
 
-  private static Logger LOGGER = LoggerFactory.getLogger(SwiftObjectStoreRepository.class);
+  private static Logger LOGGER = LoggerFactory.getLogger(S3ObjectStoreRepository.class);
 
   @Autowired
-  SwiftStorageConfigurationProperties swiftProperties;
+  S3ObjectStoreConfigurationProperties s3Properties;
 
   private BlobStoreContext context;
 
   private BlobStore store;
 
-
-  private static final String CONTENT = "content";
-  private static final String SEGMENTS = "segments";
+  private S3Client client;
 
 
-  public SwiftObjectStoreRepository(BlobStoreContext context) {
+  private static final String CONTENT = "/content";
+  private static final String SEGMENTS = "/segments";
+
+
+  public S3ObjectStoreRepository(BlobStoreContext context) {
     this.context = context;
     store = context.getBlobStore();
+    client = context.unwrapApi(S3Client.class);
   }
 
   public BlobStoreContext getContext() {
@@ -75,27 +80,16 @@ public class SwiftObjectStoreRepository implements ObjectStoreRepository {
 
 
     LOGGER.info("Uploading Chunk to container " + sf.getId());
-    boolean containerCreated = createContainer(sf.getId().toString());
     Payload payload = new InputStreamPayload(is);
-    //payload.getContentMetadata().setContentLength(f.getSize());
     if (chunk.getClientEtag() != null) {
       payload.getContentMetadata().setContentMD5(HashCode.fromString(chunk.getClientEtag()));
     }
 
-    //payload.getContentMetadata().setContentType(contentType);
-    //payload.getContentMetadata().setContentDisposition(fileName);
-    /*
-     * TODO provide metadata
-     */
-
-    String name = SEGMENTS + "/" + String.format("%06d", chunk.getNumber());
+    String name = sf.getId().toString() + SEGMENTS + "/" + String.format("%06d", chunk.getNumber());
     Map<String, String> userMetadata = new HashMap<String, String>();
-    //userMetadata.put("X-Detect-Content-Type", "true");
-    // @formatter:off
     Blob blob = store.blobBuilder(name).payload(payload).userMetadata(userMetadata).build();
-    // @formatter:on
-    String eTag = store.putBlob(sf.getId().toString(), blob);
-    LOGGER.info("Cloud server returned etag " + eTag);
+    String eTag = store.putBlob(s3Properties.getBucket(), blob);
+    LOGGER.info("S3 store returned etag " + eTag);
     return eTag;
   }
 
@@ -104,12 +98,11 @@ public class SwiftObjectStoreRepository implements ObjectStoreRepository {
 
 
     LOGGER.info("Uploading single file to container " + file.getId());
-    boolean containerCreated = createContainer(file.getId().toString());
     Payload payload = new InputStreamPayload(is);
     if (file.getChecksum() != null) {
       payload.getContentMetadata().setContentMD5(HashCode.fromString(file.getChecksum()));
     }
-
+    payload.getContentMetadata().setContentLength(file.getSize());
     payload.getContentMetadata().setContentType(file.getFormat());
     payload.getContentMetadata().setContentDisposition(file.getFilename());
     /*
@@ -117,41 +110,17 @@ public class SwiftObjectStoreRepository implements ObjectStoreRepository {
      */
 
     Map<String, String> userMetadata = new HashMap<String, String>();
-    //userMetadata.put("X-Detect-Content-Type", "true");
-    // @formatter:off
-    Blob blob = store.blobBuilder(CONTENT).payload(payload).userMetadata(userMetadata).build();
-    // @formatter:on
-    String eTag = store.putBlob(file.getId().toString(), blob);
-    LOGGER.info("Cloud server returned etag " + eTag);
-    return eTag;
-  }
-
-
-
-  public String uploadFile(String container, byte[] bytes, String name, String fileName, String contentType) {
-
-    HashCode md5 = Hashing.md5().hashBytes(bytes);
-
-    Payload payload = new ByteArrayPayload(bytes);
-    payload.getContentMetadata().setContentLength((long) bytes.length);
-    payload.getContentMetadata().setContentMD5(md5);
-    payload.getContentMetadata().setContentType(contentType);
-    payload.getContentMetadata().setContentDisposition(fileName);
-    /*
-     * TODO provide metadata
-     */
-    Map<String, String> userMetadata = new HashMap<String, String>();
-    // @formatter:off
-    Blob blob = store.blobBuilder(name).payload(payload).userMetadata(userMetadata).build();
-    // @formatter:on
-    String eTag = store.putBlob(container, blob);
+    Blob blob = store.blobBuilder(file.getId().toString() + CONTENT).payload(payload).userMetadata(userMetadata).build();
+    String eTag = store.putBlob(s3Properties.getBucket(), blob);
+    LOGGER.info("S3 store returned etag " + eTag);
     return eTag;
   }
 
   public InputStream downloadFile(String container, String name) {
 
     InputStream inputStream = null;
-    Blob blob = store.getBlob(container, name);
+    String file2downlod = container + "/" + name;
+    Blob blob = store.getBlob(s3Properties.getBucket(), file2downlod);
     try {
       inputStream = blob.getPayload().openStream();
     } catch (IOException e) {
@@ -189,29 +158,31 @@ public class SwiftObjectStoreRepository implements ObjectStoreRepository {
       throw new NotFoundException(String.format("Container with id %s does not exist.", container));
     }
     boolean isContainerGone = false;
-    store.deleteContainer(container);
+    ListContainerOptions options = new ListContainerOptions();
+    options.prefix(container);
+    options.recursive();
+    List<String> names =
+        store.list(s3Properties.getBucket(), options).parallelStream().map(meta -> meta.getName()).collect(Collectors.toList());
+    names.forEach(name -> deleteFile(name.split("/", 2)[0], name.split("/", 2)[1]));
     if (!isContainerExist(container)) {
       isContainerGone = true;
     }
     return isContainerGone;
   }
 
-  public Blob getFile(String container, String name) {
-    return store.getBlob(container, name);
-  }
-
   public String getPublicURI(String container) {
-    return store.blobMetadata(container, CONTENT).getPublicUri().toString();
+    return store.blobMetadata(s3Properties.getBucket(), container + CONTENT).getUri().toString();
   }
 
   public Long getFileSize(String container) {
-    return store.blobMetadata(container, CONTENT).getSize();
+    return store.blobMetadata(s3Properties.getBucket(), container + CONTENT).getSize();
   }
 
   public boolean deleteFile(String container, String name) {
 
     boolean isFileRemoved = false;
-    store.removeBlob(container, name);
+    String fileName = container + "/" + name;
+    store.removeBlob(s3Properties.getBucket(), fileName);
     if (!isFileExist(container, name)) {
       isFileRemoved = true;
     }
@@ -221,41 +192,20 @@ public class SwiftObjectStoreRepository implements ObjectStoreRepository {
   public boolean isFileExist(String container, String name) {
 
     boolean isExist = false;
-    isExist = store.blobExists(container, name);
+    String fileName = container + "/" + name;
+    isExist = store.blobExists(s3Properties.getBucket(), fileName);
     return isExist;
   }
 
   public boolean isContainerExist(String container) {
 
     boolean isExist = false;
-    isExist = store.containerExists(container);
+    isExist = store.list(s3Properties.getBucket()).parallelStream().anyMatch(meta -> meta.getName().equals(container.concat("/")));
     return isExist;
   }
 
-  public boolean createContainer(String name) {
-
-    boolean success = false;
-    if (!isContainerExist(name)) {
-      success = store.createContainerInLocation(null, name);
-    }
-    return success;
-  }
-
   public String createManifest(String segmentContainer, String segmentPath, String manifestContainer, String contentType) {
-    SwiftApi swiftApi = getContext().unwrapApi(SwiftApi.class);
-    StaticLargeObjectApi slo = swiftApi.getStaticLargeObjectApi(swiftProperties.getRegion(), manifestContainer);
-    List<Segment> parts = new ArrayList<>();
-    ObjectList list =
-        swiftApi.getObjectApi(swiftProperties.getRegion(), segmentContainer).list(ListContainerOptions.Builder.path(segmentPath));
-    list.forEach(so -> {
-      long size = so.getPayload().getContentMetadata().getContentLength();
-      Segment s = Segment.builder().path(segmentContainer + "/" + so.getName()).etag(so.getETag()).sizeBytes(size).build();
-      parts.add(s);
-    });
-
-    Map<String, String> metadata = ImmutableMap.of("parts_in", segmentContainer + "/" + segmentPath);
-    Map<String, String> headers = ImmutableMap.of("Content-Type", contentType);
-    return slo.replaceManifest("content", parts, metadata, headers);
+    return null;
   }
 
 

@@ -135,6 +135,7 @@ public class FileUploadController {
 
     File f = new File();
     f.setFilename(fileName);
+    f.setSize(request.getContentLengthLong());
 
     // TODO format is not set, please check
     f.setFormat(contentType);

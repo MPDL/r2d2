@@ -108,7 +108,8 @@ public class FileUploadService extends GenericServiceDbImpl<File> implements Fil
     checkAa("upload", user);
 
     File file = create(file2upload, user);
-    objectStoreRepository.createContainer(file2upload.getId().toString());
+    // moved create container to object store impl
+    // objectStoreRepository.createContainer(file2upload.getId().toString());
     String eTag = objectStoreRepository.uploadFile(file2upload, fileStream);
     //TODO compare client etag with server etag 
     file.setChecksum(eTag);
@@ -127,7 +128,8 @@ public class FileUploadService extends GenericServiceDbImpl<File> implements Fil
     checkAa("upload", user);
 
     File file = create(file2upload, user);
-    objectStoreRepository.createContainer(file2upload.getId().toString());
+    // moved create container to object store impl
+    // objectStoreRepository.createContainer(file2upload.getId().toString());
     indexingService.reindexFile(file, true);
 
     return file;

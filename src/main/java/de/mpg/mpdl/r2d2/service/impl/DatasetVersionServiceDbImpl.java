@@ -45,6 +45,7 @@ import de.mpg.mpdl.r2d2.model.validation.PublishConstraintGroup;
 import de.mpg.mpdl.r2d2.model.validation.SaveConstraintGroup;
 import de.mpg.mpdl.r2d2.search.service.impl.IndexingService;
 import de.mpg.mpdl.r2d2.service.DatasetVersionService;
+import de.mpg.mpdl.r2d2.service.storage.ObjectStoreRepository;
 import de.mpg.mpdl.r2d2.service.storage.SwiftObjectStoreRepository;
 import de.mpg.mpdl.r2d2.util.Utils;
 
@@ -69,7 +70,7 @@ public class DatasetVersionServiceDbImpl extends GenericServiceDbImpl<DatasetVer
   private ReviewTokenRepository reviewTokenRepository;
 
   @Autowired
-  private SwiftObjectStoreRepository objectStoreRepository;
+  private ObjectStoreRepository objectStoreRepository;
 
   @PersistenceContext
   private EntityManager em;

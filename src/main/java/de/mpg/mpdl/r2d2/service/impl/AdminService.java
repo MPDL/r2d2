@@ -1,6 +1,7 @@
 package de.mpg.mpdl.r2d2.service.impl;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -43,155 +44,164 @@ import de.mpg.mpdl.r2d2.model.VersionId;
 import de.mpg.mpdl.r2d2.model.aa.UserAccount;
 import de.mpg.mpdl.r2d2.search.dao.DatasetVersionDaoEs;
 import de.mpg.mpdl.r2d2.search.dao.FileDaoEs;
+import de.mpg.mpdl.r2d2.service.storage.ObjectStoreRepository;
 import de.mpg.mpdl.r2d2.service.storage.SwiftObjectStoreRepository;
 
 @Service
 @PreAuthorize("hasRole('ROLE_ADMIN')")
 public class AdminService {
 
-  private static Logger LOGGER = LoggerFactory.getLogger(AdminService.class);
+	private static Logger LOGGER = LoggerFactory.getLogger(AdminService.class);
 
-  @Autowired
-  UserAccountRepository users;
+	@Autowired
+	UserAccountRepository users;
 
-  @Autowired
-  LocalUserAccountRepository localUsers;
+	@Autowired
+	LocalUserAccountRepository localUsers;
 
-  @Autowired
-  DatasetRepository datasets;
+	@Autowired
+	DatasetRepository datasets;
 
-  @Autowired
-  DatasetVersionRepository versions;
+	@Autowired
+	DatasetVersionRepository versions;
 
-  @Autowired
-  @Qualifier("PublicDatasetVersionDaoImpl")
-  DatasetVersionDaoEs datasetVersionDaoEs;
+	@Autowired
+	@Qualifier("PublicDatasetVersionDaoImpl")
+	DatasetVersionDaoEs datasetVersionDaoEs;
 
-  @Autowired
-  FileDaoEs fileDaoEs;
+	@Autowired
+	FileDaoEs fileDaoEs;
 
-  @Autowired
-  FileRepository files;
+	@Autowired
+	FileRepository files;
 
-  @Autowired
-  SwiftObjectStoreRepository objectStore;
+	@Autowired
+	ObjectStoreRepository objectStore;
 
-  public String test() {
-    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-    return authentication.getName() + authentication.getAuthorities();
-  }
+	public String test() {
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		return authentication.getName() + authentication.getAuthorities();
+	}
 
-  public List<UserAccount> listAllUsers() {
-    List<UserAccount> userList = new ArrayList<>();
-    users.findAll().iterator().forEachRemaining(userList::add);
-    return userList;
-  }
+	public List<UserAccount> listAllUsers() {
+		List<UserAccount> userList = new ArrayList<>();
+		users.findAll().iterator().forEachRemaining(userList::add);
+		return userList;
+	}
 
-  public UserAccount listUserById(String id) throws NotFoundException {
-    return users.findById(UUID.fromString(id)).orElseThrow(() -> new NotFoundException(String.format("User with id %s NOT FOUND", id)));
-  }
+	public UserAccount listUserById(String id) throws NotFoundException {
+		return users.findById(UUID.fromString(id))
+				.orElseThrow(() -> new NotFoundException(String.format("User with id %s NOT FOUND", id)));
+	}
 
-  public UserAccount updateUser(UserAccount user2update) {
-    return users.save(user2update);
-  }
+	public UserAccount updateUser(UserAccount user2update) {
+		return users.save(user2update);
+	}
 
-  @Transactional
-  public void deleteUser(String id) throws NotFoundException {
-    UserAccount user =
-        users.findById(UUID.fromString(id)).orElseThrow(() -> new NotFoundException(String.format("user with id %s NOT found!", id)));
-    localUsers.deleteByUser(user);
-    users.deleteById(UUID.fromString(id));
-  }
+	@Transactional
+	public void deleteUser(String id) throws NotFoundException {
+		UserAccount user = users.findById(UUID.fromString(id))
+				.orElseThrow(() -> new NotFoundException(String.format("user with id %s NOT found!", id)));
+		localUsers.deleteByUser(user);
+		users.deleteById(UUID.fromString(id));
+	}
 
-  public List<DatasetVersion> listAllDatasets() {
-    List<DatasetVersion> datasetList = new ArrayList<>();
-    versions.findAll().iterator().forEachRemaining(datasetList::add);
-    return datasetList;
-  }
+	public List<DatasetVersion> listAllDatasets() {
+		List<DatasetVersion> datasetList = new ArrayList<>();
+		versions.findAll().iterator().forEachRemaining(datasetList::add);
+		return datasetList;
+	}
 
-  public DatasetVersion listDatasetById(VersionId id) throws NotFoundException {
-    return versions.findById(id).orElseThrow(() -> new NotFoundException(String.format("Dataset with id %s NOT FOUND", id)));
-  }
+	public DatasetVersion listDatasetById(VersionId id) throws NotFoundException {
+		return versions.findById(id)
+				.orElseThrow(() -> new NotFoundException(String.format("Dataset with id %s NOT FOUND", id)));
+	}
 
-  // @Transactional(rollbackFor = Throwable.class)
-  public long deleteDataset(UUID id) throws NotFoundException, R2d2TechnicalException {
-    Dataset dataset = datasets.findById(id).orElseThrow(() -> new NotFoundException(String.format("Dataset with id %s NOT FOUND", id)));
+	// @Transactional(rollbackFor = Throwable.class)
+	public long deleteDataset(UUID id) throws NotFoundException, R2d2TechnicalException {
+		Dataset dataset = datasets.findById(id)
+				.orElseThrow(() -> new NotFoundException(String.format("Dataset with id %s NOT FOUND", id)));
 
-    List<DatasetVersion> versionList = datasets.listAllVersions(id);
-    Set<File> fileSet = new HashSet<>();
-    Pageable page = PageRequest.of(0, 25);
-    versionList.forEach(v -> {
-      files.findAllForVersion(v.getVersionId(), page).forEach(f -> fileSet.add(f));
-      // versions.deleteById(v.getVersionId());
-    });
-    fileSet.forEach(f -> {
-      files.deleteById(f.getId());
-      try {
-        this.deleteContainer(f.getId().toString());
-        fileDaoEs.deleteByQuery(QueryBuilders.termQuery("id", f.getId().toString()));
-      } catch (NotFoundException e) {
-        LOGGER.warn(String.format("File with id %s for dataset %s NOT FOUND.", f.getId().toString(), id.toString()));
-      } catch (R2d2TechnicalException e) {
-        LOGGER.error(String.format("Error removing file with id %s from index.", f.getId().toString()));
-      }
-    });
-    versionList.forEach(v -> {
-      versions.deleteById(v.getVersionId());
-    });
-    datasets.deleteById(id);
-    return datasetVersionDaoEs.deleteByQuery(QueryBuilders.termQuery("id", id.toString()));
-  }
+		List<DatasetVersion> versionList = datasets.listAllVersions(id);
+		Set<File> fileSet = new HashSet<>();
+		Pageable page = PageRequest.of(0, 25);
+		versionList.forEach(v -> {
+			files.findAllForVersion(v.getVersionId(), page).forEach(f -> fileSet.add(f));
+			// versions.deleteById(v.getVersionId());
+		});
+		fileSet.forEach(f -> {
+			files.deleteById(f.getId());
+			try {
+				this.deleteContainer(f.getId().toString());
+				fileDaoEs.deleteByQuery(QueryBuilders.termQuery("id", f.getId().toString()));
+			} catch (NotFoundException e) {
+				LOGGER.warn(String.format("File with id %s for dataset %s NOT FOUND.", f.getId().toString(),
+						id.toString()));
+			} catch (R2d2TechnicalException e) {
+				LOGGER.error(String.format("Error removing file with id %s from index.", f.getId().toString()));
+			}
+		});
+		versionList.forEach(v -> {
+			versions.deleteById(v.getVersionId());
+		});
+		datasets.deleteById(id);
+		return datasetVersionDaoEs.deleteByQuery(QueryBuilders.termQuery("id", id.toString()));
+	}
 
-  public String deleteDatasetVersion(VersionId id) throws NotFoundException, R2d2TechnicalException {
-    DatasetVersion version =
-        versions.findById(id).orElseThrow(() -> new NotFoundException(String.format("Dataset with id %s NOT FOUND", id)));
-    Pageable page = PageRequest.of(0, 25);
-    Page<File> fileList = files.findAllForVersion(id, page);
-    fileList.forEach(file -> {
-      try {
-        deleteContainer(file.getId().toString());
-        fileDaoEs.deleteImmediatly(file.getId().toString());
-      } catch (NotFoundException e) {
-        LOGGER.warn(String.format("File with id %s for dataset %s NOT FOUND.", file.getId().toString(), id));
-      } catch (R2d2TechnicalException e) {
-        LOGGER.error(String.format("Error removing file with id %s from index.", file.getId().toString()));
-      }
-    });
-    versions.deleteById(id);
-    return datasetVersionDaoEs.deleteImmediatly(id.toString());
-  }
+	public String deleteDatasetVersion(VersionId id) throws NotFoundException, R2d2TechnicalException {
+		DatasetVersion version = versions.findById(id)
+				.orElseThrow(() -> new NotFoundException(String.format("Dataset with id %s NOT FOUND", id)));
+		Pageable page = PageRequest.of(0, 25);
+		Page<File> fileList = files.findAllForVersion(id, page);
+		fileList.forEach(file -> {
+			try {
+				deleteContainer(file.getId().toString());
+				fileDaoEs.deleteImmediatly(file.getId().toString());
+			} catch (NotFoundException e) {
+				LOGGER.warn(String.format("File with id %s for dataset %s NOT FOUND.", file.getId().toString(), id));
+			} catch (R2d2TechnicalException e) {
+				LOGGER.error(String.format("Error removing file with id %s from index.", file.getId().toString()));
+			}
+		});
+		versions.deleteById(id);
+		return datasetVersionDaoEs.deleteImmediatly(id.toString());
+	}
 
-  public List<String> listAllFiles() {
-    List<String> fileIds = new ArrayList<>();
-    files.findAll().iterator().forEachRemaining(file -> fileIds.add(file.getId().toString()));
-    return fileIds;
-  }
+	public List<String> listAllFiles() {
+		List<String> fileIds = new ArrayList<>();
+		files.findAll().iterator().forEachRemaining(file -> fileIds.add(file.getId().toString()));
+		return fileIds;
+	}
 
-  public List<Container> listAllContainers() {
-    return objectStore.listAllContainers();
-  }
+	public List<Container> listAllContainers() {
+		if (objectStore instanceof SwiftObjectStoreRepository) {
+			return ((SwiftObjectStoreRepository) objectStore).listAllContainers();
+		}
+		return Collections.EMPTY_LIST;
+	}
 
-  public Map<String, Object> clearObjectStore() {
-    Map<String, Object> response = new LinkedHashMap<>();
-    List<Container> containers = listAllContainers();
-    response.put("containers", containers.size());
-    List<String> files = listAllFiles();
-    response.put("files", files.size());
-    containers.removeAll(files);
-    response.put("2 be cleared", containers.size());
-    /*
-     * containers.forEach(id -> { try { deleteContainer(id); } catch
-     * (NotFoundException e) {
-     * LOGGER.warn(String.format("Container with id %s NOT FOUND.", id)); } });
-     */
-    return response;
-  }
+	public Map<String, Object> clearObjectStore() {
+		Map<String, Object> response = new LinkedHashMap<>();
+		List<Container> containers = listAllContainers();
+		response.put("containers", containers.size());
+		List<String> files = listAllFiles();
+		response.put("files", files.size());
+		containers.removeAll(files);
+		response.put("2 be cleared", containers.size());
+		/*
+		 * containers.forEach(id -> { try { deleteContainer(id); } catch
+		 * (NotFoundException e) {
+		 * LOGGER.warn(String.format("Container with id %s NOT FOUND.", id)); } });
+		 */
+		return response;
+	}
 
-  public List<Object> listContainerContent(String id) throws NotFoundException {
-    return objectStore.listContainer(id);
-  }
+	public List<Object> listContainerContent(String id) throws NotFoundException {
+		// return objectStore.listContainer(id);
+		return Collections.EMPTY_LIST;
+	}
 
-  public boolean deleteContainer(String id) throws NotFoundException {
-    return objectStore.deleteContainer(id);
-  }
+	public boolean deleteContainer(String id) throws NotFoundException {
+		return objectStore.deleteContainer(id);
+	}
 }

@@ -9,6 +9,7 @@ public class S3ObjectStoreConfigurationProperties {
   private String accessKey;
   private String secretKey;
   private String endpoint;
+  private String bucket;
 
   public String getProvider() {
     return provider;
@@ -40,6 +41,14 @@ public class S3ObjectStoreConfigurationProperties {
 
   public void setEndpoint(String endpoint) {
     this.endpoint = endpoint;
+  }
+
+  public String getBucket() {
+    return bucket;
+  }
+
+  public void setBucket(String bucket) {
+    this.bucket = bucket;
   }
 
 }

@@ -18,8 +18,6 @@ public interface ObjectStoreRepository {
 
   public boolean deleteContainer(String container) throws NotFoundException;
 
-  public Blob getFile(String container, String name);
-
   public String getPublicURI(String container);
 
   public Long getFileSize(String container);
@@ -29,8 +27,6 @@ public interface ObjectStoreRepository {
   public boolean isFileExist(String container, String name);
 
   public boolean isContainerExist(String container);
-
-  public boolean createContainer(String name);
 
   public String createManifest(File file);
 
