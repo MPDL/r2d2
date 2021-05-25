@@ -1,7 +1,5 @@
 package de.mpg.mpdl.r2d2.service.impl;
 
-import de.mpg.mpdl.r2d2.db.DatasetRepository;
-import de.mpg.mpdl.r2d2.db.DatasetVersionRepository;
 import de.mpg.mpdl.r2d2.exceptions.*;
 import de.mpg.mpdl.r2d2.model.*;
 import de.mpg.mpdl.r2d2.model.aa.R2D2Principal;
@@ -33,12 +31,6 @@ public class DatasetVersionServiceDbImplIT extends BaseIntegrationTest {
   private DatasetVersionServiceDbImpl datasetVersionServiceDbImpl;
 
   @Autowired
-  private DatasetVersionRepository datasetVersionRepository;
-
-  @Autowired
-  private DatasetRepository datasetRepository;
-
-  @Autowired
   private TestDataManager testDataManager;
 
   //TODO: Use LatestDatasetVersionDaoImpl instead of PublicDatasetVersionDaoImpl !?
@@ -63,23 +55,18 @@ public class DatasetVersionServiceDbImplIT extends BaseIntegrationTest {
     DatasetVersion returnedDatasetVersion = this.datasetVersionServiceDbImpl.create(datasetVersion, r2d2Principal);
 
     //Then
-    DatasetVersion datasetVersionFromDB = this.datasetVersionRepository.findLatestVersion(returnedDatasetVersion.getId());
+    List<DatasetVersion> datasetVersionsFromDB = this.testDataManager.findAll(DatasetVersion.class);
     //QUESTION: Why getVersionID != getID for datasetVersion?
     DatasetVersionIto datasetVersionFromIndex = this.datasetVersionIndexDao.get(returnedDatasetVersion.getVersionId().toString());
     //FIXME: Maybe use the service or DB-access/SQL/Search-Index directly for verification and don't use the repositories!?
 
-    List<DatasetVersion> createdDatasetVersions = List.of(returnedDatasetVersion, datasetVersionFromDB);
-
-    assertThat(createdDatasetVersions).doesNotContainNull();
-    assertThat(createdDatasetVersions).extracting(DatasetVersion::getMetadata).extracting(DatasetVersionMetadata::getTitle)
-        .containsOnly(datasetTitle);
-    assertThat(createdDatasetVersions).extracting(DatasetVersion::getMetadata).extracting(DatasetVersionMetadata::getDoi).isNotEmpty();
-    assertThat(createdDatasetVersions).extracting(DatasetVersion::getVersionNumber).containsOnly(1);
-
-    assertThat(datasetVersionFromIndex).isNotNull();
-    assertThat(datasetVersionFromIndex).extracting(DatasetVersionIto::getMetadata).extracting(DatasetVersionMetadata::getTitle)
-        .isEqualTo(datasetTitle);
-    assertThat(datasetVersionFromIndex).extracting(DatasetVersionIto::getVersionNumber).isEqualTo(1);
+    Condition<DatasetVersion> doiNotEmpty = new Condition<>(dv -> !Strings.isNullOrEmpty(dv.getMetadata().getDoi()), "DOI not empty");
+    assertThat(returnedDatasetVersion).isNotNull().has(doiNotEmpty)
+        .extracting(dv -> dv.getMetadata().getTitle(), DatasetVersion::getVersionNumber).containsExactly(datasetTitle, 1);
+    assertThat(datasetVersionsFromDB).hasSize(1).have(doiNotEmpty)
+        .extracting(dv -> dv.getMetadata().getTitle(), DatasetVersion::getVersionNumber).containsOnly(tuple(datasetTitle, 1));
+    assertThat(datasetVersionFromIndex).isNotNull().extracting(dvi -> dvi.getMetadata().getTitle(), DatasetVersionIto::getVersionNumber)
+        .containsExactly(datasetTitle, 1);
   }
 
   @Test
@@ -87,6 +74,8 @@ public class DatasetVersionServiceDbImplIT extends BaseIntegrationTest {
       NotFoundException, AuthorizationException {
     //Given
     UserAccount userAccount = TestDataFactory.anUser().build();
+    //FIXME: Simplify Grants/Authorization management in tests (and in prod code?)
+    R2D2Principal r2d2Principal = TestDataFactory.aR2D2Principal().userAccount(userAccount).build();
 
     String datasetTitle = "datasetTitle";
 
@@ -100,16 +89,12 @@ public class DatasetVersionServiceDbImplIT extends BaseIntegrationTest {
 
     this.testDataManager.persist(userAccount, datasetVersion);
 
-    //FIXME: Simplify Grants/Authorization management in tests (and in prod code?)
-    R2D2Principal r2d2Principal = TestDataFactory.aR2D2Principal().userAccount(userAccount).build();
-
     //When
     DatasetVersion returnedDatasetVerion =
         this.datasetVersionServiceDbImpl.publish(datasetVersion.getId(), datasetVersion.getModificationDate(), r2d2Principal);
 
     //Then
-    assertThat(returnedDatasetVerion).isNotNull();
-    assertThat(returnedDatasetVerion).extracting(DatasetVersion::getState).isEqualTo(Dataset.State.PUBLIC);
+    assertThat(returnedDatasetVerion).isNotNull().extracting(DatasetVersion::getState).isEqualTo(Dataset.State.PUBLIC);
     //TODO: Add further assertions
   }
 
@@ -118,6 +103,7 @@ public class DatasetVersionServiceDbImplIT extends BaseIntegrationTest {
       OptimisticLockingException, NotFoundException, AuthorizationException {
     //Given
     UserAccount userAccount = TestDataFactory.anUser().build();
+    R2D2Principal r2d2Principal = TestDataFactory.aR2D2Principal().userAccount(userAccount).build();
 
     String datasetTitle = "datasetTitle";
 
@@ -131,15 +117,11 @@ public class DatasetVersionServiceDbImplIT extends BaseIntegrationTest {
     String newDescription = "New Description";
     datasetVersion.getMetadata().setDescription(newDescription);
 
-    R2D2Principal r2d2Principal = TestDataFactory.aR2D2Principal().userAccount(userAccount).build();
-
     //When
     DatasetVersion returnedDatasetVersion = this.datasetVersionServiceDbImpl.update(datasetVersion.getId(), datasetVersion, r2d2Principal);
 
     //Then
-    assertThat(returnedDatasetVersion).isNotNull();
-    assertThat(returnedDatasetVersion).extracting(DatasetVersion::getMetadata).extracting(DatasetVersionMetadata::getDescription)
-        .isEqualTo(newDescription);
+    assertThat(returnedDatasetVersion).isNotNull().extracting(dv -> dv.getMetadata().getDescription()).isEqualTo(newDescription);
     //TODO: Add further assertions
   }
 
@@ -161,17 +143,14 @@ public class DatasetVersionServiceDbImplIT extends BaseIntegrationTest {
     this.datasetVersionServiceDbImpl.withdraw(datasetVersion.getId(), datasetVersion.getModificationDate(), withdrawComment, r2d2Principal);
 
     //Then
-    List<DatasetVersion> datasetVersionsFromDB = this.datasetVersionRepository.findAllByDatasetId(datasetVersion.getId());
-    Optional<Dataset> datasetOptional = this.datasetRepository.findById(datasetVersion.getId());
+    List<DatasetVersion> datasetVersionsFromDB = this.testDataManager.findAll(DatasetVersion.class);
+    Dataset datasetFromDB = this.testDataManager.find(Dataset.class, datasetVersion.getId());
     DatasetVersionIto datasetVersionFromIndex = this.datasetVersionIndexDao.get(datasetVersion.getVersionId().toString());
 
-    assertThat(datasetVersionsFromDB).isNotEmpty();
-    assertThat(datasetVersionsFromDB).extracting(DatasetVersion::getState).containsOnly(Dataset.State.WITHDRAWN);
-    assertThat(Optional.of(datasetOptional)).isPresent();
-    assertThat(datasetOptional).map(Dataset::getState).containsSame(Dataset.State.WITHDRAWN);
-    assertThat(datasetOptional).map(Dataset::getWithdrawComment).contains(withdrawComment);
-    assertThat(datasetVersionFromIndex).isNotNull();
-    assertThat(datasetVersionFromIndex).extracting(DatasetVersionIto::getState).isEqualTo(Dataset.State.WITHDRAWN);
+    assertThat(datasetVersionsFromDB).isNotEmpty().extracting(DatasetVersion::getState).containsOnly(Dataset.State.WITHDRAWN);
+    assertThat(datasetFromDB).isNotNull().extracting(Dataset::getState, Dataset::getWithdrawComment)
+        .containsExactly(Dataset.State.WITHDRAWN, withdrawComment);
+    assertThat(datasetVersionFromIndex).isNotNull().extracting(DatasetVersionIto::getState).isEqualTo(Dataset.State.WITHDRAWN);
     //TODO: Add further assertions
   }
 
@@ -192,8 +171,7 @@ public class DatasetVersionServiceDbImplIT extends BaseIntegrationTest {
     DatasetVersion returnedDatasetVersion = this.datasetVersionServiceDbImpl.getLatest(dataset.getId(), null);
 
     //Then
-    assertThat(returnedDatasetVersion).isNotNull();
-    assertThat(returnedDatasetVersion.getVersionNumber()).isEqualTo(2);
+    assertThat(returnedDatasetVersion).isNotNull().extracting(DatasetVersion::getVersionNumber).isEqualTo(2);
   }
 
   @Test
@@ -216,8 +194,7 @@ public class DatasetVersionServiceDbImplIT extends BaseIntegrationTest {
     DatasetVersion returnedDatasetVersion = this.datasetVersionServiceDbImpl.getLatest(dataset.getId(), r2d2Principal);
 
     //Then
-    assertThat(returnedDatasetVersion).isNotNull();
-    assertThat(returnedDatasetVersion.getVersionNumber()).isEqualTo(3);
+    assertThat(returnedDatasetVersion).isNotNull().extracting(DatasetVersion::getVersionNumber).isEqualTo(3);
   }
 
   @Test
@@ -238,9 +215,8 @@ public class DatasetVersionServiceDbImplIT extends BaseIntegrationTest {
     DatasetVersion returnedDatasetVersion = this.datasetVersionServiceDbImpl.get(datasetVersion2.getVersionId(), r2d2Principal);
 
     //Then
-    assertThat(returnedDatasetVersion).isNotNull();
-    assertThat(returnedDatasetVersion.getVersionNumber()).isEqualTo(2);
-    assertThat(returnedDatasetVersion.getVersionId()).isEqualTo(datasetVersion2.getVersionId());
+    assertThat(returnedDatasetVersion).isNotNull().extracting(DatasetVersion::getVersionNumber, DatasetVersion::getVersionId)
+        .containsExactly(2, datasetVersion2.getVersionId());
   }
 
   @Test
