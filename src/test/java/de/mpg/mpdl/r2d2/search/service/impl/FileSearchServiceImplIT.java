@@ -7,16 +7,12 @@ import de.mpg.mpdl.r2d2.model.DatasetVersion;
 import de.mpg.mpdl.r2d2.model.File;
 import de.mpg.mpdl.r2d2.model.aa.R2D2Principal;
 import de.mpg.mpdl.r2d2.model.aa.UserAccount;
-import de.mpg.mpdl.r2d2.search.dao.DatasetVersionDaoEs;
-import de.mpg.mpdl.r2d2.search.dao.FileDaoEs;
 import de.mpg.mpdl.r2d2.search.model.*;
 import de.mpg.mpdl.r2d2.util.BaseIntegrationTest;
-import de.mpg.mpdl.r2d2.util.DtoMapper;
 import de.mpg.mpdl.r2d2.util.testdata.TestDataFactory;
-import de.mpg.mpdl.r2d2.util.testdata.TestDataManager;
+import de.mpg.mpdl.r2d2.util.testdata.TestDataIndexer;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 
 import java.util.Collections;
 import java.util.UUID;
@@ -30,17 +26,7 @@ class FileSearchServiceImplIT extends BaseIntegrationTest {
   private FileSearchServiceImpl fileSearchService;
 
   @Autowired
-  private TestDataManager testDataManager;
-
-  @Autowired
-  @Qualifier("LatestDatasetVersionDaoImpl")
-  private DatasetVersionDaoEs datasetVersionIndexDao;
-
-  @Autowired
-  private FileDaoEs fileIndexDao;
-
-  @Autowired
-  private DtoMapper mapper;
+  private TestDataIndexer testDataIndexer;
 
   @Test
   void testSearchFilesForDatasetEmptyQuery() throws R2d2TechnicalException, AuthorizationException {
@@ -55,9 +41,7 @@ class FileSearchServiceImplIT extends BaseIntegrationTest {
         .datasets(Collections.singleton(datasetVersion)).build();
     File unattachedFile = TestDataFactory.aFile().id(UUID.randomUUID()).creator(userAccount).state(File.UploadState.COMPLETE).build();
 
-    datasetVersionIndexDao.createImmediately(datasetVersion.getVersionId().toString(), mapper.convertToDatasetVersionIto(datasetVersion));
-    fileIndexDao.createImmediately(attachedFile.getId().toString(), mapper.convertToFileIto(attachedFile));
-    fileIndexDao.createImmediately(unattachedFile.getId().toString(), mapper.convertToFileIto(unattachedFile));
+    this.testDataIndexer.index(datasetVersion, attachedFile, unattachedFile);
 
     SearchQuery searchQuery = new SearchQuery();
 
