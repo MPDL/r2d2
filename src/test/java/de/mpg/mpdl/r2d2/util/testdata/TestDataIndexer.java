@@ -9,13 +9,21 @@ import de.mpg.mpdl.r2d2.search.model.FileIto;
 import de.mpg.mpdl.r2d2.util.DtoMapper;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.index.IndexResponse;
+import org.elasticsearch.action.search.SearchRequest;
+import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.support.WriteRequest;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.common.xcontent.XContentType;
+import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.search.SearchHit;
+import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Class to search and index Test Data objects.
@@ -37,6 +45,8 @@ public class TestDataIndexer {
   @Autowired
   private Environment env;
 
+  //TODO: Add search/indexing for: index.dataset.latest, index.affiliation !?
+
   public void index(Object... objectsToIndex) throws R2d2TechnicalException {
     for (Object objectToIndex : objectsToIndex) {
       this.index(objectToIndex);
@@ -51,11 +61,9 @@ public class TestDataIndexer {
     } else {
       throw new IllegalArgumentException("No index for: " + entity.getClass());
     }
-    //TODO: Add indexing for Affiliations?
   }
 
   private String indexDataset(DatasetVersion datasetVersion) throws R2d2TechnicalException {
-    //TODO: In which case should "index.dataset.latest.name" ("LatestDatasetVersionDaoImpl") be used?
     String indexName = env.getProperty("index.dataset.public.name");
     String id = datasetVersion.getVersionId().toString();
     DatasetVersionIto datasetVersionIto = dtoMapper.convertToDatasetVersionIto(datasetVersion);
@@ -79,6 +87,36 @@ public class TestDataIndexer {
       IndexResponse indexResponse = client.index(indexRequest, RequestOptions.DEFAULT);
 
       return indexResponse.getId();
+    } catch (Exception e) {
+      throw new R2d2TechnicalException(e);
+    }
+  }
+
+  public <I> List<I> searchAll(Class<I> itoClass) throws R2d2TechnicalException {
+    String indexName;
+    if (itoClass == DatasetVersionIto.class) {
+      indexName = env.getProperty("index.dataset.public.name");
+    } else if (itoClass == FileIto.class) {
+      indexName = env.getProperty("index.file.name");
+    } else {
+      throw new IllegalArgumentException("No index for: " + itoClass);
+    }
+
+    try {
+      SearchRequest searchRequest = new SearchRequest(indexName);
+      SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
+      searchSourceBuilder.query(QueryBuilders.matchAllQuery());
+      searchRequest.source(searchSourceBuilder);
+
+      SearchResponse searchResponse = client.search(searchRequest, RequestOptions.DEFAULT);
+
+      List<I> entities = new ArrayList<>();
+      for (SearchHit searchHit : searchResponse.getHits().getHits()) {
+        I entity = objectMapper.readValue(searchHit.getSourceAsString(), itoClass);
+        entities.add(entity);
+      }
+
+      return entities;
     } catch (Exception e) {
       throw new R2d2TechnicalException(e);
     }
