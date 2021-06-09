@@ -23,7 +23,7 @@ import de.mpg.mpdl.r2d2.service.FileService;
 import de.mpg.mpdl.r2d2.util.DtoMapper;
 
 /**
- * Testing Rest API delegates to the service methods
+ * REST Unit Tests for DatasetController. Testing Rest API delegates to the service methods
  * 
  * @author helk
  *

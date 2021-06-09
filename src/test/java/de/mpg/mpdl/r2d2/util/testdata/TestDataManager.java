@@ -1,19 +1,21 @@
 package de.mpg.mpdl.r2d2.util.testdata;
 
-import de.mpg.mpdl.r2d2.model.Audit;
-import de.mpg.mpdl.r2d2.model.BaseDateDb;
-import de.mpg.mpdl.r2d2.model.DatasetVersion;
-import de.mpg.mpdl.r2d2.model.File;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
-
-import javax.persistence.EntityGraph;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import javax.persistence.EntityGraph;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+
+import de.mpg.mpdl.r2d2.model.Audit;
+import de.mpg.mpdl.r2d2.model.BaseDateDb;
+import de.mpg.mpdl.r2d2.model.DatasetVersion;
+import de.mpg.mpdl.r2d2.model.File;
 
 /**
  * Class to find and persist Test Data objects.
@@ -30,13 +32,18 @@ public class TestDataManager {
   @PersistenceContext
   private EntityManager entityManager;
 
+  /**
+   * Writes the given objects into the DB.
+   * 
+   * @param objectsToPersist the objects to be persisted
+   */
   @Transactional
   public void persist(Object... objectsToPersist) {
     Arrays.stream(objectsToPersist).forEach(object -> entityManager.persist(object));
   }
 
   /**
-   * Search for an entity of the specified class and primary key.
+   * Search the DB for an entity of the specified class and primary key.
    * <p>
    * Using eager loading: The entity with all its related associations (also LAZY fields!) are
    * loaded and returned.
@@ -58,7 +65,7 @@ public class TestDataManager {
   }
 
   /**
-   * Search for all entities of the specified class.
+   * Search the DB for all entities of the specified class.
    * <p>
    * Using eager loading: The entities with all their related associations (also LAZY fields!) are
    * loaded and returned.

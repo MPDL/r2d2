@@ -25,9 +25,6 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 public class DatasetVersionRepositoryIT extends BaseIntegrationTest {
 
-  @PersistenceContext
-  private EntityManager entityManager;
-
   @Autowired
   private TestDataManager testDataManager;
 
@@ -70,8 +67,7 @@ public class DatasetVersionRepositoryIT extends BaseIntegrationTest {
     datasetVersionRepository.save(datasetVersion);
 
     //Then
-    List<DatasetVersion> datasetVersions =
-        entityManager.createQuery("Select datasetVersion from " + DatasetVersion.class.getSimpleName() + " datasetVersion").getResultList();
+    List<DatasetVersion> datasetVersions = testDataManager.findAll(DatasetVersion.class);
 
     assertThat(datasetVersions).hasSize(1);
 

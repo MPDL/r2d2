@@ -1,20 +1,19 @@
 package de.mpg.mpdl.r2d2.transformation.doi;
 
-import de.mpg.mpdl.r2d2.transformation.doi.model.DoiCreator;
-import de.mpg.mpdl.r2d2.transformation.doi.model.DoiIdentifier;
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.util.Arrays;
+
+import javax.xml.bind.JAXBException;
+
+import org.junit.jupiter.api.Test;
+import org.xml.sax.SAXException;
+
 import de.mpg.mpdl.r2d2.transformation.doi.model.DoiMetadata;
-import de.mpg.mpdl.r2d2.transformation.doi.model.DoiTitle;
 import de.mpg.mpdl.r2d2.util.testdata.builder.DoiCreatorBuilder;
 import de.mpg.mpdl.r2d2.util.testdata.builder.DoiIdentifierBuilder;
 import de.mpg.mpdl.r2d2.util.testdata.builder.DoiMetadataBuilder;
 import de.mpg.mpdl.r2d2.util.testdata.builder.DoiTitleBuilder;
-import org.junit.jupiter.api.Test;
-import org.xml.sax.SAXException;
-
-import javax.xml.bind.JAXBException;
-import java.util.Arrays;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 public class DoiMetadataXmlConverterTest {
 

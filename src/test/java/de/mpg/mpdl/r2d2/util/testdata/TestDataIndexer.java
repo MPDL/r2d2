@@ -1,12 +1,8 @@
 package de.mpg.mpdl.r2d2.util.testdata;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import de.mpg.mpdl.r2d2.exceptions.R2d2TechnicalException;
-import de.mpg.mpdl.r2d2.model.DatasetVersion;
-import de.mpg.mpdl.r2d2.model.File;
-import de.mpg.mpdl.r2d2.search.model.DatasetVersionIto;
-import de.mpg.mpdl.r2d2.search.model.FileIto;
-import de.mpg.mpdl.r2d2.util.DtoMapper;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.action.search.SearchRequest;
@@ -22,8 +18,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.List;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import de.mpg.mpdl.r2d2.exceptions.R2d2TechnicalException;
+import de.mpg.mpdl.r2d2.model.DatasetVersion;
+import de.mpg.mpdl.r2d2.model.File;
+import de.mpg.mpdl.r2d2.search.model.DatasetVersionIto;
+import de.mpg.mpdl.r2d2.search.model.FileIto;
+import de.mpg.mpdl.r2d2.util.DtoMapper;
 
 /**
  * Class to search and index Test Data objects.
@@ -47,6 +49,12 @@ public class TestDataIndexer {
 
   //TODO: Add search/indexing for: index.dataset.latest, index.affiliation !?
 
+  /**
+   * Writes the given objects in the appropriate Index.
+   * 
+   * @param objectsToIndex objects to be indexed
+   * @throws R2d2TechnicalException
+   */
   public void index(Object... objectsToIndex) throws R2d2TechnicalException {
     for (Object objectToIndex : objectsToIndex) {
       this.index(objectToIndex);
@@ -92,6 +100,14 @@ public class TestDataIndexer {
     }
   }
 
+  /**
+   * Search the appropriate Index for all entities of the specified class.
+   * 
+   * @param itoClass the index-transfer-object class of the entities
+   * @param <I> the (ito) class type
+   * @return a List of all indexed entities of type I
+   * @throws R2d2TechnicalException
+   */
   public <I> List<I> searchAll(Class<I> itoClass) throws R2d2TechnicalException {
     String indexName;
     if (itoClass == DatasetVersionIto.class) {
