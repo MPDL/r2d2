@@ -1,5 +1,14 @@
 package de.mpg.mpdl.r2d2.search.service.impl;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.util.Collections;
+import java.util.UUID;
+import java.util.function.Function;
+
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+
 import de.mpg.mpdl.r2d2.exceptions.AuthorizationException;
 import de.mpg.mpdl.r2d2.exceptions.R2d2TechnicalException;
 import de.mpg.mpdl.r2d2.model.Dataset;
@@ -7,20 +16,16 @@ import de.mpg.mpdl.r2d2.model.DatasetVersion;
 import de.mpg.mpdl.r2d2.model.File;
 import de.mpg.mpdl.r2d2.model.aa.R2D2Principal;
 import de.mpg.mpdl.r2d2.model.aa.UserAccount;
-import de.mpg.mpdl.r2d2.search.model.*;
-import de.mpg.mpdl.r2d2.util.BaseIntegrationTest;
+import de.mpg.mpdl.r2d2.search.model.FileIto;
+import de.mpg.mpdl.r2d2.search.model.SearchQuery;
+import de.mpg.mpdl.r2d2.search.model.SearchRecord;
+import de.mpg.mpdl.r2d2.search.model.SearchResult;
+import de.mpg.mpdl.r2d2.util.R2D2IntegrationTest;
 import de.mpg.mpdl.r2d2.util.testdata.TestDataFactory;
 import de.mpg.mpdl.r2d2.util.testdata.TestDataIndexer;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.Collections;
-import java.util.UUID;
-import java.util.function.Function;
-
-import static org.assertj.core.api.Assertions.assertThat;
-
-class FileSearchServiceImplIT extends BaseIntegrationTest {
+@R2D2IntegrationTest
+class FileSearchServiceImplIT {
 
   @Autowired
   private FileSearchServiceImpl fileSearchService;

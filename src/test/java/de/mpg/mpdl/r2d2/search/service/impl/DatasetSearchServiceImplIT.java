@@ -18,11 +18,12 @@ import de.mpg.mpdl.r2d2.search.model.DatasetVersionIto;
 import de.mpg.mpdl.r2d2.search.model.SearchQuery;
 import de.mpg.mpdl.r2d2.search.model.SearchRecord;
 import de.mpg.mpdl.r2d2.search.model.SearchResult;
-import de.mpg.mpdl.r2d2.util.BaseIntegrationTest;
+import de.mpg.mpdl.r2d2.util.R2D2IntegrationTest;
 import de.mpg.mpdl.r2d2.util.testdata.TestDataFactory;
 import de.mpg.mpdl.r2d2.util.testdata.TestDataIndexer;
 
-public class DatasetSearchServiceImplIT extends BaseIntegrationTest {
+@R2D2IntegrationTest
+public class DatasetSearchServiceImplIT {
 
   @Autowired
   private DatasetSearchServiceImpl datasetSearchServiceImpl;

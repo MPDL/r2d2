@@ -1,21 +1,23 @@
 package de.mpg.mpdl.r2d2.db;
 
-import de.mpg.mpdl.r2d2.model.*;
-import de.mpg.mpdl.r2d2.util.*;
-import de.mpg.mpdl.r2d2.util.testdata.TestDataManager;
-import de.mpg.mpdl.r2d2.util.testdata.TestDataFactory;
-import de.mpg.mpdl.r2d2.util.testdata.builder.DatasetVersionMetadataBuilder;
-import de.mpg.mpdl.r2d2.util.testdata.builder.GeolocationBuilder;
-import de.mpg.mpdl.r2d2.util.testdata.builder.PersonBuilder;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import de.mpg.mpdl.r2d2.model.Dataset;
+import de.mpg.mpdl.r2d2.model.DatasetVersion;
+import de.mpg.mpdl.r2d2.model.DatasetVersionMetadata;
+import de.mpg.mpdl.r2d2.model.Geolocation;
+import de.mpg.mpdl.r2d2.util.R2D2IntegrationTest;
+import de.mpg.mpdl.r2d2.util.testdata.TestDataFactory;
+import de.mpg.mpdl.r2d2.util.testdata.TestDataManager;
+import de.mpg.mpdl.r2d2.util.testdata.builder.DatasetVersionMetadataBuilder;
+import de.mpg.mpdl.r2d2.util.testdata.builder.GeolocationBuilder;
+import de.mpg.mpdl.r2d2.util.testdata.builder.PersonBuilder;
 
 /**
  * Integration test for DatasetVersionRepository
@@ -23,7 +25,8 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author helk
  *
  */
-public class DatasetVersionRepositoryIT extends BaseIntegrationTest {
+@R2D2IntegrationTest
+public class DatasetVersionRepositoryIT {
 
   @Autowired
   private TestDataManager testDataManager;

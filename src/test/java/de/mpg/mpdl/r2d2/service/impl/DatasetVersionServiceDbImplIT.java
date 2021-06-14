@@ -1,30 +1,38 @@
 package de.mpg.mpdl.r2d2.service.impl;
 
-import de.mpg.mpdl.r2d2.exceptions.*;
-import de.mpg.mpdl.r2d2.model.*;
-import de.mpg.mpdl.r2d2.model.aa.R2D2Principal;
-import de.mpg.mpdl.r2d2.model.aa.UserAccount;
-import de.mpg.mpdl.r2d2.search.model.DatasetVersionIto;
-import de.mpg.mpdl.r2d2.util.BaseIntegrationTest;
-import de.mpg.mpdl.r2d2.util.testdata.TestDataIndexer;
-import de.mpg.mpdl.r2d2.util.testdata.TestDataManager;
-import de.mpg.mpdl.r2d2.util.testdata.TestDataFactory;
-import de.mpg.mpdl.r2d2.util.testdata.builder.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
 import org.assertj.core.api.Condition;
 import org.assertj.core.util.Strings;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.*;
-
-import static org.assertj.core.api.Assertions.*;
+import de.mpg.mpdl.r2d2.exceptions.*;
+import de.mpg.mpdl.r2d2.model.*;
+import de.mpg.mpdl.r2d2.model.aa.R2D2Principal;
+import de.mpg.mpdl.r2d2.model.aa.UserAccount;
+import de.mpg.mpdl.r2d2.search.model.DatasetVersionIto;
+import de.mpg.mpdl.r2d2.util.R2D2IntegrationTest;
+import de.mpg.mpdl.r2d2.util.testdata.TestDataFactory;
+import de.mpg.mpdl.r2d2.util.testdata.TestDataIndexer;
+import de.mpg.mpdl.r2d2.util.testdata.TestDataManager;
+import de.mpg.mpdl.r2d2.util.testdata.builder.AffiliationBuilder;
+import de.mpg.mpdl.r2d2.util.testdata.builder.DatasetVersionMetadataBuilder;
+import de.mpg.mpdl.r2d2.util.testdata.builder.PersonBuilder;
+import de.mpg.mpdl.r2d2.util.testdata.builder.ReviewTokenBuilder;
 
 /**
  * Integration test for DatasetVersionServiceDbImpl.
  *
  * @author helk
  */
-class DatasetVersionServiceDbImplIT extends BaseIntegrationTest {
+@R2D2IntegrationTest
+class DatasetVersionServiceDbImplIT {
 
   @Autowired
   private DatasetVersionServiceDbImpl datasetVersionServiceDbImpl;

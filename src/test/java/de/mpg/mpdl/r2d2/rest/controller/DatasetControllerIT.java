@@ -1,14 +1,14 @@
 package de.mpg.mpdl.r2d2.rest.controller;
 
-import com.auth0.jwt.JWT;
-import com.auth0.jwt.algorithms.Algorithm;
-import de.mpg.mpdl.r2d2.aa.JWTLoginFilter;
-import de.mpg.mpdl.r2d2.model.Dataset;
-import de.mpg.mpdl.r2d2.model.DatasetVersion;
-import de.mpg.mpdl.r2d2.model.aa.UserAccount;
-import de.mpg.mpdl.r2d2.util.BaseIntegrationTest;
-import de.mpg.mpdl.r2d2.util.testdata.TestDataManager;
-import de.mpg.mpdl.r2d2.util.testdata.TestDataFactory;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import java.util.List;
+
 import org.assertj.core.api.Condition;
 import org.assertj.core.util.Strings;
 import org.junit.jupiter.api.Test;
@@ -18,18 +18,23 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
-import java.util.List;
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.algorithms.Algorithm;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.tuple;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import de.mpg.mpdl.r2d2.aa.JWTLoginFilter;
+import de.mpg.mpdl.r2d2.model.Dataset;
+import de.mpg.mpdl.r2d2.model.DatasetVersion;
+import de.mpg.mpdl.r2d2.model.aa.UserAccount;
+import de.mpg.mpdl.r2d2.util.R2D2IntegrationTest;
+import de.mpg.mpdl.r2d2.util.testdata.TestDataFactory;
+import de.mpg.mpdl.r2d2.util.testdata.TestDataManager;
 
 /**
  * REST Integration Tests for DatasetController.
  */
+@R2D2IntegrationTest
 @AutoConfigureMockMvc
-class DatasetControllerIT extends BaseIntegrationTest {
+class DatasetControllerIT {
 
   @Autowired
   private MockMvc mockMvc;

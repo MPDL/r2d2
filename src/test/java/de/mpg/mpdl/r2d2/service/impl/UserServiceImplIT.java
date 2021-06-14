@@ -13,14 +13,15 @@ import de.mpg.mpdl.r2d2.model.Person;
 import de.mpg.mpdl.r2d2.model.aa.LocalUserAccount;
 import de.mpg.mpdl.r2d2.model.aa.UserAccount;
 import de.mpg.mpdl.r2d2.registration.RegistrationRequest;
-import de.mpg.mpdl.r2d2.util.BaseIntegrationTest;
+import de.mpg.mpdl.r2d2.util.R2D2IntegrationTest;
 import de.mpg.mpdl.r2d2.util.testdata.TestDataManager;
 import de.mpg.mpdl.r2d2.util.testdata.builder.AffiliationBuilder;
 import de.mpg.mpdl.r2d2.util.testdata.builder.LocalUserAccountBuilder;
 import de.mpg.mpdl.r2d2.util.testdata.builder.PersonBuilder;
 import de.mpg.mpdl.r2d2.util.testdata.builder.UserAccountBuilder;
 
-class UserServiceImplIT extends BaseIntegrationTest {
+@R2D2IntegrationTest
+class UserServiceImplIT {
 
   @Autowired
   UserServiceImpl userServiceImpl;
