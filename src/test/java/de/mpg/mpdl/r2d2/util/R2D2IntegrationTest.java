@@ -7,13 +7,17 @@ import java.lang.annotation.Target;
 
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+
+import de.mpg.mpdl.r2d2.service.storage.SwiftObjectStoreRepository;
 
 /**
  * <p>
  * Annotation for R2D2 Integration Test classes, providing the following features: <br>
  * - Initialize the complete Spring Context <br>
+ * - Mock all component classes with external dependencies <br>
  * - Starting DB & ES, each in a single Testcontainer at the beginning of a Test-Run <br>
  * - Clears DB & ES after each Test <br>
  * - Stopping the Testcontainers for DB & ES at the end of a Test-Run <br>
@@ -35,13 +39,11 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 //Deactivate DummyDataInitializer default data initialization by setting init.data.creation=false
 @SpringBootTest(properties = {"init.data.creation=false"})
 @ContextConfiguration(initializers = {DataBaseLauncher.Initializer.class, SearchEngineLauncher.Initializer.class})
+@MockBean(SwiftObjectStoreRepository.class)
 public @interface R2D2IntegrationTest {
 
   //TODO:
   // - Overwrite application-test.properties defining access to external Services
   // - Enhance/Adapt the mocking of the cloud storage access
-
-  //  @MockBean
-  //  private SwiftObjectStoreRepository objectStoreRepository;
 
 }
