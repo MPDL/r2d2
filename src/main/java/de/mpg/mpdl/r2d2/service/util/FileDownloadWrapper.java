@@ -4,6 +4,7 @@ import java.io.InputStream;
 
 import org.springframework.core.io.InputStreamResource;
 
+import de.mpg.mpdl.r2d2.exceptions.R2d2TechnicalException;
 import de.mpg.mpdl.r2d2.model.File;
 import de.mpg.mpdl.r2d2.service.storage.ObjectStoreRepository;
 import de.mpg.mpdl.r2d2.service.storage.SwiftObjectStoreRepository;
@@ -37,7 +38,7 @@ public class FileDownloadWrapper {
     this.storeRepository = storeRepository;
   }
 
-  public InputStream readFile() {
+  public InputStream readFile() throws R2d2TechnicalException {
     return storeRepository.downloadFile(file.getId().toString(), "content");
   }
 

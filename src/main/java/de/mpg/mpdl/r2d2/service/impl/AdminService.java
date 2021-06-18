@@ -45,6 +45,7 @@ import de.mpg.mpdl.r2d2.model.aa.UserAccount;
 import de.mpg.mpdl.r2d2.search.dao.DatasetVersionDaoEs;
 import de.mpg.mpdl.r2d2.search.dao.FileDaoEs;
 import de.mpg.mpdl.r2d2.service.storage.ObjectStoreRepository;
+import de.mpg.mpdl.r2d2.service.storage.S3ObjectStoreAwsSdkRepository;
 import de.mpg.mpdl.r2d2.service.storage.SwiftObjectStoreRepository;
 
 @Service
@@ -169,16 +170,24 @@ public class AdminService {
     return fileIds;
   }
 
-  public List<Container> listAllContainers() {
+  public List<? extends Object> listAllContainers() {
     if (objectStore instanceof SwiftObjectStoreRepository) {
       return ((SwiftObjectStoreRepository) objectStore).listAllContainers();
+    }
+    if (objectStore instanceof S3ObjectStoreAwsSdkRepository) {
+      try {
+        return ((S3ObjectStoreAwsSdkRepository) objectStore).listAllContainers();
+      } catch (NotFoundException | R2d2TechnicalException e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+      }
     }
     return Collections.emptyList();
   }
 
   public Map<String, Object> clearObjectStore() {
     Map<String, Object> response = new LinkedHashMap<>();
-    List<Container> containers = listAllContainers();
+    List<? extends Object> containers = listAllContainers();
     response.put("containers", containers.size());
     List<String> files = listAllFiles();
     response.put("files", files.size());
@@ -192,9 +201,12 @@ public class AdminService {
     return response;
   }
 
-  public List<Object> listContainerContent(String id) throws NotFoundException {
+  public List<? extends Object> listContainerContent(String id) throws NotFoundException, R2d2TechnicalException {
     if (objectStore instanceof SwiftObjectStoreRepository) {
       return ((SwiftObjectStoreRepository) objectStore).listContainer(id);
+    } else if (objectStore instanceof S3ObjectStoreAwsSdkRepository) {
+      System.out.println("listContainerContent 4 " + id);
+      return ((S3ObjectStoreAwsSdkRepository) objectStore).listContainer(id);
     }
     return Collections.emptyList();
   }

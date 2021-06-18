@@ -79,8 +79,16 @@ public class AdminController {
   }
 
   @GetMapping(value = "/store/{id}")
-  public ResponseEntity<?> listObjectStoreContainer(@PathVariable("id") String id) throws AuthorizationException, NotFoundException {
-    List<Object> details = service.listContainerContent(id);
+  public ResponseEntity<?> listObjectStoreContainer(@PathVariable("id") String id)
+      throws AuthorizationException, NotFoundException, R2d2TechnicalException {
+    List<? extends Object> details = service.listContainerContent(id);
+    return new ResponseEntity<>(details, HttpStatus.OK);
+  }
+
+  @GetMapping(value = "/store/get")
+  public ResponseEntity<?> getObjectStoreContainer(@RequestParam("id") String id)
+      throws AuthorizationException, NotFoundException, R2d2TechnicalException {
+    List<? extends Object> details = service.listContainerContent(id);
     return new ResponseEntity<>(details, HttpStatus.OK);
   }
 

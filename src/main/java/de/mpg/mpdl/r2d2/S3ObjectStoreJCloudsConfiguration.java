@@ -23,8 +23,8 @@ import com.google.common.collect.ImmutableSet;
 import com.google.inject.Module;
 
 @Configuration
-@ConditionalOnProperty(value = "r2d2.storage", havingValue = "s3")
-public class S3ObjectStoreConfiguration {
+@ConditionalOnProperty(value = "r2d2.storage", havingValue = "s3jclouds")
+public class S3ObjectStoreJCloudsConfiguration {
 
   private final Logger LOGGER = LoggerFactory.getLogger(getClass());
 

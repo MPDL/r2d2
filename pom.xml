@@ -19,10 +19,23 @@
 		<java.version>11</java.version>
 		<elasticsearch.version>7.12.1</elasticsearch.version>
 		<jclouds.version>2.2.1</jclouds.version>
+		<awssdk.version>2.16.83</awssdk.version>
 		<org.mapstruct.version>1.4.1.Final</org.mapstruct.version>
 		<!-- Required for automatically compiling mapstruct in eclipse -->
 		<m2e.apt.activation>jdt_apt</m2e.apt.activation>
 	</properties>
+	
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>software.amazon.awssdk</groupId>
+				<artifactId>bom</artifactId>
+				<version>${awssdk.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
 
 	<dependencies>
 		<dependency>
@@ -124,6 +137,10 @@
 			<groupId>org.apache.jclouds.api</groupId>
 			<artifactId>s3</artifactId>
 			<version>${jclouds.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>software.amazon.awssdk</groupId>
+			<artifactId>s3</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>commons-fileupload</groupId>

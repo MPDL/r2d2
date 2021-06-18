@@ -3,6 +3,7 @@ package de.mpg.mpdl.r2d2.service.storage;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -46,10 +47,10 @@ import de.mpg.mpdl.r2d2.model.FileChunk;
 import de.mpg.mpdl.r2d2.model.File;
 
 @Repository
-@ConditionalOnProperty(value = "r2d2.storage", havingValue = "s3")
-public class S3ObjectStoreRepository implements ObjectStoreRepository {
+@ConditionalOnProperty(value = "r2d2.storage", havingValue = "s3jclouds")
+public class S3ObjectStoreJCloudsRepository implements ObjectStoreRepository {
 
-  private static Logger LOGGER = LoggerFactory.getLogger(S3ObjectStoreRepository.class);
+  private static Logger LOGGER = LoggerFactory.getLogger(S3ObjectStoreJCloudsRepository.class);
 
   @Autowired
   S3ObjectStoreConfigurationProperties s3Properties;
@@ -65,7 +66,7 @@ public class S3ObjectStoreRepository implements ObjectStoreRepository {
   private static final String SEGMENTS = "/segments";
 
 
-  public S3ObjectStoreRepository(BlobStoreContext context) {
+  public S3ObjectStoreJCloudsRepository(BlobStoreContext context) {
     this.context = context;
     store = context.getBlobStore();
     client = context.unwrapApi(S3Client.class);
@@ -130,44 +131,18 @@ public class S3ObjectStoreRepository implements ObjectStoreRepository {
   }
 
   public List<Container> listAllContainers() {
-    PageSet<? extends StorageMetadata> set = store.list();
-    SwiftApi api = context.unwrapApi(SwiftApi.class);
-    ContainerApi capi = api.getContainerApi("region1");
-    List<Container> list = capi.list().toList();
-    return list;
-    // return set.stream().map(smd -> smd.getName()).collect(Collectors.toList());
 
+    return Collections.emptyList();
   }
 
   public List<Object> listContainer(String container) throws NotFoundException {
-    if (!isContainerExist(container)) {
-      throw new NotFoundException(String.format("Container with id %s does not exist.", container));
-    }
-    ObjectMapper mapper = new ObjectMapper();
-    mapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
-    mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-    mapper.setSerializationInclusion(Include.NON_NULL);
-    mapper.setSerializationInclusion(Include.NON_EMPTY);
-    PageSet<? extends StorageMetadata> set =
-        store.list(container, org.jclouds.blobstore.options.ListContainerOptions.Builder.recursive().withDetails());
-    return set.stream().map(smd -> mapper.valueToTree(smd)).collect(Collectors.toList());
+
+    return Collections.emptyList();
   }
 
   public boolean deleteContainer(String container) throws NotFoundException {
-    if (!isContainerExist(container)) {
-      throw new NotFoundException(String.format("Container with id %s does not exist.", container));
-    }
-    boolean isContainerGone = false;
-    ListContainerOptions options = new ListContainerOptions();
-    options.prefix(container);
-    options.recursive();
-    List<String> names =
-        store.list(s3Properties.getBucket(), options).parallelStream().map(meta -> meta.getName()).collect(Collectors.toList());
-    names.forEach(name -> deleteFile(name.split("/", 2)[0], name.split("/", 2)[1]));
-    if (!isContainerExist(container)) {
-      isContainerGone = true;
-    }
-    return isContainerGone;
+
+    return false;
   }
 
   public String getPublicURI(String container) {
